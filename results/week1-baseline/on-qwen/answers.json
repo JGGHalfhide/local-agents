@@ -1,0 +1,90 @@
+{
+  "c01": {
+    "cause": "The llama-server container exhibits a memory leak, causing memory usage to accumulate and eventually exceed the 6Gi limit after handling multiple requests in succession, leading to OOMKilled restarts.",
+    "fix": "Update the deployment configuration for the `llama-server` to increase the container memory limit to 8Gi or more to prevent immediate pod eviction under current leak behavior. However, fix requires applying a patched version of llama-server that does not leak, which should be done via Ansible/Argo CD."
+  },
+  "c02": {
+    "cause": "The workload has exhausted the memory budget allocated to the container, which is a correct operational state for resource-limited inference servers, but triggered an alert due to high utilization without OOM kills.",
+    "fix": "No fix required; the container is running successfully (Requests are answered normally) and not being throttled or killed. If scaling needs optimization, review KEDA scale-up rules or request limits to prevent hitting 100% utilization frequently."
+  },
+  "c03": {
+    "cause": "Version mismatch or binary incompatibility between the image used in the cluster and the build host, combined with a specific argument parsing behavior in the deployed version of llama-server regarding --ctx-size. Given FIPS mode and Rocky Linux 9 constraints, it is also possible that the container runtime or library linkage differs from the build host, causing argument validation to fail.",
+    "fix": "Pin the exact docker image tag (digest) for llm-server in the Argo CD manifest to ensure it matches the build host environment. Ensure the K8s `args` are passed as a list of strings correctly rather than being merged by the underlying tooling, or use an entrypoint wrapper script that validates arguments before execution."
+  },
+  "c04": {
+    "cause": "The 'private-registry' ImagePullSecret exists in the cluster but does not contain credentials for the local registry (Zot) running on the node, or the image reference in the Zarf package explicitly points to an internal address that requires different auth configuration than a default Docker/Registry secret. However, based strictly on the evidence provided, the most direct cause is that the ImagePullSecret named 'private-registry' is referenced by the pod but does not exist (or is empty) in the cluster where it is expected to be found for image pulling.",
+    "fix": "Ensure the 'private-registry' secret contains valid credentials matching the registry being pulled from. However, given the error message points to a local address (127.0.0.1), verify if Zot auth config matches this address or if the Zarf template is pushing an incorrect image digest reference for the airgapped environment. Check if 'private-registry' secret actually exists at cluster level."
+  },
+  "c05": {
+    "cause": "Digest drift in the StatefulSet definition versus the registry. The git repo still pins the old image digest (`9a8e21...`), while `make image` pushed a newer build (`c41f07...`) which exists on Zot but does not match the manifest hash.",
+    "fix": "Update the StatefulSet image reference in Git to use the new digest (`sha256:c41f07...`) and run Argo CD sync or deploy again. Ensure the CI process triggers an update to the git repository or uses a registry tag instead of hardcoded digests, then recommit."
+  },
+  "c06": {
+    "cause": "The in-cluster image registry (Zot) no longer contains the specific image digest that was previously verified, likely because the cluster rebuild process or Ansible/Terraform configuration reset the Registry state but not the persistent storage for that digest, resulting in the `MANIFEST_UNKNOWN` error during Kyverno admission.",
+    "fix": "Ensure the same image (alpine) is pushed to Zot with the correct digest before deploying the Job. Since this is a build cluster and Zot is managed by Terraform/Ansible, you likely need to re-push the image or update the Registry's content configuration within your GitOps pipeline."
+  },
+  "c07": {
+    "cause": "Kyverno's 'restrict-image-registries' policy is configured to whitelist only specific localhost ports (127.0.0.1:30500 or 127.0.0.1:31999) as trusted registry hosts, but the 'zarf-injector' component references an image from Docker Hub (docker.io/rancher/mirrored-pause), which violates this policy. The failure on a fresh cluster suggests that either policies were missing initially, or the specific Zarf package deployed previously used different base images or the Kyverno configuration applied during the interrupted install differs from what was present in the 'failed' run.",
+    "fix": "Update the Kyverno policy configuration for 'restrict-image-registries' to include 'docker.io/rancher/mirrored-pause' (or simply allow external registries) as a trusted source, or modify the Zarf package definition to reference the image via Zot registry instead of Docker Hub. Given the airgapped nature and STIG hardening, updating the Kyverno policy is less destructive than changing the Zarf manifest, but verify why Docker.io is being used if Zot is intended for all images."
+  },
+  "c08": {
+    "cause": "KEDA scaled the llama-server Deployment down to zero replicas due to inactivity. The latency spike is caused by the cold start time (approx. 6s) plus processing overhead for the newly spawned pod.",
+    "fix": "Update KEDA config to increase the scale-to-zero minimum or adjust cooldown duration to prevent unnecessary scaling down before requests, or acknowledge that this behavior is expected per lab policy."
+  },
+  "c09": {
+    "cause": "Container/File descriptor leak or host limit exhaustion due to high FD usage not matching soft limit settings",
+    "fix": "Reduce file descriptor limit via kubelet configuration (e.g., `--file-descriptor-limit`), as current host ulimit of 1M allows excessive accumulation but underlying inotify watchers might be blocked by kernel defaults."
+  },
+  "c10": {
+    "cause": "SELinux label mismatch caused by etcd restore operation",
+    "fix": "Apply correct SELinux context to the restored config file using: chcon -t rke2_service_db_file_t /var/lib/rancher/rke2/server/db/etcd/config"
+  },
+  "c11": {
+    "cause": "Pod scheduling failure caused by Kubelet/Kyverno Policy rejection or StorageClass binding issue post-cluster reset that did not trigger scheduling events in the excerpt",
+    "fix": "Check `kubectl get nodes --show-labels` to verify the node has been fully initialized post-restoration; check `kubectl describe pvc data-db-0` for storage provisioner errors; if LocalPath provisioning failed due to SELinux (e.g., 'file create mode' or path restriction), review and patch the RKE2 kubelet config or ensure `/var/log/kubelet.log` shows the specific error before re-deploying via Argo CD"
+  },
+  "c12": {
+    "cause": "SELinux policy denies node_exporter (labeled container_t) from reading host files (labeled init_t) via /proc mount, blocking filesystem collector.",
+    "fix": "Update the hostPath volume definition for node_exporter to include `type` and `mode` SELinux contexts, or adjust the node-exporter deployment manifest (GitOps/Ansible) to use a sidecar with correct policy. Recommended: Change the volume mount context in YAML to allow access to specific paths without privileged access."
+  },
+  "c13": {
+    "cause": "NetworkPolicy is blocking monitoring namespace egress to CoreDNS pods.",
+    "fix": "Edit the kube-prometheus-stack deployment to add an IngressNetworkPolicy allowing access to port 9153 on kube-system, or remove the restrictive default policy from RKE2 if it was intended for DNS only (verify intent). Recommended change: Add `allow-ingress` or `allow-egress` rule in monitoring namespace NetworkPolicy referencing CoreDNS pods."
+  },
+  "c14": {
+    "cause": "The airgapped namespace lacks the security exemption label set in the build cluster.",
+    "fix": "Update the Argo CD Git repo to apply `pod-security.kubernetes.io/enforce=privileged` to the `monitoring-node` namespace on the airgapped cluster."
+  },
+  "c15": {
+    "cause": "The secret \"argocd-redis\" does not exist in the cluster. The Argo CD deployment manifests expect this pre-existing Secret (likely defined by Ansible/Terraform or the Makefile logic to be mounted as a volume) but it is missing at startup. This is caused by the dependency order during `make up` failing before the secret creation step completes, or the change from environment variables to file mounts requiring manual secret setup in a fresh cluster.",
+    "fix": "Create the missing Secret \"argocd-redis\" containing the Redis password before starting Argo CD. Since this is a rebuild from scratch and you want to match last week's config, ensure Ansible/Terraform or your Makefile script generates and deploys this secret first (or use kubectl create secret), or update your Makefile/Ansible playbook to create it as part of the pre-requisite step for Argo CD."
+  },
+  "c16": {
+    "cause": "Operator applied Kyverno policy changes via kubectl outside of Argo CD GitOps workflow while the policy is managed by Argo CD from source-of-truth Git with selfHeal enabled, causing drift detection and rollback when sync checks detect mismatch between /tmp file content and Git repository",
+    "fix": "Remove temp kubectl apply for Kyverno policies and instead make changes in the Git repository under argocd application 'policies' source-of-truth (the manifest path should be updated there), then commit to git. This ensures Argo CD properly applies changes through its controlled sync mechanism rather than allowing unmanaged manual modifications"
+  },
+  "c17": {
+    "cause": "The pinned version (1.36.5) does not match the installed/running version (1.36.6), triggering a state mismatch in Ansible.",
+    "fix": "Update the `rke2_version` pin in the repository to '1.36.6' (or revert the node to 1.36.5 if strict pinning is required and 1.36.6 is an upstream update you don't control)."
+  },
+  "c18": {
+    "cause": "The Velero backup is failing due to an SELinux context mismatch between the Velero node agent and the local-path PVC volume files on the host.",
+    "fix": "Ensure the Velero DaemonSet or Kopia pod has access to the host paths required for volume backups by adding appropriate `type=container_t` permissions in `/etc/audit/rules.d/local-kubelet-rules.conf` or ensuring the Pod Security Policy allows it, but specifically for this error, verify if the `hostPath` mount point is correctly labeled. Since SELinux context on the target directory is `system_u:object_r:container_file_t`, Velero's node agent (likely running as non-root inside a container) requires `container_t` to be accessible for file operations, or vice versa. Actually, looking closer at the provided evidence (`system_u:object_r:container_file_t`), standard Kopia/Backup agents often need `host_t` or specific labels. The smallest fix is to check if Velero is running in FIPS mode which might impact encryption keys or access. But given SELinux enforcing, the root cause is likely the node agent trying to read a file it cannot access. Since SELinux prevents access, adjust the SELinux context of the PVC directory to `system_u:object_r:user_home_t` if it's a user volume, OR more commonly for local-path PVs, ensure the Velero node agent has a hostPath mount with proper SELinux context (change from spc_t to container_file_t in the volume definition or add an exemption). Wait, standard solution for this specific error (`system_u:object_r:container_file_t` vs non-root) is often to relabel or configure the Velero image to have `SELINUX_NOEXEC=0` or modify `securityContext.fsGroup`. However, since we must not weaken security, and it is a local-path PV (likely managed by kubelet), the safest fix without weakening security is to ensure the Kopia pod has the correct permissions. But actually, looking at `container_file_t`, if Velero is non-root, it cannot access it. A better diagnosis: The node agent DaemonSet is likely trying to mount a volume with SELinux protection but failing due to policy mismatch."
+  },
+  "c19": {
+    "cause": "Kyverno ImageValidatingPolicy cannot reach the Zot registry via 127.0.0.1:30500 to fetch image metadata for signature verification due to network binding restrictions or Docker socket exposure limitations on SELinux/FIPS Rocky nodes.",
+    "fix": "Update the Kyverno policy to use the internal service name `zot.zot.svc.cluster.local` (with default port 5000) or ensure the specific nodeport is reachable via host networking. The smallest fix is changing the policy image fetcher's registry endpoint to match the service DNS (`zot.zot.svc.cluster.local:5000`) instead of localhost, as containerd and Kubernetes networking handle that resolution."
+  },
+  "c20": {
+    "cause": "Kyverno PolicyReport CRDs record historical validation failures and persist indefinitely; policy updates fix future enforcement but do not retroactively alter existing report objects or invalidate historical audit trails.",
+    "fix": "No manual action needed to remove false alarm on enforcement (new pods pass). If reports are noise for dashboard purposes, consider using Kyverno's `policy-report` resource lifecycle policies if available in your release, or accept that audit history persists per CIS compliance expectations. Ensure monitoring dashboards parse report status correctly rather than looking for raw failure count."
+  },
+  "c21": {
+    "cause": "Argo CD GitOps application failed to fully reconcile its own deployment spec because Kubernetes (via kubectl or an earlier CLI invocation) applied a conflicting update that left the old envVar defined alongside the new volumeMount, causing Argo's self-heal loop to skip the removal of the redundant envVar as per ServerSideApply drift tolerance defaults.",
+    "fix": "Re-run `argocd application sync --wait` or ensure the 'argocd' application in Git is re-deployed via a fresh commit push (GitOps) to allow Argo's Self-Heal loop to reconcile the envVar removal, ensuring no conflicting kubectl manifests remain."
+  },
+  "c22": {
+    "cause": "The Kyverno Helm chart migration phase expected a Service Account 'kyverno-migrate-resources' to exist for RBAC permissions, but on this fresh install the underlying RBAC resources were not created before the controller pods started.",
+    "fix": "Deploy the Kyverno CRDs and Service Accounts first using `kubectl apply -f https://kyverno.io/docs/kyverno-deployment-manifests.yaml` or ensure the Helm chart `resources.serviceAccount.name` configuration correctly targets the base `kyverno` namespace SA, then trigger Argo CD sync to create the remaining manifests."
+  }
+}

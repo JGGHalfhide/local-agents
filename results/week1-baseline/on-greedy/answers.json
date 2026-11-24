@@ -1,0 +1,90 @@
+{
+  "c01": {
+    "cause": "Insufficient memory limit for the llama-server workload under concurrency, combined with memory retention behavior (potential leak or buffer accumulation) causing the container to exceed the 6Gi limit and be OOMKilled.",
+    "fix": "Increase the memory limit from 6Gi to 8Gi (or higher) in the deployment configuration managed by Terraform/Ansible to accommodate peak memory usage under concurrency and allow for memory retention without immediate OOM."
+  },
+  "c02": {
+    "cause": "The llama-server application is allocating memory up to the configured limit (6 GiB) due to high model weights or context cache usage, but the application is stable and not triggering OOM kills because the limit is set to the exact current usage rather than a safety margin.",
+    "fix": "Increase the memory limit in the Kubernetes Deployment YAML (or Helm chart) to allow headroom (e.g., 8 GiB) to prevent potential OOM kills or throttling, or reduce the model context size if the memory allocation is due to configuration."
+  },
+  "c03": {
+    "cause": "The llama-server binary in the container is a different version than the one on the build host, and the argument --ctx-size is not supported or parsed differently in the container's version, likely due to a version mismatch introduced during the image build or a specific constraint interaction with the hardened environment (FIPS/SELinux) affecting argument parsing.",
+    "fix": "Update the Deployment YAML to use the correct argument syntax for the specific version of llama-server in the container, or rebuild the image on the build host to match the container version. Since the build host works, the image digest is likely stale or built on a different environment. Rebuild the image with the correct version and update the Argo CD deployment to use the new digest."
+  },
+  "c04": {
+    "cause": "The smoke test pod spec references a secret 'private-registry' for image authentication, but this secret does not exist in the 'llm-smoke' namespace. The Zarf-deployed pods likely use a cluster-scoped secret or a different secret name, or the smoke test deployment definition is missing the secret reference or the secret creation step.",
+    "fix": "Create the 'private-registry' secret in the 'llm-smoke' namespace with the appropriate credentials for the local registry (Zot) or update the smoke test deployment definition to reference the existing cluster-scoped secret (e.g., 'zot-registry' or similar) used by the Zarf packages."
+  },
+  "c05": {
+    "cause": "The StatefulSet manifest in the git repository references an image digest (9a8e21...) that no longer exists in the Zot registry. The `make image` command pushed a new image with a different digest (c41f07...) for the same tag, but the Argo CD deployment configuration was not updated to match the new digest, violating the digest pinning policy.",
+    "fix": "Update the StatefulSet manifest in the git repository to reference the new image digest (c41f07...) and commit the change to trigger an Argo CD sync. Alternatively, if the intention was to keep the old image, pull the old image back to the registry and update the registry digest to match the manifest. Given the rebuild context, updating the manifest to the new digest is the standard fix."
+  },
+  "c06": {
+    "cause": "The Zot registry was likely reset or corrupted during the cluster rebuild, causing the specific image digest (alpine@sha256:4bcff6...) to be missing from the registry, triggering the Kyverno 'verify-platform-images' policy failure.",
+    "fix": "Re-push the alpine image to the Zot registry with the same digest, or update the Job manifest to use a digest that exists in the registry."
+  },
+  "c07": {
+    "cause": "The Kyverno policy 'restrict-image-registries' is configured to only allow images from internal registries (127.0.0.1:30500/ or 127.0.0.1:31999/), but the 'zarf-injector' component is attempting to use an image from Docker Hub (docker.io/rancher/mirrored-pause). This policy was likely applied during the previous interrupted 'zarf init' or a prior package deployment, and it is now blocking the re-initialization because the image source is not whitelisted.",
+    "fix": "Update the Kyverno policy 'restrict-image-registries' to include 'docker.io' in the allowed registries list, or push the required 'zarf-injector' image to the internal Zot registry (127.0.0.1:30500/ or 127.0.0.1:31999/) and update the component definition to use that digest. Given the airgapped nature, pushing to the internal registry is preferred to maintain security controls."
+  },
+  "c08": {
+    "cause": "The cluster is in a boot sequence state where the KEDA controller or the LLM server pod is not yet fully initialized or the KEDA scale-to-zero policy is triggering immediately due to the VM boot timing, causing the pod to be scaled to zero before the test request arrives, resulting in a cold start latency. The discrepancy between the '2 minutes ago' boot time and the '9h' age in the kubectl output suggests the kubectl output is stale or from a different node/cluster, but the symptom (9s latency vs 1.9s) combined with the 'scaled to 0' description indicates a cold start.",
+    "fix": "Verify the actual pod state immediately after boot. If the pod is indeed 0 replicas, ensure the KEDA scale-up policy is configured to handle the initial boot load or increase the initial replicas to prevent scaling to zero during the boot sequence. If the kubectl output is stale, re-run it to confirm the current state. If the pod is 0 replicas, the root cause is KEDA scaling to zero before the application is ready to serve traffic."
+  },
+  "c09": {
+    "cause": "The 'too many open files' errors are caused by the container runtime (containerd) or the specific application (llama-server, argocd) hitting the process-level file descriptor limit (ulimit) within the container, not the system-wide limit. The system limit (`file-nr`) is high (9824 used), but the application is failing to create watchers because it cannot open more file descriptors than allowed by the container's `ulimit` or the `fsnotify` mechanism's internal limits, which is often lower than the container's `ulimit` setting or the specific application's requirement. The `ulimit -n` output of 1048576 is the container limit, but the error suggests the process is hitting a lower threshold or the `fsnotify` mechanism is failing due to resource exhaustion at the process level.",
+    "fix": "Increase the `ulimit` for the specific container runtime or the specific application configuration to allow more file descriptors. Since this is a hardened lab, changes should be made via Ansible or Terraform to update the `ulimit` configuration for the container runtime or the specific application deployment. For example, update the `ulimit` setting in the container definition or the systemd unit for the container runtime to a higher value (e.g., 2097152) to accommodate the `fsnotify` watcher creation."
+  },
+  "c10": {
+    "cause": "The etcd restore process failed to relabel the restored configuration file to the correct SELinux context (system_u) required by the running etcd service, resulting in a context mismatch (unconfined_u vs system_u) that prevents the etcd process from opening the file.",
+    "fix": "Run `restorecon -Rv /var/lib/rancher/rke2/server/db/etcd/config` to relabel the file to the correct SELinux context, or update the Ansible playbook to apply `restorecon` after restoring etcd snapshots."
+  },
+  "c11": {
+    "cause": "The pod is stuck in a Pending state without generating standard Kubernetes events, which is inconsistent with typical scheduling or image pull failures. Given the cluster was just restored from an etcd snapshot and the environment is hardened (SELinux, FIPS, Kyverno), the root cause is likely a Kyverno policy or admission controller blocking the pod creation, or a specific storage driver issue on the restored node that isn't triggering standard events. However, the most probable cause in a restored cluster with no events is a Kyverno policy rejection or a specific SELinux context mismatch preventing the container from starting, which often results in the pod staying Pending without immediate event logging if the admission controller rejects it before scheduling.",
+    "fix": "Check Kyverno policies and the pod's security context against the CIS profile. If a policy is blocking the pod, update the policy or the pod's security context via GitOps (Argo CD) to allow the specific image or container configuration. If SELinux is blocking the mount, check the audit logs or SELinux context on the PVC. Do not weaken security controls; instead, verify the policy allows the specific image digest used in the restored cluster."
+  },
+  "c12": {
+    "cause": "SELinux policy denies the container process (node_exporter) from reading the host's mountinfo file because the container is running in a restricted SELinux context (container_t) while attempting to access a host-owned file (init_t) via a hostPath mount.",
+    "fix": "Update the node-exporter pod definition to add the `node_exporter` SELinux boolean `node_exporter_read_proc` or use a `hostPath` volume with `readOnly: true` and ensure the SELinux context allows access, or better yet, use the `hostPath` volume with `readOnly: true` and add the `node_exporter` SELinux boolean `node_exporter_read_proc` to allow reading host proc files."
+  },
+  "c13": {
+    "cause": "NetworkPolicy 'default-network-dns-policy' in kube-system namespace is blocking ingress traffic from the monitoring namespace to CoreDNS pods on port 9153.",
+    "fix": "Update the NetworkPolicy 'default-network-dns-policy' to allow ingress from the monitoring namespace (or remove the policy if it is a default-deny policy intended for other traffic)."
+  },
+  "c14": {
+    "cause": "The airgapped cluster enforces 'restricted' Pod Security Standards (likely via Kyverno or default admission controller settings inherited from the CIS profile), while the kube-prometheus-stack chart (specifically node-exporter) is configured to run with privileged settings (hostNetwork, hostPID, hostPath) which are forbidden under 'restricted' mode. The build cluster allows this via a namespace label (pod-security.kubernetes.io/enforce=privileged), which is missing on the airgapped cluster.",
+    "fix": "Update the Zarf package values or the Helm chart values for the airgapped cluster to remove privileged settings (hostNetwork, hostPID, hostPath) from node-exporter, or apply the same namespace label (pod-security.kubernetes.io/enforce=privileged) to the monitoring-node namespace on the airgapped cluster via GitOps (Argo CD) or Terraform/Ansible to match the build cluster configuration."
+  },
+  "c15": {
+    "cause": "The Argo CD Redis secret 'argocd-redis' does not exist in the cluster when Argo CD pods attempt to mount the 'redis-creds' volume. The change last week modified Argo CD to read the Redis password from a file path (REDIS_CREDS_DIR_PATH) requiring the Secret to be present before the Redis pod's init container can create it. This creates a circular dependency or a startup ordering issue where Argo CD pods fail to mount the volume because the Secret resource is missing, preventing the Redis pod from starting, which in turn prevents the Secret from being created.",
+    "fix": "Create the 'argocd-redis' Secret resource manually or via a pre-existing Ansible/Terraform playbook before running 'make up', or modify the Argo CD deployment to wait for the Redis secret to exist (e.g., using a readiness probe or init container that waits for the secret). Given the security constraints, creating the Secret via Ansible/Terraform is preferred. If the Secret creation is part of the Redis init container logic, ensure the Argo CD Redis pod definition does not require the secret to be mounted before the Redis pod is running, or explicitly define the Secret resource in the Argo CD Helm values/manifests to be created before the Redis pod starts."
+  },
+  "c16": {
+    "cause": "Manual kubectl modification of a GitOps-managed resource. Argo CD's 'selfHeal' and 'prune' settings automatically revert any drift from the Git repository state to match the desired state.",
+    "fix": "Update the Kyverno policy definition in the Git repository (e.g., the `policies` application source) to include the namespace exclusion, commit the change, and let Argo CD sync it. Do not use kubectl to modify resources managed by Argo CD."
+  },
+  "c17": {
+    "cause": "The RKE2 version on the node (1.36.6) does not match the version pinned in the Ansible playbook (1.36.5). The 'Update all packages' change indicates an OS-level update or manual `dnf update` occurred that upgraded the RKE2 package to 1.36.6, causing the Ansible idempotency check to fail because the installed version differs from the expected version.",
+    "fix": "Update the `rke2_version` pin in the Ansible playbook repository to `1.36.6` to match the installed version, or downgrade the node to `1.36.5` if the pin is intentional. Given the 'Update all packages' change, the node likely received an upstream update; updating the pin is the safer, non-destructive fix."
+  },
+  "c18": {
+    "cause": "SELinux policy mismatch between the Velero hosting pod (container_t) and the local-path volume (container_file_t) prevents file access, though audit logs are not capturing the denial due to how the error is surfaced or SELinux context propagation.",
+    "fix": "Update the SELinux context on the local-path volume directory to `system_u:object_r:velero_t` or ensure the `container_file_t` policy allows `container_t` to open files. Given the hardened environment, the safest fix is to adjust the SELinux context on the volume to match the Velero pod's domain or add a specific allow rule in the SELinux policy. However, since this is a local-path PVC, the volume context is set by the node. The most direct fix without weakening security is to ensure the Velero hosting pod has the correct SELinux context to access `container_file_t` volumes, which typically requires a policy change or context adjustment on the volume itself."
+  },
+  "c19": {
+    "cause": "Kyverno's image validation webhook attempts to fetch the image descriptor from the registry address specified in the pod spec (127.0.0.1:30500), but the connection is refused. This indicates the Kyverno controller pod cannot reach the Zot registry service exposed via NodePort on localhost, likely due to network isolation or service discovery mismatch between the Kyverno controller and the registry service.",
+    "fix": "Update the Kyverno policy configuration to use the internal service name (zot.zot.svc.cluster.local:5000) instead of the NodePort address (127.0.0.1:30500) for image validation, or ensure the registry service is properly exposed to the Kyverno controller's network namespace. This change should be made via the GitOps configuration (Argo CD) or Terraform/Ansible playbook managing Kyverno policies."
+  },
+  "c20": {
+    "cause": "Kyverno PolicyReports are historical records that persist independently of policy updates. When a policy is modified, existing PolicyReport resources for past evaluations are not automatically updated or deleted. The dashboard and kubectl queries are reading these stale historical records, while new evaluations (new pods) correctly apply the updated policy and exceptions.",
+    "fix": "Delete the stale PolicyReport resources for the affected policy to clear the historical failures from the dashboard and kubectl output. This is a non-destructive operation regarding cluster state, only removes historical audit logs."
+  },
+  "c21": {
+    "cause": "The commit changed the Argo CD application definition to mount the secret as a file instead of using secretKeyRef, but Argo CD's self-healing mechanism (ServerSideApply) is reconciling the state based on the Git repository. The `kubectl get deploy` output showing the env var name suggests the definition still exists in the Git repo or the reconciliation is lagging, but the `--show-managed-fields` indicates `kubectl` applied the change directly to the cluster state, overriding Argo CD's managed fields. This creates a conflict where the cluster state reflects the commit (file mount), but the `kubectl` output suggests the env var name persists (likely due to the commit not fully removing the env var definition or Argo CD's self-heal trying to restore the old state).",
+    "fix": "Update the Argo CD application definition in the Git repository to remove the `REDIS_PASSWORD` environment variable entirely or ensure it uses the correct `secretKeyRef` if required by the application logic. Since Argo CD manages itself via ServerSideApply, the Git repository is the source of truth. Do not apply changes via `kubectl` directly to avoid conflicts with Argo CD's self-heal. Verify the `gitops/argocd` repository contains the correct definition and commit it."
+  },
+  "c22": {
+    "cause": "The Kyverno Helm chart installation failed to create the Service Account 'kyverno-migrate-resources' required by the migration pod, causing kube-bench to flag a missing Service Account token mount.",
+    "fix": "Reinstall the Kyverno Helm chart to ensure the Service Account 'kyverno-migrate-resources' is created, or manually create the Service Account in the kyverno namespace."
+  }
+}
