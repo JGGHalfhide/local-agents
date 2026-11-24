@@ -1,8 +1,10 @@
-# The status reporter (ADR 0003): once an hour, one run of `python -m agent`
-# writes a JSON report to its log (collected by Loki). Each run wakes the
-# inference endpoint for about two minutes (it scales to zero after 5 min
-# idle). The image is built with `make agent-image` (ADR 0004) and published
-# with platform-lab's `make image`; pinned by digest, verified by Kyverno.
+# The status reporter (ADR 0003) behind the operator API (ADR 0005,
+# docs/interface.md): a Deployment serving API v1 on 8080 and a ClusterIP
+# Service. The hourly CronJob calls the API with agentctl, so scheduled
+# runs, operators (kubectl port-forward) and the fault-injection scorer all
+# use one path. The image is built with `make agent-image` (ADR 0004),
+# published with platform-lab's `make image`, pinned by digest, verified
+# by Kyverno.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -13,12 +15,106 @@ data:
   config.json: |
     {"base_url": "http://llm-api.llm.svc:8080/v1", "model": "qwen3.5-4b", "api_key_env": ""}
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: status-reporter
+  labels:
+    app.kubernetes.io/name: status-reporter
+    app.kubernetes.io/part-of: local-agents
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: status-reporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: status-reporter
+        app.kubernetes.io/part-of: local-agents
+        inference.local-airgap-llm/client: "true"
+    spec:
+      serviceAccountName: status-reporter
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: status-reporter
+          # IMAGE: set at publish (local-agents/agent:<commit>)
+          image: 127.0.0.1:30500/local-agents/agent@sha256:5826aca199d9a46358643da7c62a75c0a63bc91839fa2cdaa2b3882918a65834
+          args: [serve, --port, "8080"]
+          env:
+            - name: AGENT_CONFIG
+              value: /opt/agent/config/config.json
+            - name: AGENT_RUNS_DIR
+              value: /var/lib/agent/runs
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: config
+              mountPath: /opt/agent/config
+              readOnly: true
+            - name: runs
+              mountPath: /var/lib/agent/runs
+      volumes:
+        - name: config
+          configMap:
+            name: status-reporter-config
+        - name: runs
+          # The last 50 runs (docs/interface.md); lost on restart by design.
+          emptyDir:
+            sizeLimit: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: status-reporter
+  labels:
+    app.kubernetes.io/name: status-reporter
+spec:
+  selector:
+    app.kubernetes.io/name: status-reporter
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+# Hourly: `agentctl status` against the Service. agentctl exits 0 healthy,
+# 1 fault, 2 error; a fault is a successful run (rc <= 1), so a fault in the
+# cluster does not fail this Job (which the reporter would then report).
 apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: status-reporter
   labels:
-    app.kubernetes.io/name: status-reporter
+    app.kubernetes.io/name: agentctl
     app.kubernetes.io/part-of: local-agents
 spec:
   schedule: "0 * * * *"
@@ -28,16 +124,15 @@ spec:
   jobTemplate:
     spec:
       backoffLimit: 0
-      activeDeadlineSeconds: 900
+      activeDeadlineSeconds: 420
       ttlSecondsAfterFinished: 86400
       template:
         metadata:
           labels:
-            app.kubernetes.io/name: status-reporter
+            app.kubernetes.io/name: agentctl
             app.kubernetes.io/part-of: local-agents
-            inference.local-airgap-llm/client: "true"
         spec:
-          serviceAccountName: status-reporter
+          automountServiceAccountToken: false
           restartPolicy: Never
           securityContext:
             runAsNonRoot: true
@@ -46,28 +141,23 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           containers:
-            - name: status-reporter
-              # local-agents/agent:d0b286f (make agent-image at d0b286f)
+            - name: agentctl
+              # IMAGE: same digest as the Deployment
               image: 127.0.0.1:30500/local-agents/agent@sha256:5826aca199d9a46358643da7c62a75c0a63bc91839fa2cdaa2b3882918a65834
+              command: [/bin/sh, -c]
+              args:
+                - python3 /opt/agent/app/agent/agentctl.py status; rc=$?; [ "$rc" -le 1 ]
               env:
-                - name: AGENT_CONFIG
-                  value: /opt/agent/config/config.json
+                - name: AGENTCTL_ENDPOINT
+                  value: http://status-reporter.agents.svc:8080
               resources:
                 requests:
-                  cpu: 50m
-                  memory: 128Mi
+                  cpu: 10m
+                  memory: 32Mi
                 limits:
-                  memory: 256Mi
+                  memory: 64Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 readOnlyRootFilesystem: true
                 capabilities:
                   drop: [ALL]
-              volumeMounts:
-                - name: config
-                  mountPath: /opt/agent/config
-                  readOnly: true
-          volumes:
-            - name: config
-              configMap:
-                name: status-reporter-config

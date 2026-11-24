@@ -1,0 +1,67 @@
+# Status reporter fault-injection cases (docs/eval-status.md, approved 11/24).
+# Each case lives in namespace agent-eval-<id>, made by eval/status/inject.sh
+# from eval/status/cases/<id>.yaml. The scorer (eval/status/score.py) reads
+# this file:
+#   kind: fault | control
+#   category: the expected category (faults; one of the 10 in eval-status.md)
+#   objects: accepted locations, "Kind/name" or "Kind/name-prefix*" (pod
+#            names carry generated suffixes)
+cases:
+  f01:
+    title: Deployment at 0 replicas, not autoscaled, a Service selects it
+    kind: fault
+    category: other
+    also_accept: [scaled-to-zero]
+    objects: [Deployment/podinfo, Service/podinfo]
+  f02:
+    title: ImagePullBackOff (registry address with nothing behind it)
+    kind: fault
+    category: image-pull
+    objects: [Deployment/puller, ReplicaSet/puller-*, Pod/puller-*]
+  f04:
+    title: CrashLoopBackOff from a bad command (exit 127)
+    kind: fault
+    category: crash-loop
+    objects: [Deployment/crashy, ReplicaSet/crashy-*, Pod/crashy-*]
+  f05:
+    title: OOMKilled restart (32Mi limit)
+    kind: fault
+    category: oom-killed
+    also_accept: [crash-loop]
+    objects: [Deployment/hungry, ReplicaSet/hungry-*, Pod/hungry-*]
+  f06:
+    title: Admission denial by Kyverno (digest not in the registry)
+    kind: fault
+    category: admission-denied
+    objects: [Deployment/unsigned, ReplicaSet/unsigned-*]
+  f07:
+    title: Unschedulable pod (requests 64 CPUs)
+    kind: fault
+    category: unschedulable
+    objects: [Deployment/greedy, ReplicaSet/greedy-*, Pod/greedy-*]
+  f08:
+    title: DaemonSet with 0 pods, rejected by Pod Security (hostNetwork)
+    kind: fault
+    category: admission-denied
+    objects: [DaemonSet/hostnet]
+  f10:
+    title: Unbound PVC (storage class does not exist)
+    kind: fault
+    category: storage-unbound
+    also_accept: [unschedulable]
+    objects: [PersistentVolumeClaim/data, Pod/claimer, PersistentVolumeClaim/data*]
+  k1:
+    title: Workload at zero, scaled by KEDA (cron trigger never active)
+    kind: control
+  k2:
+    title: Memory near the limit, no OOM (48 MiB in /dev/shm, 64Mi limit)
+    kind: control
+  k3:
+    title: Completed Job
+    kind: control
+  k4:
+    title: Fully healthy namespace (Deployment + Service)
+    kind: control
+  k5:
+    title: Warning event only (imagePullSecret absent, registry allows anonymous pulls)
+    kind: control

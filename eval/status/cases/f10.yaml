@@ -1,0 +1,60 @@
+# f10: Unbound PVC: storage class agent-eval-missing does not exist; a pod waits for it
+# Applied by eval/status/inject.sh f10; removed by eval/status/cleanup.sh.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agent-eval-f10
+  labels:
+    local-agents/eval: "true"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data
+  namespace: agent-eval-f10
+  labels:
+    app.kubernetes.io/name: claimer
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: agent-eval-missing
+  resources:
+    requests:
+      storage: 16Mi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: claimer
+  namespace: agent-eval-f10
+  labels:
+    app.kubernetes.io/name: claimer
+spec:
+  automountServiceAccountToken: false
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: claimer
+      image: 127.0.0.1:30500/library/alpine:3.22@sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f
+      command: ["sleep", "3600"]
+      resources:
+        requests:
+          cpu: "10m"
+          memory: 16Mi
+        limits:
+          memory: 64Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: [ALL]
+      volumeMounts:
+        - name: data
+          mountPath: /data
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: data

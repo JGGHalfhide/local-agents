@@ -1,0 +1,48 @@
+# f06: Admission denial: a digest that is not in the registry (verify-platform-images)
+# Applied by eval/status/inject.sh f06; removed by eval/status/cleanup.sh.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agent-eval-f06
+  labels:
+    local-agents/eval: "true"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unsigned
+  namespace: agent-eval-f06
+  labels:
+    app.kubernetes.io/name: unsigned
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: unsigned
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: unsigned
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: unsigned
+          image: 127.0.0.1:30500/library/alpine:3.22@sha256:0000000000000000000000000000000000000000000000000000000000000001
+          command: ["sleep", "3600"]
+          resources:
+            requests:
+              cpu: "10m"
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]

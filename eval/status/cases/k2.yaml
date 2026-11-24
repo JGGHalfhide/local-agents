@@ -1,0 +1,48 @@
+# k2: Control: 48 MiB held in /dev/shm under a 64Mi limit, no OOM
+# Applied by eval/status/inject.sh k2; removed by eval/status/cleanup.sh.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agent-eval-k2
+  labels:
+    local-agents/eval: "true"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: holder
+  namespace: agent-eval-k2
+  labels:
+    app.kubernetes.io/name: holder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: holder
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: holder
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: holder
+          image: 127.0.0.1:30500/library/alpine:3.22@sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f
+          command: ["/bin/sh", "-c", "dd if=/dev/zero of=/dev/shm/hold bs=1M count=48 && sleep 3600"]
+          resources:
+            requests:
+              cpu: "10m"
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]

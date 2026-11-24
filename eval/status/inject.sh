@@ -1,41 +1,67 @@
 #!/usr/bin/env bash
-# STUB (approved spec, docs/eval-status.md): inject one fault or control for the
-# status reporter evaluation. Not implemented: it validates its input and
-# prints its plan, then exits 3 without touching the cluster. Manifests go in
-# eval/status/cases/<id>/ when implemented; injecting waits for the user's go.
+# Inject one fault or control for the status reporter evaluation
+# (docs/eval-status.md, approved 11/24): apply eval/status/cases/<id>.yaml
+# into namespace agent-eval-<id>, then wait until the case is visible
+# through the Kubernetes API (or time out).
 #
-# Usage: KUBECONFIG=... eval/status/inject.sh <case-id>   (e.g. f04, k3)
+#   KUBECONFIG=... eval/status/inject.sh <case-id>     (e.g. f04, k3)
 #
-# Rules the implementation must keep:
-# - Writes only in namespace agent-eval-<case-id>, created here with label
-#   local-agents/eval=true; never in a platform namespace.
-# - Refuses a kubeconfig whose server is not the build cluster's.
-# - Every workload: signed image from 127.0.0.1:30500 by digest (alpine 3.22,
-#   podinfo 6.17.0), app.kubernetes.io/name label, requests and limits,
-#   restricted securityContext; it breaks only what its case is about.
-# - Before injecting: record the ambient snapshot (unhealthy pods, workloads,
-#   Applications outside agent-eval-*) to results/<run>/<case>/ambient.json;
-#   abort if a platform component is unhealthy.
-# - After injecting: wait until the fault is visible through the API (the
-#   case's condition, e.g. waiting reason CrashLoopBackOff) or time out.
+# Rules kept from the approved spec:
+# - only approved case ids; only namespace agent-eval-<id> (labelled
+#   local-agents/eval=true); nothing in a platform namespace;
+# - refuses a kubeconfig whose server is not the build cluster's;
+# - every workload: a signed image from 127.0.0.1:30500 by digest, labels,
+#   requests and limits, restricted securityContext; it breaks only what its
+#   case is about (f02 and f06 use the image itself as the fault).
 set -euo pipefail
 
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+BUILD_SERVER="${BUILD_SERVER:-https://192.168.122.10:6443}"
+TIMEOUT="${TIMEOUT:-240}"
 # Approved by the user 11/24 (docs/eval-status.md, Decisions). f09 dropped.
 APPROVED=(f01 f02 f04 f05 f06 f07 f08 f10 k1 k2 k3 k4 k5)
-KNOWN=("${APPROVED[@]}")
 
 case_id=${1:-}
 [[ -n $case_id ]] || { echo "usage: $0 <case-id>" >&2; exit 2; }
-[[ $case_id =~ ^[fk][0-9]{2}$ ]] || { echo "bad case id: $case_id" >&2; exit 2; }
-printf '%s\n' "${KNOWN[@]}" | grep -qx "$case_id" || { echo "unknown case: $case_id" >&2; exit 2; }
+printf '%s\n' "${APPROVED[@]}" | grep -qx "$case_id" || { echo "not an approved case: $case_id" >&2; exit 3; }
 ns="agent-eval-$case_id"
+manifest="$ROOT/eval/status/cases/$case_id.yaml"
+[[ -f $manifest ]] || { echo "missing $manifest" >&2; exit 2; }
 
-echo "plan: create namespace $ns (label local-agents/eval=true), record ambient snapshot,"
-echo "      apply eval/status/cases/$case_id/*.yaml into $ns, wait until the fault is visible"
+server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+[[ "$server" == "$BUILD_SERVER" ]] || { echo "refusing: kubeconfig server $server is not the build cluster ($BUILD_SERVER)" >&2; exit 3; }
+# Every object in the manifest must be the namespace itself or inside it.
+others="$(kubectl apply --dry-run=client -f "$manifest" -o jsonpath='{range .items[*]}{.kind}/{.metadata.namespace}{"\n"}{end}' |
+  grep -v -e "^Namespace/" -e "/$ns\$" || true)"
+[[ -z "$others" ]] || { echo "refusing: objects outside $ns: $others" >&2; exit 3; }
 
-if ! printf '%s\n' "${APPROVED[@]}" | grep -qx "$case_id"; then
-  echo "refusing: $case_id is not approved (docs/eval-status.md, Decisions)" >&2
-  exit 3
-fi
-echo "not implemented yet" >&2
-exit 3
+[[ "${CHECK_ONLY:-0}" == 1 ]] && { echo "CHECK_ONLY=1: $case_id passes the guards; nothing applied"; exit 0; }
+echo "==> $case_id: applying $manifest into $ns"
+kubectl apply -f "$manifest" >/dev/null
+
+k() { kubectl -n "$ns" "$@" 2>/dev/null; }
+visible() {
+  case "$case_id" in
+    f01) k get deploy podinfo -o jsonpath='{.spec.replicas}' | grep -qx 0 ;;
+    f02) k get pods -l app.kubernetes.io/name=puller -o jsonpath='{.items[*].status.containerStatuses[*].state.waiting.reason}' | grep -qE 'ErrImagePull|ImagePullBackOff' ;;
+    f04) k get pods -l app.kubernetes.io/name=crashy -o jsonpath='{.items[*].status.containerStatuses[*].state.waiting.reason}' | grep -q CrashLoopBackOff ;;
+    f05) k get pods -l app.kubernetes.io/name=hungry -o jsonpath='{.items[*].status.containerStatuses[*].lastState.terminated.reason}' | grep -q OOMKilled ;;
+    f06) k get rs -l app.kubernetes.io/name=unsigned -o jsonpath='{.items[*].status.conditions[?(@.type=="ReplicaFailure")].status}' | grep -q True ;;
+    f07) k get pods -l app.kubernetes.io/name=greedy -o jsonpath='{.items[*].status.conditions[?(@.type=="PodScheduled")].reason}' | grep -q Unschedulable ;;
+    f08) k get events --field-selector involvedObject.kind=DaemonSet,reason=FailedCreate -o name | grep -q . ;;
+    f10) k get pvc data -o jsonpath='{.status.phase}' | grep -qx Pending && k get pod claimer -o jsonpath='{.status.phase}' | grep -qx Pending ;;
+    k1) k get scaledobject idle -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' | grep -qx True && k get deploy idle -o jsonpath='{.status.replicas}' | grep -qvE '[1-9]' ;;
+    k2) kubectl get --raw "/apis/metrics.k8s.io/v1beta1/namespaces/$ns/pods" 2>/dev/null | grep -q '"memory"' ;;
+    k3) k get job done -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}' | grep -qx True ;;
+    k4) k get deploy web -o jsonpath='{.status.availableReplicas}' | grep -qx 1 ;;
+    k5) k get pods -l app.kubernetes.io/name=nosecret -o jsonpath='{.items[*].status.phase}' | grep -qx Running ;;
+  esac
+}
+
+echo "==> waiting until the case is visible through the API (up to ${TIMEOUT}s)"
+for ((i = 0; i < TIMEOUT; i += 5)); do
+  if visible; then echo "    visible after ${i}s"; exit 0; fi
+  sleep 5
+done
+echo "timed out: $case_id not visible after ${TIMEOUT}s" >&2
+exit 1

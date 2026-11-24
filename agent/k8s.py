@@ -29,6 +29,11 @@ PATHS = {
     "jobs.batch": "/apis/batch/v1/jobs",
     "scaledobjects.keda.sh": "/apis/keda.sh/v1alpha1/scaledobjects",
     "httpscaledobjects.http.keda.sh": "/apis/http.keda.sh/v1alpha1/httpscaledobjects",
+    "persistentvolumeclaims": "/api/v1/persistentvolumeclaims",
+    "services": "/api/v1/services",
+    "storageclasses.storage.k8s.io": "/apis/storage.k8s.io/v1/storageclasses",
+    "applications.argoproj.io": "/apis/argoproj.io/v1alpha1/applications",
+    "pods.metrics.k8s.io": "/apis/metrics.k8s.io/v1beta1/pods",
 }
 
 

@@ -1,0 +1,48 @@
+# f07: Unschedulable: requests 64 CPUs (nothing is consumed)
+# Applied by eval/status/inject.sh f07; removed by eval/status/cleanup.sh.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agent-eval-f07
+  labels:
+    local-agents/eval: "true"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greedy
+  namespace: agent-eval-f07
+  labels:
+    app.kubernetes.io/name: greedy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: greedy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: greedy
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: greedy
+          image: 127.0.0.1:30500/library/alpine:3.22@sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f
+          command: ["sleep", "3600"]
+          resources:
+            requests:
+              cpu: "64"
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]

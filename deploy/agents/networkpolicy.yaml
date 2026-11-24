@@ -53,3 +53,57 @@ spec:
       ports:
         - protocol: TCP
           port: 6443
+---
+# The API (ADR 0005): ingress only from the CronJob's agentctl pods.
+# Operators and the fault-injection scorer use kubectl port-forward, which
+# NetworkPolicy does not filter; RBAC on pods/portforward gates it
+# (docs/interface.md). The kubelet's health probes come from the node and
+# are allowed by Canal.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: status-reporter-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: status-reporter
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: agentctl
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+# agentctl pods (the CronJob) reach only DNS and the API.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: agentctl-egress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: agentctl
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: status-reporter
+      ports:
+        - protocol: TCP
+          port: 8080

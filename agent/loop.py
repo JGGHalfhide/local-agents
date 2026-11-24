@@ -1,4 +1,5 @@
-"""The status reporter's tool loop on the openai SDK (ADR 0002).
+"""The status reporter's tool loop on the openai SDK (ADR 0002); returns the
+run object of the operator API (ADR 0005, docs/interface.md).
 
 Handles the endpoint behaviour found in the spike (ADR 0002):
 - a cap on model turns (a model can call one tool hundreds of times), then
@@ -8,11 +9,21 @@ Handles the endpoint behaviour found in the spike (ADR 0002):
 - the final structured request ends on a user turn (response_format on a
   request ending with an assistant message is rejected);
 - at least one tool call before any report (the model invented a report
-  when it was free to skip the tools);
-- grounding: a reported fault whose namespace or name appears in no tool
-  output is dropped, and listed under "ungrounded".
+  when it was free to skip the tools).
+Then, on the model's report:
+- evidence: each quote is matched to the tool call whose result contains
+  it; a finding with no matching quote gets the tool-result line naming its
+  object;
+- grounding (the scorer's check): a finding whose namespace or name appears
+  in no tool result is moved to "ungrounded";
+- the KEDA rule (step 3 smoke test): a scaled-to-zero finding on a workload
+  KEDA manages is moved to "ungrounded".
 """
+import datetime as dt
+import hashlib
 import json
+import re
+import secrets
 import time
 
 from openai import OpenAI
@@ -24,25 +35,31 @@ CATEGORIES = ["scaled-to-zero", "image-pull", "crash-loop", "oom-killed", "admis
 MAX_TOOL_CALLS = 8
 MAX_TURNS = MAX_TOOL_CALLS + 2
 MAX_TOKENS = 1024
+DEADLINE_S = 300
+RESULT_KEEP = 2000
 
 SYSTEM_PROMPT = f"""You are a read-only Kubernetes platform status reporter.
 Use the tools to look at the cluster, then report every fault you find.
 A fault is something broken now: a workload that should run but cannot, pods
 crash-looping, OOM-killed, failing to pull, rejected at admission,
-unschedulable, an unbound volume, a node not Ready.
+unschedulable, an unbound volume, a node not Ready, a Service whose workload
+was scaled to zero by hand, an Argo CD application not Synced or not Healthy.
 Not faults: a workload KEDA scales to zero (the tools say so), a completed
 Job, restarts in the past of a pod that is ready now. list_events already
 hides warnings about objects that are healthy now.
-Rules: always call tools before reporting; at most {MAX_TOOL_CALLS} tool calls; only name
-namespaces and objects that appear in tool output. Each fault gets one
-category from: {", ".join(CATEGORIES)}.
+Start with the overview tool; use the other tools only to look closer at
+something it shows. Rules: always call tools before reporting; at most {MAX_TOOL_CALLS} tool calls; only name
+namespaces and objects that appear in tool output; quote evidence exactly as
+the tools printed it. Each fault gets one category from:
+{", ".join(CATEGORIES)}.
 Your final answer is a JSON object only:
 {{"faults": [{{"namespace": "...", "kind": "...", "name": "...", "category": "...",
-"evidence": ["..."]}}], "summary": "..."}}
+"summary": "one sentence", "evidence": ["exact text from a tool result"]}}], "summary": "..."}}
 An empty "faults" list means no fault."""
 USER_PROMPT = "Report the current status of the cluster: list every fault."
 FINAL_ASK = "Give the final report as JSON only."
-LOOK_FIRST = "Call the tools first (for example list_pods, list_workloads, list_events); do not report before."
+LOOK_FIRST = "Call the tools first (start with overview); do not report before."
+PROMPT_SHA256 = hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest()
 
 REPORT_SCHEMA = {
     "type": "object",
@@ -50,11 +67,13 @@ REPORT_SCHEMA = {
         "faults": {"type": "array", "items": {
             "type": "object",
             "properties": {"namespace": {"type": "string"}, "kind": {"type": "string"}, "name": {"type": "string"},
-                           "category": {"type": "string", "enum": CATEGORIES},
+                           "category": {"type": "string", "enum": CATEGORIES}, "summary": {"type": "string"},
                            "evidence": {"type": "array", "items": {"type": "string"}}},
             "required": ["namespace", "kind", "name", "category", "evidence"], "additionalProperties": False}},
         "summary": {"type": "string"}},
     "required": ["faults", "summary"], "additionalProperties": False}
+
+NS_TOOLS = {n for n, _d, props, _r in tools.SPECS if "namespace" in props}
 
 
 def parse_args(raw):
@@ -74,80 +93,174 @@ def parse_report(text):
         r = json.loads(s[i:j + 1])
     except ValueError:
         return None
-    if not isinstance(r, dict) or not isinstance(r.get("faults"), list) or not isinstance(r.get("summary"), str):
+    if not isinstance(r, dict) or not isinstance(r.get("faults"), list):
         return None
-    ok = []
-    for f in r["faults"]:
-        if isinstance(f, dict) and all(isinstance(f.get(k), str) for k in ("namespace", "kind", "name", "category")) \
-                and f["category"] in CATEGORIES:
-            f["evidence"] = [str(e) for e in f.get("evidence") or []]
-            ok.append(f)
-    r["faults"] = ok
-    return r
+    faults = [f for f in r["faults"] if isinstance(f, dict)
+              and all(isinstance(f.get(k), str) for k in ("namespace", "kind", "name", "category"))
+              and f["category"] in CATEGORIES]
+    return {"faults": faults, "summary": r.get("summary") if isinstance(r.get("summary"), str) else ""}
 
 
-def ground(report, outputs):
-    """Keep faults whose namespace (if any) and name appear in tool output."""
-    seen = "\n".join(outputs)
-    kept, dropped = [], []
+def _norm(s):
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def _evidence(fault, calls):
+    """Evidence items {tool_call_id, excerpt}: the model's quotes found verbatim
+    (whitespace-normalised) in a tool result; else the result line naming the object."""
+    items = []
+    for quote in fault.get("evidence") or []:
+        q = _norm(str(quote))
+        if len(q) < 8:
+            continue
+        for c in calls:
+            if q in _norm(c["full"]):
+                items.append({"tool_call_id": c["id"], "excerpt": str(quote)[:300]})
+                break
+    if not items:
+        for c in calls:
+            line = next((ln for ln in c["full"].splitlines() if fault["name"] in ln
+                         and (not fault["namespace"] or fault["namespace"] in ln or c["tool"] == "get_status")), None)
+            if line:
+                items.append({"tool_call_id": c["id"], "excerpt": line[:300]})
+                break
+    return items
+
+
+def _findings(report, calls, cluster):
+    findings, ungrounded = [], []
+    seen = "\n".join(c["full"] for c in calls)
     for f in report["faults"]:
-        ns_ok = not f["namespace"] or f["namespace"] in seen
-        (kept if ns_ok and f["name"] and f["name"] in seen else dropped).append(f)
-    report["faults"], report["ungrounded"] = kept, dropped
-    return report
+        item = {"namespace": f["namespace"], "object": f"{f['kind']}/{f['name']}", "category": f["category"],
+                "summary": f.get("summary") or "", "evidence": []}
+        if f["category"] == "scaled-to-zero" and cluster.keda_managed(f["namespace"], f["kind"], f["name"]):
+            ungrounded.append({**item, "reason": "KEDA manages it: at zero by design (KEDA rule)"})
+            continue
+        if not f["name"] or f["name"] not in seen or (f["namespace"] and f["namespace"] not in seen):
+            ungrounded.append({**item, "reason": "object or namespace appears in no tool result"})
+            continue
+        item["evidence"] = _evidence(f, calls)
+        findings.append(item)
+    return findings, ungrounded
 
 
-def run(cfg, cluster, log=None):
-    """One status report. Returns (report or None, trace)."""
-    client = OpenAI(base_url=cfg["base_url"], api_key=cfg["api_key"], max_retries=1, timeout=600)
+def _now():
+    return dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def new_run_id():
+    return "r-" + dt.datetime.now(dt.UTC).strftime("%Y%m%dT%H%M%SZ") + "-" + secrets.token_hex(2)
+
+
+def run(cfg, cluster, namespace=None, thinking=False, run_id=None, log=None):
+    """One status run. Returns the API's run object (docs/interface.md)."""
+    run_id = run_id or new_run_id()
+    started, t0 = _now(), time.monotonic()
+    client = OpenAI(base_url=cfg["base_url"], api_key=cfg["api_key"], max_retries=0)
     opts = {"model": cfg["model"], "temperature": 0, "max_tokens": MAX_TOKENS}
-    msgs = [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": USER_PROMPT}]
-    trace = {"tool_calls": [], "invalid_calls": 0, "turns": 0, "looked_first_nudge": False}
-    outputs, content = [], ""
-    t0 = time.time()
-    for _ in range(MAX_TURNS):
-        trace["turns"] += 1
-        m = client.chat.completions.create(messages=msgs, tools=tools.openai_tools(), **opts).choices[0].message
-        content = m.content or ""
-        if not m.tool_calls:
-            if not trace["tool_calls"] and not trace["looked_first_nudge"]:
-                trace["looked_first_nudge"] = True
-                msgs += [{"role": "assistant", "content": content}, {"role": "user", "content": LOOK_FIRST}]
-                continue
-            break
-        d = m.model_dump(exclude_none=True)
-        for c in d["tool_calls"]:
-            if parse_args(c["function"]["arguments"]) is None:
-                c["function"]["arguments"] = "{}"
-        msgs.append(d)
-        for c in m.tool_calls:
-            args = parse_args(c.function.arguments)
-            if len(trace["tool_calls"]) >= MAX_TOOL_CALLS:
-                out = "error: tool-call limit reached; give your final answer now"
-            elif args is None:
-                trace["invalid_calls"] += 1
-                out = "error: arguments are not JSON"
-            else:
-                out = tools.call(cluster, c.function.name, args)
-                if out.startswith("error:"):
-                    trace["invalid_calls"] += 1
-                trace["tool_calls"].append({"name": c.function.name, "args": args, "chars": len(out)})
-                outputs.append(out)
-            if log:
-                log(c.function.name, args, out)
-            msgs.append({"role": "tool", "tool_call_id": c.id, "content": out})
-        content = ""
-    report = parse_report(content) if trace["tool_calls"] else None
-    if report is None and trace["tool_calls"]:
-        if content:
-            msgs.append({"role": "assistant", "content": content})
-        msgs.append({"role": "user", "content": FINAL_ASK})
-        r = client.chat.completions.create(
-            messages=msgs, response_format={"type": "json_schema", "json_schema": {"name": "report", "schema": REPORT_SCHEMA}},
-            **opts)
-        report = parse_report(r.choices[0].message.content)
-        trace["final_structured_request"] = True
-    if report is not None:
-        report = ground(report, outputs)
-    trace["seconds"] = round(time.time() - t0, 1)
-    return report, trace
+    if thinking:
+        opts["extra_body"] = {"chat_template_kwargs": {"enable_thinking": True}}
+    user = USER_PROMPT
+    if namespace:
+        user = (f"Report the current status of namespace {namespace}: list every fault there. "
+                f"Pass namespace={namespace} to the tools that take one.")
+    msgs = [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": user}]
+    calls, turns, nudged, content, error = [], 0, False, "", None
+    model_s = tools_s = 0.0
+
+    def remaining():
+        return DEADLINE_S - (time.monotonic() - t0)
+
+    def chat(**kw):
+        nonlocal model_s
+        if remaining() <= 5:
+            raise TimeoutError("deadline exceeded")
+        t = time.monotonic()
+        try:
+            return client.with_options(timeout=remaining()).chat.completions.create(messages=msgs, **opts, **kw)
+        finally:
+            model_s += time.monotonic() - t
+
+    report = None
+    try:
+        for _ in range(MAX_TURNS):
+            if len([x for x in calls if not x["error"]]) >= MAX_TOOL_CALLS:
+                content = ""          # cap reached: no more tools, straight to the final request
+                break
+            turns += 1
+            m = chat(tools=tools.openai_tools()).choices[0].message
+            content = m.content or ""
+            if not m.tool_calls:
+                if not calls and not nudged:
+                    nudged = True
+                    msgs += [{"role": "assistant", "content": content}, {"role": "user", "content": LOOK_FIRST}]
+                    continue
+                break
+            d = m.model_dump(exclude_none=True)
+            for c in d["tool_calls"]:
+                if parse_args(c["function"]["arguments"]) is None:
+                    c["function"]["arguments"] = "{}"
+            msgs.append(d)
+            for c in m.tool_calls:
+                args = parse_args(c.function.arguments)
+                if args is not None and namespace and c.function.name in NS_TOOLS and not args.get("namespace"):
+                    args["namespace"] = namespace
+                if len([x for x in calls if not x["error"]]) >= MAX_TOOL_CALLS:
+                    out, err = "error: tool-call limit reached; give your final answer now", True
+                elif args is None:
+                    out, err = "error: arguments are not JSON", True
+                else:
+                    t = time.monotonic()
+                    out = tools.call(cluster, c.function.name, args)
+                    tools_s += time.monotonic() - t
+                    err = out.startswith("error:")
+                call = {"id": f"t{len(calls) + 1}", "tool": c.function.name, "arguments": args or {},
+                        "full": out, "duration_ms": int((time.monotonic() - t) * 1000) if args is not None and not err else 0,
+                        "error": err}
+                calls.append(call)
+                if log:
+                    log(call)
+                msgs.append({"role": "tool", "tool_call_id": c.id, "content": out})
+            content = ""
+        report = parse_report(content) if calls else None
+        if report is None and calls:
+            if content:
+                msgs.append({"role": "assistant", "content": content})
+            msgs.append({"role": "user", "content": FINAL_ASK})
+            r = chat(response_format={"type": "json_schema", "json_schema": {"name": "report", "schema": REPORT_SCHEMA}})
+            turns += 1
+            report = parse_report(r.choices[0].message.content)
+            if report is None:
+                error = (f"no valid report (final request: finish_reason={r.choices[0].finish_reason}, "
+                         f"content starts {(r.choices[0].message.content or '')[:120]!r})")
+        if not calls:
+            error = "no tool call"
+        elif report is None and not error:
+            error = "no valid report"
+    except TimeoutError as e:
+        error = str(e)
+    except Exception as e:      # endpoint or API errors: the run is unknown, not a crash
+        error = f"{type(e).__name__}: {e}"[:300]
+
+    findings, ungrounded = _findings(report, calls, cluster) if report else ([], [])
+    if report is None:
+        status = "unknown"
+    elif findings:
+        status = "fault"
+    elif any("KEDA rule" not in u["reason"] for u in ungrounded):
+        status = "unknown"      # the model named objects the tools never showed
+    else:
+        status = "healthy"
+    return {
+        "run_id": run_id, "status": status, "demo": False, "namespace": namespace,
+        "findings": findings, "ungrounded": ungrounded, "summary": (report or {}).get("summary", ""),
+        "tool_calls": [{"id": c["id"], "tool": c["tool"], "arguments": c["arguments"], "result": c["full"][:RESULT_KEEP],
+                        "result_chars": len(c["full"]), "truncated": len(c["full"]) > RESULT_KEEP,
+                        "duration_ms": c["duration_ms"], "error": c["error"]} for c in calls],
+        "model": {"name": cfg["model"], "base_url": cfg["base_url"], "temperature": 0, "max_tokens": MAX_TOKENS,
+                  "thinking": bool(thinking), "max_tool_calls": MAX_TOOL_CALLS, "max_turns": MAX_TURNS,
+                  "prompt_sha256": PROMPT_SHA256},
+        "timings": {"started": started, "finished": _now(), "total_s": round(time.monotonic() - t0, 1),
+                    "model_s": round(model_s, 1), "tools_s": round(tools_s, 2), "turns": turns},
+        "error": error,
+    }

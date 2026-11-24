@@ -1,0 +1,66 @@
+# k1: Control: KEDA scales the workload to zero (cron window never open)
+# Applied by eval/status/inject.sh k1; removed by eval/status/cleanup.sh.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agent-eval-k1
+  labels:
+    local-agents/eval: "true"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: idle
+  namespace: agent-eval-k1
+  labels:
+    app.kubernetes.io/name: idle
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: idle
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: idle
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: idle
+          image: 127.0.0.1:30500/stefanprodan/podinfo:6.17.0@sha256:fa2f27c1a8561097e5144bfc0853eba6054d743b68b03de4cad4675616ddefb0
+          resources:
+            requests:
+              cpu: "10m"
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: idle
+  namespace: agent-eval-k1
+spec:
+  scaleTargetRef:
+    name: idle
+  minReplicaCount: 0
+  maxReplicaCount: 1
+  cooldownPeriod: 30
+  triggers:
+    - type: cron
+      metadata:
+        timezone: Etc/UTC
+        start: "0 0 1 1 *"
+        end: "1 0 1 1 *"
+        desiredReplicas: "1"

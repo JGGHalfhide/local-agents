@@ -101,16 +101,66 @@ class Cluster:
                     ns, name = o["metadata"]["namespace"], o["metadata"]["name"]
                     k = scaled.get((ns, f"{kind}/{name}"))
                     note = "-"
+                    orphaned = []
                     if k:
                         note = f"scaled by KEDA {k['kind']}/{k['name']} ({k['min']}-{k['max']})"
                         if desired == 0:
                             note += "; at zero by design, not a fault"
+                    elif desired == 0 and kind in ("Deployment", "StatefulSet"):
+                        tmpl = ((sp.get("template") or {}).get("metadata") or {}).get("labels") or {}
+                        orphaned = [svc["metadata"]["name"] for svc in self.src.items("services")
+                                    if svc["metadata"]["namespace"] == ns and (svc.get("spec") or {}).get("selector")
+                                    and all(tmpl.get(a) == b for a, b in svc["spec"]["selector"].items())]
+                        note = (f"0 replicas, not autoscaled; Service/{','.join(orphaned)} selects it and has no pods"
+                                if orphaned else "0 replicas, not autoscaled; no Service selects it")
                     conds = _bad_conditions(s.get("conditions"))
                     complete = kind == "Job" and any(c["type"] == "Complete" and c["status"] == "True" for c in s.get("conditions") or [])
-                    ok = complete or (ready >= desired and conds in ("-",)) or (k is not None and desired == 0)
+                    ok = (complete or (ready >= desired and conds in ("-",)) or (k is not None and desired == 0)) and not orphaned
                     self._wl.append({"namespace": ns, "kind": kind, "name": name, "desired": desired, "ready": ready,
                                      "conditions": conds, "autoscaler": note, "ok": ok})
         return self._wl
+
+    def keda_managed(self, ns, kind, name):
+        """True if a KEDA object scales this workload (or is this object)."""
+        return any(k["namespace"] == ns and (k["target"] == f"{kind}/{name}" or k["name"] == name) for k in self.keda())
+
+    def pvcs(self):
+        classes = {c["metadata"]["name"] for c in self.src.items("storageclasses.storage.k8s.io")}
+        rows = []
+        for c in self.src.items("persistentvolumeclaims"):
+            sc = (c.get("spec") or {}).get("storageClassName") or "(default)"
+            rows.append({"namespace": c["metadata"]["namespace"], "name": c["metadata"]["name"],
+                         "phase": (c.get("status") or {}).get("phase", ""), "storage_class": sc,
+                         "class_exists": "yes" if sc == "(default)" or sc in classes else "NO",
+                         "capacity": ((c.get("status") or {}).get("capacity") or {}).get("storage", "-")})
+        return rows
+
+    def argocd_apps(self):
+        rows = []
+        for a in self.src.items("applications.argoproj.io"):
+            st = a.get("status") or {}
+            rows.append({"namespace": a["metadata"]["namespace"], "name": a["metadata"]["name"],
+                         "sync": (st.get("sync") or {}).get("status", "-"),
+                         "health": (st.get("health") or {}).get("status", "-"),
+                         "message": " ".join(((st.get("health") or {}).get("message") or "").split())[:160]})
+        return rows
+
+    def pod_metrics(self, ns):
+        limits = {}
+        for p in self.src.items("pods"):
+            if p["metadata"]["namespace"] != ns:
+                continue
+            for c in (p.get("spec") or {}).get("containers") or []:
+                limits[(p["metadata"]["name"], c["name"])] = ((c.get("resources") or {}).get("limits") or {}).get("memory", "-")
+        rows = []
+        for m in self.src.items("pods.metrics.k8s.io"):
+            if m["metadata"]["namespace"] != ns:
+                continue
+            for c in m.get("containers") or []:
+                rows.append({"namespace": ns, "pod": m["metadata"]["name"], "container": c["name"],
+                             "cpu": c["usage"].get("cpu"), "memory": c["usage"].get("memory"),
+                             "memory_limit": limits.get((m["metadata"]["name"], c["name"]), "-")})
+        return rows
 
     def nodes(self):
         rows = []
@@ -176,12 +226,17 @@ def _ns(rows, ns):
 
 _NS = {"namespace": {"type": "string", "description": "Namespace; omit for all namespaces"}}
 SPECS = [
+    ("overview", "Start here: everything that is NOT healthy now (nodes, pods, workloads, warning events, PVCs, Argo CD apps) in one result, plus counts of what is healthy.", _NS, []),
     ("list_namespaces", "List namespaces and their phase.", {}, []),
     ("list_nodes", "List nodes: Ready, pressure conditions, unschedulable.", {}, []),
     ("list_pods", "List pods: phase, ready, restarts, waiting reason, last termination. Not-ready pods first.", _NS, []),
     ("list_workloads", "List Deployments, StatefulSets, DaemonSets, ReplicaSets and Jobs: desired/ready, conditions that are not True, and whether KEDA scales them. Unhealthy first.", _NS, []),
     ("list_events", "List Warning events whose object is NOT healthy now (resolved ones are hidden and counted), newest first.", _NS, []),
     ("list_keda_objects", "List KEDA ScaledObjects and HTTPScaledObjects: target, min/max replicas, Ready, Active, Paused.", _NS, []),
+    ("list_pvcs", "List PersistentVolumeClaims: phase, storage class and whether that class exists, capacity.", _NS, []),
+    ("list_argocd_apps", "List Argo CD Applications: sync status, health, health message.", {}, []),
+    ("pod_metrics", "Memory and CPU use per container in one namespace, with the memory limit.",
+     {"namespace": {"type": "string", "description": "Namespace"}}, ["namespace"]),
     ("get_status", "Status of one object.",
      {"kind": {"type": "string", "enum": KINDS}, "namespace": {"type": "string", "description": "Namespace (empty for a Node)"},
       "name": {"type": "string"}}, ["kind", "name"]),
@@ -202,7 +257,7 @@ def validate_args(name, args):
         return "arguments must be a JSON object"
     props, req = spec[2], spec[3]
     for k in req:
-        if not args.get(k) and k != "namespace":
+        if not args.get(k):
             return f"missing {k}"
     for k, v in args.items():
         if k not in props:
@@ -214,11 +269,49 @@ def validate_args(name, args):
     return None
 
 
+def _overview(cluster, ns):
+    parts, healthy = [], []
+
+    def section(title, rows, cols, total):
+        healthy.append(f"{title} {total - len(rows)}/{total} healthy")
+        if rows:
+            parts.append(title + "\n" + "\n".join(["\t".join(cols)] + ["\t".join(str(r.get(c, "")) for c in cols) for r in rows]))
+
+    if not ns:
+        nodes = cluster.nodes()
+        section("nodes", [n for n in nodes if n["ready"] != "True" or n["pressure"] != "-"],
+                ["name", "ready", "pressure"], len(nodes))
+    pods = _ns(cluster.pods(), ns)
+    section("pods", [p for p in pods if not p["ok"]],
+            ["namespace", "name", "phase", "ready", "restarts", "waiting", "last_terminated", "owner"], len(pods))
+    wl = _ns(cluster.workloads(), ns)
+    section("workloads", [w for w in wl if not w["ok"]],
+            ["namespace", "kind", "name", "desired", "ready", "conditions", "autoscaler"], len(wl))
+    ev, hidden = cluster.events()
+    ev = _ns(ev, ns)
+    section("warning events (object not healthy now)", ev, ["namespace", "object", "reason", "count", "age", "message"],
+            len(ev) + hidden)
+    pv = _ns(cluster.pvcs(), ns)
+    section("pvcs", [c for c in pv if c["phase"] != "Bound" or c["class_exists"] != "yes"],
+            ["namespace", "name", "phase", "storage_class", "class_exists"], len(pv))
+    if not ns:
+        apps = cluster.argocd_apps()
+        section("argo cd apps", [a for a in apps if a["sync"] != "Synced" or a["health"] != "Healthy"],
+                ["name", "sync", "health", "message"], len(apps))
+    text = "overview" + (f" of namespace {ns}" if ns else "") + ": " + "; ".join(healthy)
+    text += ("\n\n" + "\n\n".join(parts)) if parts else "\nNothing unhealthy found."
+    if len(text) > MAX_RESULT_CHARS:
+        text = text[:MAX_RESULT_CHARS - 80] + "\n... truncated; use the list_* tools with a namespace"
+    return text
+
+
 def call(cluster, name, args):
     err = validate_args(name, args)
     if err:
         return f"error: {err}"
     ns = args.get("namespace") or None
+    if name == "overview":
+        return _overview(cluster, ns)
     if name == "list_namespaces":
         return _render("namespaces", [{"name": n["metadata"]["name"], "phase": n["status"]["phase"]}
                                       for n in cluster.src.items("namespaces")], ["name", "phase"])
@@ -239,6 +332,14 @@ def call(cluster, name, args):
     if name == "list_keda_objects":
         return _render("keda objects", _ns(cluster.keda(), ns),
                        ["namespace", "kind", "name", "target", "min", "max", "ready", "active", "paused"])
+    if name == "list_pvcs":
+        return _render("persistent volume claims", _ns(cluster.pvcs(), ns),
+                       ["namespace", "name", "phase", "storage_class", "class_exists", "capacity"])
+    if name == "list_argocd_apps":
+        return _render("argo cd applications", cluster.argocd_apps(), ["namespace", "name", "sync", "health", "message"])
+    if name == "pod_metrics":
+        return _render(f"pod metrics in {ns}", cluster.pod_metrics(ns),
+                       ["pod", "container", "cpu", "memory", "memory_limit"])
     if name == "get_status":
         kind, nm = args["kind"], args["name"]
         pool = {"Pod": cluster.pods(), "ScaledObject": cluster.keda(), "Node": cluster.nodes()}.get(kind) or \

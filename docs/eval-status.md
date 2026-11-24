@@ -122,6 +122,7 @@ carry env values); Secret names in `imagePullSecrets` are not either.
 
 | Tool | Returns |
 |---|---|
+| `overview(namespace?)` | added 11/24: everything not healthy now (nodes, pods, workloads, warning events, PVCs, Argo CD apps) in one result, plus healthy counts; the model starts here |
 | `list_namespaces()` | name, phase |
 | `list_pods(namespace?)` | pod, phase, ready, restarts, waiting reason, last terminated reason/exit code, node |
 | `list_workloads(namespace?)` | Deployments, StatefulSets, DaemonSets, ReplicaSets with failures, Jobs: desired / ready / available, conditions not True |
@@ -132,6 +133,7 @@ carry env values); Secret names in `imagePullSecrets` are not either.
 | `list_argocd_apps()` | name, sync, health, message |
 | `list_keda_objects(namespace?)` | ScaledObjects / HTTPScaledObjects: target, min/max, Ready, Active, Paused |
 | `pod_metrics(namespace)` | memory and CPU usage vs limit per container (k2) |
+| `list_pvcs(namespace?)`, `list_argocd_apps()` | added 11/24: PVC phase, storage class and whether it exists (f10); Application sync and health |
 
 ### ServiceAccount and ClusterRole
 

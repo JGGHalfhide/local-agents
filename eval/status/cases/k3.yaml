@@ -1,0 +1,46 @@
+# k3: Control: a Job that completed
+# Applied by eval/status/inject.sh k3; removed by eval/status/cleanup.sh.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agent-eval-k3
+  labels:
+    local-agents/eval: "true"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: done
+  namespace: agent-eval-k3
+  labels:
+    app.kubernetes.io/name: done
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: done
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: done
+          image: 127.0.0.1:30500/library/alpine:3.22@sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f
+          command: ["true"]
+          resources:
+            requests:
+              cpu: "10m"
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]

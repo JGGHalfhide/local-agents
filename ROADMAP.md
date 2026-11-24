@@ -35,10 +35,11 @@ thinking, sampling and model choices cannot be judged without one.)
 
 Acceptance: VMs sized and documented; endpoint access decided; an eval set with a measured baseline.
 
-## Week 2: Agent 1 (status reporter): tools, identity and policy
+## Week 2: Agent 1 (status reporter): tools, identity, policy, operator API
 
 Goal: the status reporter in the cluster, using read-only Kubernetes API
-tools under the platform's policies, scored by fault injection.
+tools under the platform's policies, reachable through a structured API and
+`agentctl`, scored by fault injection through that same API.
 
 - [x] Image build path (11/24, ADR 0004): crane on the host, `make agent-image`, published with platform-lab's `make image IMAGE=oci-layout:...` (platform-lab 47c3d56); `local-agents/agent:0.1.0` signed and admitted, an unsigned copy rejected (docs/scans/week2-agent-image-admission.txt)
 - [x] Status reporter tools, from the spike (11/24): list_events hides warnings about objects healthy now, workloads show KEDA scaling (zero by design is not a fault), list_nodes added, a tool call required before any report, grounding check; first live run 0 false faults (docs/scans/week2-status-reporter-live.txt)
@@ -47,7 +48,10 @@ tools under the platform's policies, scored by fault injection.
 - [x] Identity (11/24, deploy/agents/rbac.yaml): ServiceAccount status-reporter, ClusterRole get/list/watch only; can-i: Secrets, logs, exec, attach, port-forward and every write denied (docs/scans/week2-identity-smoke.txt). Original item: Identity: the status reporter's own ServiceAccount and ClusterRole (get/list/watch only on the resources above; no Secrets, no pods/exec, no pods/log in v1); one ServiceAccount per tool server if any; no Secrets in env
 - [x] NetworkPolicy (11/24, deploy/agents/networkpolicy.yaml): default deny; status reporter -> DNS, the KEDA interceptor :8080, the API server on the lab network :6443 only; namespace and pod carry the client label. Original item: NetworkPolicy: agent -> tools and llm-api only; tools -> their backends only; no egress; namespaces labelled as endpoint clients
 - [x] Images through platform-lab (11/24): local-agents/agent:d0b286f signed, verified at admission; Argo CD Application in platform-lab 55545f1 (Synced Healthy). Original item: Images through platform-lab's `make image` (SBOM, Trivy gate, cosign), Kyverno verifies at admission; restricted Pod Security; Argo CD Application in platform-lab
-- [ ] Fault-injection eval run (approved faults and controls only, in `agent-eval-*` namespaces): automatic scores; greedy repeated to check determinism, any sampled configuration run 3 times
+- [ ] Operator API v1 (ADR 0005, docs/interface.md): `python -m agent serve` (stdlib http.server), Deployment + Service in `agents`; POST /v1/status, GET /v1/runs, GET /v1/runs/{id}, GET /healthz; run object with findings, evidence by tool-call id, tool calls, model settings, timings; 300 s run deadline, one run at a time (429), last 50 runs in an emptyDir; ingress only from agentctl pods, operators via port-forward (RBAC)
+- [ ] agentctl (ADR 0005): one stdlib-only Python file; status [-n], runs, trace, health; --json, --thinking, --timeout, --endpoint; exit 0 healthy, 1 fault, 2 error/unknown; the CronJob runs `agentctl status` against the Service
+- [ ] Deterministic rule from the step 3 smoke test: drop `scaled-to-zero` findings on workloads the tools mark as KEDA-managed; PVC and Argo CD Application tools (for f10)
+- [ ] Fault-injection eval run (approved faults and controls only, in `agent-eval-*` namespaces), every run through POST /v1/status (the operators' path): automatic scores; greedy repeated to check determinism, any sampled configuration run 3 times
 - [x] Smoke test (11/24): in-cluster report (Job from the CronJob, 142 s, 1 false fault), labelled pod reaches the endpoint, unlabelled pod blocked, unsigned image rejected (docs/scans/week2-identity-smoke.txt, week2-agent-image-admission.txt). Original item: Smoke test: a status report in-cluster with tool calls; unlabelled pod blocked; no egress; unsigned image rejected; the agent's ServiceAccount denied Secrets, pods/exec and pods/log
 - [ ] Tag v0.2
 
@@ -102,6 +106,7 @@ Goal: numbers, guardrails, and a repo a stranger can follow.
 - [ ] README: architecture (Mermaid), results table, quickstart (depends on platform-lab v1.0+ and local-airgap-LLM v1.1+)
 - [ ] docs/stack.md complete; ADRs complete; gitleaks; employer check
 - [ ] Full rebuild of both clusters from fresh clones of all three repos; record times
+- [ ] Stretch (Week 5-6, if time): read-only web view (ADR 0005, docs/interface.md): served by the agent's server from the same run JSON; server-rendered, no JavaScript, vendored CSS; everything HTML-escaped, strict CSP, no write actions; demo mode with a DEMO banner for screenshots
 - [ ] Tag v1.0; post (user's)
 
 Acceptance: a fresh clone of the three repos reproduces the agents on both clusters, with eval results.
