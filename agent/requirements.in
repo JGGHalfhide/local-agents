@@ -1,0 +1,3 @@
+# Top-level runtime dependencies of the agent image (ADR 0002). The full,
+# hashed set is agent/requirements.lock, made by scripts/lock-agent-deps.sh.
+openai==3.46.0

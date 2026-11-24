@@ -1,8 +1,10 @@
-# Building the agent image (proposal)
+# Building the agent image
 
-Status: **proposal** (Week 1, 11/24), for the user's decision. Nothing is
-installed or changed. The change to the publishing script is platform-lab's
-(it owns the supply chain); this repo would own the image's contents.
+Status: **decided** (Week 2, 11/24): option A, crane
+([ADR 0004](adr/0004-agent-image-built-with-crane.md)). Implemented:
+`make agent-image` (scripts/build-agent-image.sh), `make agent-lock`, and
+platform-lab's `make image IMAGE=oci-layout:<dir> NAME=<repo>:<tag>`. The
+comparison below is kept as the record of the options.
 
 ## What exists (checked 11/24)
 
