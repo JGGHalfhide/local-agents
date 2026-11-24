@@ -1,0 +1,19 @@
+# Agent image publish and admission check, build cluster, 2026-11-24
+# Image: make agent-image at 86886ee -> sha256:ef0bdcec2e7f4c7ec98f7db3132c63c05fb7b1d1e5444270eb09aabc04e88e71
+#   (built twice from the same commit earlier: same digest; import check passed).
+# Published: platform-lab make image IMAGE=oci-layout:build/agent-image/oci NAME=local-agents/agent:0.1.0
+#   (platform-lab 47c3d56): SBOM 110 packages, Trivy CRITICAL 0 (0 fixable), HIGH 61 (8 fixable),
+#   gate passed; pushed digest = built digest; cosign signature + SBOM attestation verified.
+# Negative control: a copy with another timestamp (sha256:756b2e0a1eaa993bbdc645f81c00dd7fe37ba3cc2ce5b42949bb72b177d64a87)
+#   published with SIGN=0 as local-agents/agent:0.1.0-unsigned-test (kept in Zot, test only).
+# Method: kubectl create --dry-run=server of a pod meeting every other policy (label, resources,
+#   restricted securityContext, digest pin) in namespace default; nothing is created.
+
+## signed
+pod/agent-admission-signed created (server dry run)   exit 0
+
+## unsigned
+Error from server: error when creating "STDIN": admission webhook "ivpol.validate.kyverno.svc-fail" denied the request: Policy verify-platform-images failed: image is not signed with the platform-lab cosign key (pki/cosign.pub); publish it with `make image`   exit 1
+
+## afterwards
+kubectl -n default get pods -l app.kubernetes.io/name=local-agents-admission-test: No resources found

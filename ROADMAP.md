@@ -40,7 +40,7 @@ Acceptance: VMs sized and documented; endpoint access decided; an eval set with 
 Goal: the status reporter in the cluster, using read-only Kubernetes API
 tools under the platform's policies, scored by fault injection.
 
-- [ ] Image build path: proposal in docs/image-build.md (crane append/mutate on a pinned base, then platform-lab's publish script from a local OCI layout); the user's decision, then the platform-lab change
+- [x] Image build path (11/24, ADR 0004): crane on the host, `make agent-image`, published with platform-lab's `make image IMAGE=oci-layout:...` (platform-lab 47c3d56); `local-agents/agent:0.1.0` signed and admitted, an unsigned copy rejected (docs/scans/week2-agent-image-admission.txt)
 - [ ] Status reporter tools, from the spike (docs/scans/week1-runtime-spike.txt): mark warning events whose object is healthy now, flag KEDA-managed workloads, require a tool call before any report, a grounding check (every named object appears in tool output); every report in the spike listed 4-7 false faults
 - [ ] Tool interface: tools as functions in the agent vs separate tool servers (e.g. MCP); ADR
 - [ ] First read-only tools (Kubernetes API, get/list/watch): pods, events, workloads, namespaces, nodes, PVCs, Argo CD Applications, KEDA objects; every result capped and summarised within a per-run input budget (docs/eval-status.md). Pod logs not in v1; a safe way to add them proposed. Prometheus and Loki queries later

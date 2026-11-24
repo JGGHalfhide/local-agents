@@ -204,8 +204,7 @@ finalized by the user): points of 88 off-greedy 38, off-qwen 30, on-greedy
 49, on-qwen 42 (docs/eval.md). Runtime candidates
 measured offline (scripts/runtime-footprint.sh,
 docs/scans/week1-runtime-footprint.txt); the endpoint spike for ADR 0002
-waits for the baseline (it would share the 4 slots). Gap for Week 2: no
-container image builder on the host.
+waits for the baseline (it would share the 4 slots).
 Pivot 11/24 (ADR 0003): agent 1 = status reporter, agent 2 = triage
 (stretch); ROADMAP.md, docs/eval.md updated; docs/eval-status.md (fault
 injection spec) approved 11/24: faults f01 f02 f04-f08 f10, controls k1-k5,
@@ -220,8 +219,14 @@ langgraph 3/4, smolagents 2/4, pydantic-ai 0/4). Endpoint quirks every loop
 must handle are in the ADR. Report quality was weak for all (false faults
 from boot-time warnings and KEDA scale-to-zero): Week 2 tool design.
 MVP scope (user, 11/24): proof of concept; smallest test that decides.
-Week 1 tagged v0.1 (11/24; employer check signed off by the user). Image
-build proposal: docs/image-build.md (crane, recommended; awaiting the user).
+Week 1 tagged v0.1 (11/24; employer check signed off by the user).
+Week 2 step 1 done (11/24, ADR 0004): agent image built with crane
+(`make agent-image`, reproducible, locked wheels), published through
+platform-lab's supply chain (`make image IMAGE=oci-layout:<dir>
+NAME=<repo>:<tag>`, platform-lab 47c3d56): local-agents/agent:0.1.0 signed
+and admitted; an unsigned test copy (tag 0.1.0-unsigned-test) is rejected
+and stays in Zot as a test image. Gap for Week 2: no container image
+builder on the host -> closed. Next: step 2, the status reporter's tools.
 Lab: build-node-01 running, airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state
