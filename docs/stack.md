@@ -32,6 +32,7 @@ Keep this page current every week.
 |---|---|---|---|
 | Agent runtime | *planned, Week 1* | | ADR 0001 |
 | Tools | *planned, Week 2* | | |
+| Endpoint access | NetworkPolicy (Canal), no API key | Agent namespaces and agent pods labelled `inference.local-airgap-llm/client: "true"` (both required by the interceptor's policy); tools unlabelled | [ADR 0001](adr/0001-endpoint-access-networkpolicy-only.md) |
 | Identity and policy | *planned, Week 2* | | |
 | Retrieval: embedding model, vector store, index | *planned, Week 3* | | |
 | Tracing | *planned, Week 4* | | |

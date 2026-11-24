@@ -9,7 +9,8 @@ decided.
 
 | # | Decision |
 |---|---|
+| [0001](0001-endpoint-access-networkpolicy-only.md) | Endpoint access: NetworkPolicy only, no API key (Week 1) |
 
-Expected in the first weeks (ROADMAP.md): agent runtime (Week 1), endpoint
-access (Week 1), tool interface (Week 2), embedding model and vector store
-(Week 3), tracing (Week 4), write actions and approval (Week 6).
+Expected in the first weeks (ROADMAP.md): agent runtime (Week 1), tool
+interface (Week 2), embedding model and vector store (Week 3), tracing
+(Week 4), write actions and approval (Week 6).

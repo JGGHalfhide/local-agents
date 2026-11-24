@@ -64,14 +64,20 @@ platform-lab (Phase 1, v1.0 11/18) and local-airgap-LLM (Phase 2, v1.1
   but looped to 8,192 tokens with no answer on 3/3 open-ended triage
   questions at temperature 0; a 256 budget made answers worse.
 - Tool calling and JSON-schema output pass (5/5) with thinking on or off.
-- Access today: NetworkPolicy only. Clients must be pods or namespaces
-  labelled `inference.local-airgap-llm/client: "true"`; no API key yet.
+- Access: NetworkPolicy only, no API key (ADR 0001). A client must be a
+  pod labelled `inference.local-airgap-llm/client: "true"` IN a namespace
+  with the same label (both, one `from` entry in platform-lab
+  gitops/keda/networkpolicy-interceptor.yaml).
 
 ## Decisions so far (11/23)
 - Separate repo; same conventions as the other two.
 - The endpoint stays fast, bounded and predictable by default; this repo
   decides when to pay for slower, better answers (thinking, longer
   contexts, a second model).
+- Both VMs 12 vCPU / 20 GiB, one at a time (docs/resource-plan.md).
+- Endpoint access: NetworkPolicy only, no API key (ADR 0001). Only agent
+  pods get the client label (namespace and pod, via GitOps); tools stay
+  unlabelled; agent/tool RBAC must not create pods or edit labels.
 - Everything else is open: see ROADMAP.md Week 1 and Open questions.
 
 ## Conventions (same as platform-lab and local-airgap-LLM)
