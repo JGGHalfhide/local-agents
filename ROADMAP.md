@@ -30,7 +30,7 @@ thinking, sampling and model choices cannot be judged without one.)
 - [ ] Baseline: the model alone on the eval set (no tools, no retrieval): thinking off vs on (1024 budget), greedy vs Qwen's recommended sampling. Latency and tokens per case.
 - [x] ADR 0003: first agent = read-only platform status reporter, scored by fault injection; triage becomes agent 2 (11/24)
 - [ ] ADR 0002: agent runtime (a plain loop on the OpenAI-compatible API vs an agent framework), chosen by a small spike against the endpoint whose task is the status reporter's tool loop (read-only Kubernetes tools, capped results); footprint, airgap packaging, supply chain, backend-neutral client config (base URL, model, key)
-- [ ] Fault-injection eval spec (docs/eval-status.md) and inject/cleanup stubs, proposed; nothing injected before the user's OK
+- [x] Fault-injection eval spec (docs/eval-status.md) and inject/cleanup stubs; approved 11/24 (8 faults, 5 controls, f09 dropped, context caps); nothing injected yet
 - [ ] Tag v0.1
 
 Acceptance: VMs sized and documented; endpoint access decided; an eval set with a measured baseline.

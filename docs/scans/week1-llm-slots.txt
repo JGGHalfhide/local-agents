@@ -1,0 +1,17 @@
+# Per-slot context of the endpoint, build cluster, 2026-11-24 (build-node-01)
+# Method: kubectl -n keda port-forward svc/keda-add-ons-http-interceptor-proxy 18082:8080;
+#   curl -H 'Host: llm-api.llm.svc' http://127.0.0.1:18082/{props,slots} (woke llama-server from zero).
+# llama-server args (kubectl -n llm get deploy llama-server): --ctx-size 32768, no --parallel, no --kv-unified flag.
+
+## /props (fields with ctx/slot/parallel/build)
+build_info = b12359-b1b770d90
+total_slots = 4
+endpoint_slots = True
+default_generation_settings.n_ctx = 32768
+
+## /slots (raw)
+[{"id":0,"n_ctx":32768,"speculative":false,"is_processing":false},{"id":1,"n_ctx":32768,"speculative":false,"is_processing":false},{"id":2,"n_ctx":32768,"speculative":false,"is_processing":false},{"id":3,"n_ctx":32768,"speculative":false,"is_processing":false}]
+
+# Reading: --parallel unset = auto (4 slots); llama.cpp server README (master): -kvu/--kv-unified
+# 'default: enabled if number of slots is auto'. Each slot reports n_ctx 32768: one unified
+# 32768-token KV pool shared by the 4 slots, not 4 x 8192.

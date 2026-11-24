@@ -201,7 +201,10 @@ waits for the baseline (it would share the 4 slots). Gap for Week 2: no
 container image builder on the host.
 Pivot 11/24 (ADR 0003): agent 1 = status reporter, agent 2 = triage
 (stretch); ROADMAP.md, docs/eval.md updated; docs/eval-status.md (fault
-injection spec) is a proposal awaiting the user's OK.
+injection spec) approved 11/24: faults f01 f02 f04-f08 f10, controls k1-k5,
+f09 dropped, caps 1k tokens/tool result, 8 calls, 12k input/run; per-slot
+n_ctx is one unified 32k pool (docs/scans/week1-llm-slots.txt). Stubs in
+eval/status/ refuse to run; nothing injected yet.
 Lab: build-node-01 running, airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state
