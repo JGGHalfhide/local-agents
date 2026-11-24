@@ -231,7 +231,15 @@ Week 2 step 2 done (11/24): the status reporter (agent/: k8s.py stdlib API
 access GET only, tools.py 7 tools with the spike's lessons, loop.py openai
 loop with turn cap, sanitising, look-first and grounding). First live run:
 6 tool calls, 76 s, 0 false faults (docs/scans/week2-status-reporter-live.txt).
-Next: step 3, identity (ServiceAccount, read-only ClusterRole, client labels).
+Week 2 step 3 done (11/24): deployed by Argo CD (platform-lab 55545f1 ->
+deploy/ at 69b8cc3): namespace agents, ServiceAccount status-reporter,
+read-only ClusterRole, NetworkPolicies, hourly CronJob (image
+local-agents/agent:d0b286f, signed). Smoke (docs/scans/week2-identity-smoke.txt):
+Secrets/logs/exec/writes denied; labelled pod reaches the endpoint, unlabelled
+blocked; in-cluster report in 142 s with 1 false fault (llama-server
+scaled-to-zero despite the KEDA label; proposed fix: drop such faults in code).
+Note: `kubectl auth can-i get pods/log` means a pod named "log"; use
+--subresource=log. Next: step 4, fault injection (approved cases).
 Lab: build-node-01 running, airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state

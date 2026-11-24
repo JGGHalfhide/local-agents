@@ -1,0 +1,70 @@
+# Status reporter identity and in-cluster smoke test, build cluster, 2026-11-24
+# Deployed by Argo CD: platform-lab 55545f1 (Application local-agents) -> local-agents 69b8cc3 deploy/:
+#   Synced Healthy, 8 objects. Image local-agents/agent:d0b286f@sha256:5826aca1... (signed).
+# Method: kubectl auth can-i --as=system:serviceaccount:agents:status-reporter (subresources
+#   with --subresource; 'pods/log' as a resource name means a pod named log); one Job from the
+#   CronJob (kubectl create job --from); two probe pods in agents (same name label, so the
+#   namespace egress rule allows them; only the client label differs), deleted afterwards.
+
+## RBAC (expected: list allowed on the tools' resources; everything else denied)
+list pods -A                                   yes
+list events -A                                 yes
+list nodes                                     yes
+list deployments.apps -A                       yes
+list scaledobjects.keda.sh -A                  yes
+list applications.argoproj.io -A               yes
+get secrets -n agents                          no
+list secrets -A                                no
+get pods --subresource=log -n llm              no
+create pods --subresource=exec -n llm          no
+create pods --subresource=attach -n llm        no
+create pods --subresource=portforward -n llm   no
+create pods -n agents                          no
+delete pods -n agents                          no
+patch namespaces                               no
+update deployments.apps -n llm                 no
+create jobs.batch -n agents                    no
+
+## Endpoint access (ADR 0001)
+pod with client label:    REACHED 200
+pod without client label: BLOCKED URLError <urlopen error timed out>
+
+## In-cluster run (Job status-reporter-smoke-1: Complete, 23:01:07 -> 23:03:35 UTC)
+tool list_namespaces {} -> 273 chars
+tool list_nodes {} -> 66 chars
+tool list_pods {} -> 3310 chars
+tool list_workloads {} -> 3383 chars
+tool list_events {} -> 562 chars
+tool list_keda_objects {} -> 250 chars
+tool get_status {"kind": "Pod", "name": "agent-admission-unsigned", "namespace": "default"} -> 47 chars
+tool get_status {"kind": "ScaledObject", "name": "llama-server", "namespace": "llm"} -> 179 chars
+tool list_pods {"namespace": "default"} -> 58 chars
+{"tool_calls": [{"name": "list_namespaces", "args": {}, "chars": 273}, {"name": "list_nodes", "args": {}, "chars": 66}, {"name": "list_pods", "args": {}, "chars": 3310}, {"name": "list_workloads", "args": {}, "chars": 3383}, {"name": "list_events", "args": {}, "chars": 562}, {"name": "list_keda_objects", "args": {}, "chars": 250}, {"name": "get_status", "args": {"kind": "Pod", "name": "agent-admission-unsigned", "namespace": "default"}, "chars": 47}, {"name": "get_status", "args": {"kind": "ScaledObject", "name": "llama-server", "namespace": "llm"}, "chars": 179}], "invalid_calls": 0, "turns": 4, "looked_first_nudge": false, "final_structured_request": true, "seconds": 142.0}
+{
+ "faults": [
+  {
+   "namespace": "default",
+   "kind": "Pod",
+   "name": "agent-admission-unsigned",
+   "category": "admission-denied",
+   "evidence": [
+    "default/ImageValidatingPolicy/verify-platform-images: PolicyViolation - Pod default/agent-admission-unsigned: [verify-platform-images] fail (blocked); image is not signed with the platform-lab cosign key"
+   ]
+  },
+  {
+   "namespace": "llm",
+   "kind": "Deployment",
+   "name": "llama-server",
+   "category": "scaled-to-zero",
+   "evidence": [
+    "llm/ScaledObject/llama-server: target 0-1, active 0"
+   ]
+  }
+ ],
+ "summary": "Found 1 admission-denied fault (unsigned image blocked in default namespace) and 1 scaled-to-zero fault (llama-server scaled to 0 by KEDA in llm namespace).",
+ "ungrounded": []
+}
+
+## Note
+One false fault: llm/llama-server as scaled-to-zero although list_workloads marks it
+'scaled by KEDA (0-1); at zero by design, not a fault' (spike: 4-7 false faults per report).
