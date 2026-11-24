@@ -1,0 +1,2268 @@
+{
+ "provenance": "CONSTRUCTED from healthy.json: k1, Deployment idle scaled to zero by its KEDA ScaledObject (healthy control)",
+ "namespaces": [
+  {
+   "name": "argocd",
+   "phase": "Active"
+  },
+  {
+   "name": "default",
+   "phase": "Active"
+  },
+  {
+   "name": "keda",
+   "phase": "Active"
+  },
+  {
+   "name": "kube-node-lease",
+   "phase": "Active"
+  },
+  {
+   "name": "kube-public",
+   "phase": "Active"
+  },
+  {
+   "name": "kube-system",
+   "phase": "Active"
+  },
+  {
+   "name": "kyverno",
+   "phase": "Active"
+  },
+  {
+   "name": "llm",
+   "phase": "Active"
+  },
+  {
+   "name": "local-path-storage",
+   "phase": "Active"
+  },
+  {
+   "name": "monitoring",
+   "phase": "Active"
+  },
+  {
+   "name": "monitoring-node",
+   "phase": "Active"
+  },
+  {
+   "name": "sample-app",
+   "phase": "Active"
+  },
+  {
+   "name": "velero",
+   "phase": "Active"
+  },
+  {
+   "name": "zot",
+   "phase": "Active"
+  },
+  {
+   "name": "agent-eval-k1",
+   "phase": "Active"
+  }
+ ],
+ "pods": [
+  {
+   "namespace": "argocd",
+   "name": "argocd-application-controller-0",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "StatefulSet/argocd-application-controller",
+   "ok": true
+  },
+  {
+   "namespace": "argocd",
+   "name": "argocd-applicationset-controller-76bd7bf48d-7qkpl",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/argocd-applicationset-controller-76bd7bf48d",
+   "ok": true
+  },
+  {
+   "namespace": "argocd",
+   "name": "argocd-dex-server-6fb66cc6ff-mlj5k",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/argocd-dex-server-6fb66cc6ff",
+   "ok": true
+  },
+  {
+   "namespace": "argocd",
+   "name": "argocd-notifications-controller-df77dddcb-gv6xw",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/argocd-notifications-controller-df77dddcb",
+   "ok": true
+  },
+  {
+   "namespace": "argocd",
+   "name": "argocd-redis-798c57b5ff-8g4p2",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/argocd-redis-798c57b5ff",
+   "ok": true
+  },
+  {
+   "namespace": "argocd",
+   "name": "argocd-repo-server-8dc7449bc-glg97",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/argocd-repo-server-8dc7449bc",
+   "ok": true
+  },
+  {
+   "namespace": "argocd",
+   "name": "argocd-server-55dc66fbb9-hlzw8",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/argocd-server-55dc66fbb9",
+   "ok": true
+  },
+  {
+   "namespace": "keda",
+   "name": "keda-add-ons-http-interceptor-5d586bf6fc-hdlgd",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/keda-add-ons-http-interceptor-5d586bf6fc",
+   "ok": true
+  },
+  {
+   "namespace": "keda",
+   "name": "keda-add-ons-http-operator-9d4944f68-9c8j9",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/keda-add-ons-http-operator-9d4944f68",
+   "ok": true
+  },
+  {
+   "namespace": "keda",
+   "name": "keda-add-ons-http-scaler-5676f47f5f-mqxw9",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 7,
+   "waiting": "-",
+   "last_terminated": "Completed(0)",
+   "owner": "ReplicaSet/keda-add-ons-http-scaler-5676f47f5f",
+   "ok": true
+  },
+  {
+   "namespace": "keda",
+   "name": "keda-admission-85b5f686f5-4sncr",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/keda-admission-85b5f686f5",
+   "ok": true
+  },
+  {
+   "namespace": "keda",
+   "name": "keda-metrics-apiserver-774888449-8hnx9",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/keda-metrics-apiserver-774888449",
+   "ok": true
+  },
+  {
+   "namespace": "keda",
+   "name": "keda-operator-59f65cfb46-sgpjx",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 6,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/keda-operator-59f65cfb46",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "cloud-controller-manager-build-node-01",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 10,
+   "waiting": "-",
+   "last_terminated": "Error(2)",
+   "owner": "Node/build-node-01",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "etcd-build-node-01",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 12,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "Node/build-node-01",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "helm-install-rke2-canal-slvtj",
+   "phase": "Succeeded",
+   "ready": "0/1",
+   "restarts": 0,
+   "waiting": "-",
+   "last_terminated": "-",
+   "owner": "Job/helm-install-rke2-canal",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "helm-install-rke2-coredns-464fg",
+   "phase": "Succeeded",
+   "ready": "0/1",
+   "restarts": 0,
+   "waiting": "-",
+   "last_terminated": "-",
+   "owner": "Job/helm-install-rke2-coredns",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "helm-install-rke2-metrics-server-p2x7n",
+   "phase": "Succeeded",
+   "ready": "0/1",
+   "restarts": 0,
+   "waiting": "-",
+   "last_terminated": "-",
+   "owner": "Job/helm-install-rke2-metrics-server",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "helm-install-rke2-runtimeclasses-9mm9f",
+   "phase": "Succeeded",
+   "ready": "0/1",
+   "restarts": 0,
+   "waiting": "-",
+   "last_terminated": "-",
+   "owner": "Job/helm-install-rke2-runtimeclasses",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "helm-install-rke2-snapshot-controller-crd-zr24s",
+   "phase": "Succeeded",
+   "ready": "0/1",
+   "restarts": 0,
+   "waiting": "-",
+   "last_terminated": "-",
+   "owner": "Job/helm-install-rke2-snapshot-controller-crd",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "helm-install-rke2-snapshot-controller-rj4jt",
+   "phase": "Succeeded",
+   "ready": "0/1",
+   "restarts": 2,
+   "waiting": "-",
+   "last_terminated": "Error(1)",
+   "owner": "Job/helm-install-rke2-snapshot-controller",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "helm-install-rke2-traefik-crd-rkqs9",
+   "phase": "Succeeded",
+   "ready": "0/1",
+   "restarts": 0,
+   "waiting": "-",
+   "last_terminated": "-",
+   "owner": "Job/helm-install-rke2-traefik-crd",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "helm-install-rke2-traefik-zb6cz",
+   "phase": "Succeeded",
+   "ready": "0/1",
+   "restarts": 0,
+   "waiting": "-",
+   "last_terminated": "-",
+   "owner": "Job/helm-install-rke2-traefik",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "kube-apiserver-build-node-01",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "Node/build-node-01",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "kube-controller-manager-build-node-01",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 10,
+   "waiting": "-",
+   "last_terminated": "Error(1)",
+   "owner": "Node/build-node-01",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "kube-proxy-build-node-01",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 0,
+   "waiting": "-",
+   "last_terminated": "-",
+   "owner": "Node/build-node-01",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "kube-scheduler-build-node-01",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "Node/build-node-01",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "rke2-canal-fmsbj",
+   "phase": "Running",
+   "ready": "2/2",
+   "restarts": 10,
+   "waiting": "-",
+   "last_terminated": "Unknown(255),Unknown(255)",
+   "owner": "DaemonSet/rke2-canal",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "rke2-coredns-rke2-coredns-747b86f67b-8j7fw",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/rke2-coredns-rke2-coredns-747b86f67b",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "rke2-coredns-rke2-coredns-autoscaler-878589fc9-cxkv5",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/rke2-coredns-rke2-coredns-autoscaler-878589fc9",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "rke2-metrics-server-956b4b7f5-q4m6s",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/rke2-metrics-server-956b4b7f5",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "rke2-snapshot-controller-5574cc88bf-pg7np",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/rke2-snapshot-controller-5574cc88bf",
+   "ok": true
+  },
+  {
+   "namespace": "kube-system",
+   "name": "rke2-traefik-mgnz4",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "DaemonSet/rke2-traefik",
+   "ok": true
+  },
+  {
+   "namespace": "kyverno",
+   "name": "kyverno-admission-controller-65c4f7d8cf-tc977",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/kyverno-admission-controller-65c4f7d8cf",
+   "ok": true
+  },
+  {
+   "namespace": "kyverno",
+   "name": "kyverno-background-controller-5bb5679d85-sdzd8",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/kyverno-background-controller-5bb5679d85",
+   "ok": true
+  },
+  {
+   "namespace": "kyverno",
+   "name": "kyverno-cleanup-controller-6ffb74558b-k6mcb",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/kyverno-cleanup-controller-6ffb74558b",
+   "ok": true
+  },
+  {
+   "namespace": "kyverno",
+   "name": "kyverno-reports-controller-79556f46c5-kv8kx",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/kyverno-reports-controller-79556f46c5",
+   "ok": true
+  },
+  {
+   "namespace": "local-path-storage",
+   "name": "local-path-provisioner-6f9b6486fb-qphh2",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/local-path-provisioner-6f9b6486fb",
+   "ok": true
+  },
+  {
+   "namespace": "monitoring-node",
+   "name": "kps-prometheus-node-exporter-wpslw",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "DaemonSet/kps-prometheus-node-exporter",
+   "ok": true
+  },
+  {
+   "namespace": "monitoring",
+   "name": "alloy-b6fddbb77-7x4nd",
+   "phase": "Running",
+   "ready": "2/2",
+   "restarts": 10,
+   "waiting": "-",
+   "last_terminated": "Unknown(255),Unknown(255)",
+   "owner": "ReplicaSet/alloy-b6fddbb77",
+   "ok": true
+  },
+  {
+   "namespace": "monitoring",
+   "name": "kps-grafana-5c8f4c96d7-j9h6c",
+   "phase": "Running",
+   "ready": "2/2",
+   "restarts": 10,
+   "waiting": "-",
+   "last_terminated": "Unknown(255),Unknown(255)",
+   "owner": "ReplicaSet/kps-grafana-5c8f4c96d7",
+   "ok": true
+  },
+  {
+   "namespace": "monitoring",
+   "name": "kps-kube-prometheus-stack-operator-5df696b4cb-gbxvv",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/kps-kube-prometheus-stack-operator-5df696b4cb",
+   "ok": true
+  },
+  {
+   "namespace": "monitoring",
+   "name": "kps-kube-state-metrics-5767897545-mtlgr",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/kps-kube-state-metrics-5767897545",
+   "ok": true
+  },
+  {
+   "namespace": "monitoring",
+   "name": "loki-0",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "StatefulSet/loki",
+   "ok": true
+  },
+  {
+   "namespace": "monitoring",
+   "name": "prometheus-kps-kube-prometheus-stack-prometheus-0",
+   "phase": "Running",
+   "ready": "2/2",
+   "restarts": 10,
+   "waiting": "-",
+   "last_terminated": "Unknown(255),Unknown(255)",
+   "owner": "StatefulSet/prometheus-kps-kube-prometheus-stack-prometheus",
+   "ok": true
+  },
+  {
+   "namespace": "sample-app",
+   "name": "db-0",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "StatefulSet/db",
+   "ok": true
+  },
+  {
+   "namespace": "sample-app",
+   "name": "web-64f5d6bc8-79vx2",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/web-64f5d6bc8",
+   "ok": true
+  },
+  {
+   "namespace": "velero",
+   "name": "node-agent-64s6f",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "DaemonSet/node-agent",
+   "ok": true
+  },
+  {
+   "namespace": "velero",
+   "name": "velero-85bbb5689d-6tlt6",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/velero-85bbb5689d",
+   "ok": true
+  },
+  {
+   "namespace": "zot",
+   "name": "zot-0",
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "StatefulSet/zot",
+   "ok": true
+  }
+ ],
+ "workloads": [
+  {
+   "namespace": "argocd",
+   "kind": "Deployment",
+   "name": "argocd-applicationset-controller",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "argocd",
+   "kind": "Deployment",
+   "name": "argocd-dex-server",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "argocd",
+   "kind": "Deployment",
+   "name": "argocd-notifications-controller",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "argocd",
+   "kind": "Deployment",
+   "name": "argocd-redis",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "argocd",
+   "kind": "Deployment",
+   "name": "argocd-repo-server",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "argocd",
+   "kind": "Deployment",
+   "name": "argocd-server",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "keda",
+   "kind": "Deployment",
+   "name": "keda-add-ons-http-interceptor",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "keda",
+   "kind": "Deployment",
+   "name": "keda-add-ons-http-operator",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "keda",
+   "kind": "Deployment",
+   "name": "keda-add-ons-http-scaler",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "keda",
+   "kind": "Deployment",
+   "name": "keda-admission",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "keda",
+   "kind": "Deployment",
+   "name": "keda-metrics-apiserver",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "keda",
+   "kind": "Deployment",
+   "name": "keda-operator",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "Deployment",
+   "name": "rke2-coredns-rke2-coredns",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "Deployment",
+   "name": "rke2-coredns-rke2-coredns-autoscaler",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "Deployment",
+   "name": "rke2-metrics-server",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "Deployment",
+   "name": "rke2-snapshot-controller",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kyverno",
+   "kind": "Deployment",
+   "name": "kyverno-admission-controller",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kyverno",
+   "kind": "Deployment",
+   "name": "kyverno-background-controller",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kyverno",
+   "kind": "Deployment",
+   "name": "kyverno-cleanup-controller",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kyverno",
+   "kind": "Deployment",
+   "name": "kyverno-reports-controller",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "llm",
+   "kind": "Deployment",
+   "name": "llama-server",
+   "desired": 0,
+   "ready": 0,
+   "available": 0,
+   "conditions": "-"
+  },
+  {
+   "namespace": "local-path-storage",
+   "kind": "Deployment",
+   "name": "local-path-provisioner",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "monitoring",
+   "kind": "Deployment",
+   "name": "alloy",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "monitoring",
+   "kind": "Deployment",
+   "name": "kps-grafana",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "monitoring",
+   "kind": "Deployment",
+   "name": "kps-kube-prometheus-stack-operator",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "monitoring",
+   "kind": "Deployment",
+   "name": "kps-kube-state-metrics",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "sample-app",
+   "kind": "Deployment",
+   "name": "web",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "velero",
+   "kind": "Deployment",
+   "name": "velero",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "argocd",
+   "kind": "StatefulSet",
+   "name": "argocd-application-controller",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "monitoring",
+   "kind": "StatefulSet",
+   "name": "loki",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "monitoring",
+   "kind": "StatefulSet",
+   "name": "prometheus-kps-kube-prometheus-stack-prometheus",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "sample-app",
+   "kind": "StatefulSet",
+   "name": "db",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "zot",
+   "kind": "StatefulSet",
+   "name": "zot",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "DaemonSet",
+   "name": "rke2-canal",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "DaemonSet",
+   "name": "rke2-traefik",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "monitoring-node",
+   "kind": "DaemonSet",
+   "name": "kps-prometheus-node-exporter",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "velero",
+   "kind": "DaemonSet",
+   "name": "node-agent",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "argocd",
+   "kind": "ReplicaSet",
+   "name": "argocd-applicationset-controller-76bd7bf48d",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "argocd",
+   "kind": "ReplicaSet",
+   "name": "argocd-dex-server-6fb66cc6ff",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "argocd",
+   "kind": "ReplicaSet",
+   "name": "argocd-notifications-controller-df77dddcb",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "argocd",
+   "kind": "ReplicaSet",
+   "name": "argocd-redis-798c57b5ff",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "argocd",
+   "kind": "ReplicaSet",
+   "name": "argocd-repo-server-8dc7449bc",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "argocd",
+   "kind": "ReplicaSet",
+   "name": "argocd-server-55dc66fbb9",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "keda",
+   "kind": "ReplicaSet",
+   "name": "keda-add-ons-http-interceptor-5d586bf6fc",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "keda",
+   "kind": "ReplicaSet",
+   "name": "keda-add-ons-http-operator-9d4944f68",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "keda",
+   "kind": "ReplicaSet",
+   "name": "keda-add-ons-http-scaler-5676f47f5f",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "keda",
+   "kind": "ReplicaSet",
+   "name": "keda-admission-85b5f686f5",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "keda",
+   "kind": "ReplicaSet",
+   "name": "keda-metrics-apiserver-774888449",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "keda",
+   "kind": "ReplicaSet",
+   "name": "keda-operator-59f65cfb46",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "ReplicaSet",
+   "name": "rke2-coredns-rke2-coredns-747b86f67b",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "ReplicaSet",
+   "name": "rke2-coredns-rke2-coredns-autoscaler-878589fc9",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "ReplicaSet",
+   "name": "rke2-metrics-server-956b4b7f5",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "ReplicaSet",
+   "name": "rke2-snapshot-controller-5574cc88bf",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kyverno",
+   "kind": "ReplicaSet",
+   "name": "kyverno-admission-controller-65c4f7d8cf",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kyverno",
+   "kind": "ReplicaSet",
+   "name": "kyverno-background-controller-5bb5679d85",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kyverno",
+   "kind": "ReplicaSet",
+   "name": "kyverno-cleanup-controller-6ffb74558b",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kyverno",
+   "kind": "ReplicaSet",
+   "name": "kyverno-reports-controller-79556f46c5",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "local-path-storage",
+   "kind": "ReplicaSet",
+   "name": "local-path-provisioner-6f9b6486fb",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "monitoring",
+   "kind": "ReplicaSet",
+   "name": "alloy-b6fddbb77",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "monitoring",
+   "kind": "ReplicaSet",
+   "name": "kps-grafana-5c8f4c96d7",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "monitoring",
+   "kind": "ReplicaSet",
+   "name": "kps-kube-prometheus-stack-operator-5df696b4cb",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "monitoring",
+   "kind": "ReplicaSet",
+   "name": "kps-kube-state-metrics-5767897545",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "sample-app",
+   "kind": "ReplicaSet",
+   "name": "web-64f5d6bc8",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "velero",
+   "kind": "ReplicaSet",
+   "name": "velero-85bbb5689d",
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "Job",
+   "name": "helm-install-rke2-canal",
+   "desired": 1,
+   "ready": 1,
+   "available": 0,
+   "conditions": "Suspended=False(JobResumed)"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "Job",
+   "name": "helm-install-rke2-coredns",
+   "desired": 1,
+   "ready": 1,
+   "available": 0,
+   "conditions": "Suspended=False(JobResumed)"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "Job",
+   "name": "helm-install-rke2-metrics-server",
+   "desired": 1,
+   "ready": 1,
+   "available": 0,
+   "conditions": "Suspended=False(JobResumed)"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "Job",
+   "name": "helm-install-rke2-runtimeclasses",
+   "desired": 1,
+   "ready": 1,
+   "available": 0,
+   "conditions": "Suspended=False(JobResumed)"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "Job",
+   "name": "helm-install-rke2-snapshot-controller",
+   "desired": 1,
+   "ready": 1,
+   "available": 0,
+   "conditions": "Suspended=False(JobResumed)"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "Job",
+   "name": "helm-install-rke2-snapshot-controller-crd",
+   "desired": 1,
+   "ready": 1,
+   "available": 0,
+   "conditions": "Suspended=False(JobResumed)"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "Job",
+   "name": "helm-install-rke2-traefik",
+   "desired": 1,
+   "ready": 1,
+   "available": 0,
+   "conditions": "Suspended=False(JobResumed)"
+  },
+  {
+   "namespace": "kube-system",
+   "kind": "Job",
+   "name": "helm-install-rke2-traefik-crd",
+   "desired": 1,
+   "ready": 1,
+   "available": 0,
+   "conditions": "Suspended=False(JobResumed)"
+  },
+  {
+   "namespace": "agent-eval-k1",
+   "kind": "Deployment",
+   "name": "idle",
+   "desired": 0,
+   "ready": 0,
+   "available": 0,
+   "conditions": "-"
+  }
+ ],
+ "events": [
+  {
+   "namespace": "keda",
+   "object": "HorizontalPodAutoscaler/keda-hpa-keda-add-ons-http-interceptor",
+   "reason": "FailedGetExternalMetric",
+   "count": 2,
+   "age": "42m",
+   "message": "unable to get external metric keda/s0-http-keda_002Fkeda-add-ons-http-interceptor/&LabelSelector{MatchLabels:map[string]string{scaledobject.keda.sh/name: keda-add-ons-http-interceptor,},MatchExpressio"
+  },
+  {
+   "namespace": "keda",
+   "object": "HorizontalPodAutoscaler/keda-hpa-keda-add-ons-http-interceptor",
+   "reason": "FailedComputeMetricsReplicas",
+   "count": 2,
+   "age": "42m",
+   "message": "invalid metrics (1 invalid out of 1), first error is: failed to get s0-http-keda_002Fkeda-add-ons-http-interceptor external metric value: failed to get s0-http-keda_002Fkeda-add-ons-http-interceptor e"
+  },
+  {
+   "namespace": "kube-system",
+   "object": "Pod/kube-apiserver-build-node-01",
+   "reason": "Unhealthy",
+   "count": 3,
+   "age": "42m",
+   "message": "Readiness probe failed: Error from server (InternalError): an error on the server (\"[+]ping ok\\n[+]log ok\\n[-]etcd failed: reason withheld\\n[+]etcd-readiness ok\\n[+]kms-providers ok\\n[+]informer-sync "
+  },
+  {
+   "namespace": "local-path-storage",
+   "object": "Pod/local-path-provisioner-6f9b6486fb-qphh2",
+   "reason": "Unhealthy",
+   "count": 3,
+   "age": "42m",
+   "message": "Readiness probe failed: Get \"http://10.42.0.195:8080/ready\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+  },
+  {
+   "namespace": "monitoring",
+   "object": "Pod/loki-0",
+   "reason": "Unhealthy",
+   "count": 4,
+   "age": "42m",
+   "message": "Readiness probe failed: HTTP probe failed with statuscode: 503"
+  },
+  {
+   "namespace": "keda",
+   "object": "Pod/keda-admission-85b5f686f5-4sncr",
+   "reason": "Failed",
+   "count": 1,
+   "age": "43m",
+   "message": "Error: ImagePullBackOff"
+  },
+  {
+   "namespace": "keda",
+   "object": "Pod/keda-metrics-apiserver-774888449-8hnx9",
+   "reason": "Failed",
+   "count": 1,
+   "age": "43m",
+   "message": "Failed to pull image \"127.0.0.1:30500/kedacore/keda-metrics-apiserver@sha256:747e376b3e80dc4f72bf4f7043f47cc4cdb56f34b1aed9531789f474996e1c84\": rpc error: code = NotFound desc = failed to pull and unp"
+  },
+  {
+   "namespace": "keda",
+   "object": "Pod/keda-operator-59f65cfb46-sgpjx",
+   "reason": "Failed",
+   "count": 1,
+   "age": "43m",
+   "message": "Failed to pull image \"127.0.0.1:30500/kedacore/keda@sha256:d09d92c0a310e3057a3c54df387b99abf2bf31352218dbe1adcb00e807886488\": rpc error: code = NotFound desc = failed to pull and unpack image \"127.0.0"
+  },
+  {
+   "namespace": "keda",
+   "object": "Pod/keda-add-ons-http-scaler-5676f47f5f-mqxw9",
+   "reason": "Unhealthy",
+   "count": 15,
+   "age": "43m",
+   "message": "Readiness probe failed: service unhealthy (responded with \"NOT_SERVING\")"
+  },
+  {
+   "namespace": "kube-system",
+   "object": "Pod/rke2-canal-fmsbj",
+   "reason": "Unhealthy",
+   "count": 1,
+   "age": "43m",
+   "message": "Readiness probe failed: HTTP probe failed with statuscode: 503"
+  },
+  {
+   "namespace": "kube-system",
+   "object": "Pod/rke2-snapshot-controller-5574cc88bf-pg7np",
+   "reason": "Unhealthy",
+   "count": 2,
+   "age": "43m",
+   "message": "Readiness probe failed: Get \"http://10.42.0.219:8080/healthz/leader-election\": dial tcp 10.42.0.219:8080: connect: connection refused"
+  },
+  {
+   "namespace": "kube-system",
+   "object": "Pod/cloud-controller-manager-build-node-01",
+   "reason": "BackOff",
+   "count": 4,
+   "age": "43m",
+   "message": "Back-off restarting failed container cloud-controller-manager in pod cloud-controller-manager-build-node-01_kube-system(b5d09d4a7553626375b163b850ca7643)"
+  },
+  {
+   "namespace": "kube-system",
+   "object": "Pod/kube-controller-manager-build-node-01",
+   "reason": "BackOff",
+   "count": 4,
+   "age": "43m",
+   "message": "Back-off restarting failed container kube-controller-manager in pod kube-controller-manager-build-node-01_kube-system(92c8e03309e80d8944d1b56ab9a2a05a)"
+  },
+  {
+   "namespace": "default",
+   "object": "Node/build-node-01",
+   "reason": "Rebooted",
+   "count": 1,
+   "age": "43m",
+   "message": "Node build-node-01 has been rebooted, boot id: 1da5e44f-f501-4e8b-9e24-4e1c7ca9dc36"
+  }
+ ],
+ "keda": [
+  {
+   "namespace": "keda",
+   "kind": "ScaledObject",
+   "name": "keda-add-ons-http-interceptor",
+   "target": "Deployment/keda-add-ons-http-interceptor",
+   "min": 1,
+   "max": 1,
+   "ready": "True",
+   "active": "False",
+   "paused": "False"
+  },
+  {
+   "namespace": "llm",
+   "kind": "ScaledObject",
+   "name": "llama-server",
+   "target": "Deployment/llama-server",
+   "min": 0,
+   "max": 1,
+   "ready": "True",
+   "active": "False",
+   "paused": "False"
+  },
+  {
+   "namespace": "agent-eval-k1",
+   "kind": "ScaledObject",
+   "name": "idle",
+   "target": "Deployment/idle",
+   "min": 0,
+   "max": 1,
+   "ready": "True",
+   "active": "False",
+   "paused": "False"
+  }
+ ],
+ "status": {
+  "Pod/argocd/argocd-application-controller-0": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "StatefulSet/argocd-application-controller"
+  },
+  "Pod/argocd/argocd-applicationset-controller-76bd7bf48d-7qkpl": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/argocd-applicationset-controller-76bd7bf48d"
+  },
+  "Pod/argocd/argocd-dex-server-6fb66cc6ff-mlj5k": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/argocd-dex-server-6fb66cc6ff"
+  },
+  "Pod/argocd/argocd-notifications-controller-df77dddcb-gv6xw": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/argocd-notifications-controller-df77dddcb"
+  },
+  "Pod/argocd/argocd-redis-798c57b5ff-8g4p2": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/argocd-redis-798c57b5ff"
+  },
+  "Pod/argocd/argocd-repo-server-8dc7449bc-glg97": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/argocd-repo-server-8dc7449bc"
+  },
+  "Pod/argocd/argocd-server-55dc66fbb9-hlzw8": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/argocd-server-55dc66fbb9"
+  },
+  "Pod/keda/keda-add-ons-http-interceptor-5d586bf6fc-hdlgd": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/keda-add-ons-http-interceptor-5d586bf6fc"
+  },
+  "Pod/keda/keda-add-ons-http-operator-9d4944f68-9c8j9": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/keda-add-ons-http-operator-9d4944f68"
+  },
+  "Pod/keda/keda-add-ons-http-scaler-5676f47f5f-mqxw9": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 7,
+   "waiting": "-",
+   "last_terminated": "Completed(0)",
+   "owner": "ReplicaSet/keda-add-ons-http-scaler-5676f47f5f"
+  },
+  "Pod/keda/keda-admission-85b5f686f5-4sncr": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/keda-admission-85b5f686f5"
+  },
+  "Pod/keda/keda-metrics-apiserver-774888449-8hnx9": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/keda-metrics-apiserver-774888449"
+  },
+  "Pod/keda/keda-operator-59f65cfb46-sgpjx": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 6,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/keda-operator-59f65cfb46"
+  },
+  "Pod/kube-system/cloud-controller-manager-build-node-01": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 10,
+   "waiting": "-",
+   "last_terminated": "Error(2)",
+   "owner": "Node/build-node-01"
+  },
+  "Pod/kube-system/etcd-build-node-01": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 12,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "Node/build-node-01"
+  },
+  "Pod/kube-system/helm-install-rke2-canal-slvtj": {
+   "phase": "Succeeded",
+   "ready": "0/1",
+   "restarts": 0,
+   "waiting": "-",
+   "last_terminated": "-",
+   "owner": "Job/helm-install-rke2-canal"
+  },
+  "Pod/kube-system/helm-install-rke2-coredns-464fg": {
+   "phase": "Succeeded",
+   "ready": "0/1",
+   "restarts": 0,
+   "waiting": "-",
+   "last_terminated": "-",
+   "owner": "Job/helm-install-rke2-coredns"
+  },
+  "Pod/kube-system/helm-install-rke2-metrics-server-p2x7n": {
+   "phase": "Succeeded",
+   "ready": "0/1",
+   "restarts": 0,
+   "waiting": "-",
+   "last_terminated": "-",
+   "owner": "Job/helm-install-rke2-metrics-server"
+  },
+  "Pod/kube-system/helm-install-rke2-runtimeclasses-9mm9f": {
+   "phase": "Succeeded",
+   "ready": "0/1",
+   "restarts": 0,
+   "waiting": "-",
+   "last_terminated": "-",
+   "owner": "Job/helm-install-rke2-runtimeclasses"
+  },
+  "Pod/kube-system/helm-install-rke2-snapshot-controller-crd-zr24s": {
+   "phase": "Succeeded",
+   "ready": "0/1",
+   "restarts": 0,
+   "waiting": "-",
+   "last_terminated": "-",
+   "owner": "Job/helm-install-rke2-snapshot-controller-crd"
+  },
+  "Pod/kube-system/helm-install-rke2-snapshot-controller-rj4jt": {
+   "phase": "Succeeded",
+   "ready": "0/1",
+   "restarts": 2,
+   "waiting": "-",
+   "last_terminated": "Error(1)",
+   "owner": "Job/helm-install-rke2-snapshot-controller"
+  },
+  "Pod/kube-system/helm-install-rke2-traefik-crd-rkqs9": {
+   "phase": "Succeeded",
+   "ready": "0/1",
+   "restarts": 0,
+   "waiting": "-",
+   "last_terminated": "-",
+   "owner": "Job/helm-install-rke2-traefik-crd"
+  },
+  "Pod/kube-system/helm-install-rke2-traefik-zb6cz": {
+   "phase": "Succeeded",
+   "ready": "0/1",
+   "restarts": 0,
+   "waiting": "-",
+   "last_terminated": "-",
+   "owner": "Job/helm-install-rke2-traefik"
+  },
+  "Pod/kube-system/kube-apiserver-build-node-01": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "Node/build-node-01"
+  },
+  "Pod/kube-system/kube-controller-manager-build-node-01": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 10,
+   "waiting": "-",
+   "last_terminated": "Error(1)",
+   "owner": "Node/build-node-01"
+  },
+  "Pod/kube-system/kube-proxy-build-node-01": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 0,
+   "waiting": "-",
+   "last_terminated": "-",
+   "owner": "Node/build-node-01"
+  },
+  "Pod/kube-system/kube-scheduler-build-node-01": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "Node/build-node-01"
+  },
+  "Pod/kube-system/rke2-canal-fmsbj": {
+   "phase": "Running",
+   "ready": "2/2",
+   "restarts": 10,
+   "waiting": "-",
+   "last_terminated": "Unknown(255),Unknown(255)",
+   "owner": "DaemonSet/rke2-canal"
+  },
+  "Pod/kube-system/rke2-coredns-rke2-coredns-747b86f67b-8j7fw": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/rke2-coredns-rke2-coredns-747b86f67b"
+  },
+  "Pod/kube-system/rke2-coredns-rke2-coredns-autoscaler-878589fc9-cxkv5": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/rke2-coredns-rke2-coredns-autoscaler-878589fc9"
+  },
+  "Pod/kube-system/rke2-metrics-server-956b4b7f5-q4m6s": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/rke2-metrics-server-956b4b7f5"
+  },
+  "Pod/kube-system/rke2-snapshot-controller-5574cc88bf-pg7np": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/rke2-snapshot-controller-5574cc88bf"
+  },
+  "Pod/kube-system/rke2-traefik-mgnz4": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "DaemonSet/rke2-traefik"
+  },
+  "Pod/kyverno/kyverno-admission-controller-65c4f7d8cf-tc977": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/kyverno-admission-controller-65c4f7d8cf"
+  },
+  "Pod/kyverno/kyverno-background-controller-5bb5679d85-sdzd8": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/kyverno-background-controller-5bb5679d85"
+  },
+  "Pod/kyverno/kyverno-cleanup-controller-6ffb74558b-k6mcb": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/kyverno-cleanup-controller-6ffb74558b"
+  },
+  "Pod/kyverno/kyverno-reports-controller-79556f46c5-kv8kx": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/kyverno-reports-controller-79556f46c5"
+  },
+  "Pod/local-path-storage/local-path-provisioner-6f9b6486fb-qphh2": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/local-path-provisioner-6f9b6486fb"
+  },
+  "Pod/monitoring-node/kps-prometheus-node-exporter-wpslw": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "DaemonSet/kps-prometheus-node-exporter"
+  },
+  "Pod/monitoring/alloy-b6fddbb77-7x4nd": {
+   "phase": "Running",
+   "ready": "2/2",
+   "restarts": 10,
+   "waiting": "-",
+   "last_terminated": "Unknown(255),Unknown(255)",
+   "owner": "ReplicaSet/alloy-b6fddbb77"
+  },
+  "Pod/monitoring/kps-grafana-5c8f4c96d7-j9h6c": {
+   "phase": "Running",
+   "ready": "2/2",
+   "restarts": 10,
+   "waiting": "-",
+   "last_terminated": "Unknown(255),Unknown(255)",
+   "owner": "ReplicaSet/kps-grafana-5c8f4c96d7"
+  },
+  "Pod/monitoring/kps-kube-prometheus-stack-operator-5df696b4cb-gbxvv": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/kps-kube-prometheus-stack-operator-5df696b4cb"
+  },
+  "Pod/monitoring/kps-kube-state-metrics-5767897545-mtlgr": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/kps-kube-state-metrics-5767897545"
+  },
+  "Pod/monitoring/loki-0": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "StatefulSet/loki"
+  },
+  "Pod/monitoring/prometheus-kps-kube-prometheus-stack-prometheus-0": {
+   "phase": "Running",
+   "ready": "2/2",
+   "restarts": 10,
+   "waiting": "-",
+   "last_terminated": "Unknown(255),Unknown(255)",
+   "owner": "StatefulSet/prometheus-kps-kube-prometheus-stack-prometheus"
+  },
+  "Pod/sample-app/db-0": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "StatefulSet/db"
+  },
+  "Pod/sample-app/web-64f5d6bc8-79vx2": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/web-64f5d6bc8"
+  },
+  "Pod/velero/node-agent-64s6f": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "DaemonSet/node-agent"
+  },
+  "Pod/velero/velero-85bbb5689d-6tlt6": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "ReplicaSet/velero-85bbb5689d"
+  },
+  "Pod/zot/zot-0": {
+   "phase": "Running",
+   "ready": "1/1",
+   "restarts": 5,
+   "waiting": "-",
+   "last_terminated": "Unknown(255)",
+   "owner": "StatefulSet/zot"
+  },
+  "Deployment/argocd/argocd-applicationset-controller": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/argocd/argocd-dex-server": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/argocd/argocd-notifications-controller": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/argocd/argocd-redis": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/argocd/argocd-repo-server": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/argocd/argocd-server": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/keda/keda-add-ons-http-interceptor": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/keda/keda-add-ons-http-operator": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/keda/keda-add-ons-http-scaler": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/keda/keda-admission": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/keda/keda-metrics-apiserver": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/keda/keda-operator": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/kube-system/rke2-coredns-rke2-coredns": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/kube-system/rke2-coredns-rke2-coredns-autoscaler": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/kube-system/rke2-metrics-server": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/kube-system/rke2-snapshot-controller": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/kyverno/kyverno-admission-controller": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/kyverno/kyverno-background-controller": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/kyverno/kyverno-cleanup-controller": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/kyverno/kyverno-reports-controller": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/llm/llama-server": {
+   "desired": 0,
+   "ready": 0,
+   "available": 0,
+   "conditions": "-"
+  },
+  "Deployment/local-path-storage/local-path-provisioner": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/monitoring/alloy": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/monitoring/kps-grafana": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/monitoring/kps-kube-prometheus-stack-operator": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/monitoring/kps-kube-state-metrics": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/sample-app/web": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Deployment/velero/velero": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "StatefulSet/argocd/argocd-application-controller": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "StatefulSet/monitoring/loki": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "StatefulSet/monitoring/prometheus-kps-kube-prometheus-stack-prometheus": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "StatefulSet/sample-app/db": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "StatefulSet/zot/zot": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "DaemonSet/kube-system/rke2-canal": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "DaemonSet/kube-system/rke2-traefik": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "DaemonSet/monitoring-node/kps-prometheus-node-exporter": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "DaemonSet/velero/node-agent": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/argocd/argocd-applicationset-controller-76bd7bf48d": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/argocd/argocd-dex-server-6fb66cc6ff": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/argocd/argocd-notifications-controller-df77dddcb": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/argocd/argocd-redis-798c57b5ff": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/argocd/argocd-repo-server-8dc7449bc": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/argocd/argocd-server-55dc66fbb9": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/keda/keda-add-ons-http-interceptor-5d586bf6fc": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/keda/keda-add-ons-http-operator-9d4944f68": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/keda/keda-add-ons-http-scaler-5676f47f5f": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/keda/keda-admission-85b5f686f5": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/keda/keda-metrics-apiserver-774888449": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/keda/keda-operator-59f65cfb46": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/kube-system/rke2-coredns-rke2-coredns-747b86f67b": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/kube-system/rke2-coredns-rke2-coredns-autoscaler-878589fc9": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/kube-system/rke2-metrics-server-956b4b7f5": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/kube-system/rke2-snapshot-controller-5574cc88bf": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/kyverno/kyverno-admission-controller-65c4f7d8cf": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/kyverno/kyverno-background-controller-5bb5679d85": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/kyverno/kyverno-cleanup-controller-6ffb74558b": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/kyverno/kyverno-reports-controller-79556f46c5": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/local-path-storage/local-path-provisioner-6f9b6486fb": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/monitoring/alloy-b6fddbb77": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/monitoring/kps-grafana-5c8f4c96d7": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/monitoring/kps-kube-prometheus-stack-operator-5df696b4cb": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/monitoring/kps-kube-state-metrics-5767897545": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/sample-app/web-64f5d6bc8": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "ReplicaSet/velero/velero-85bbb5689d": {
+   "desired": 1,
+   "ready": 1,
+   "available": 1,
+   "conditions": "-"
+  },
+  "Job/kube-system/helm-install-rke2-canal": {
+   "desired": 1,
+   "ready": 1,
+   "available": 0,
+   "conditions": "Suspended=False(JobResumed)"
+  },
+  "Job/kube-system/helm-install-rke2-coredns": {
+   "desired": 1,
+   "ready": 1,
+   "available": 0,
+   "conditions": "Suspended=False(JobResumed)"
+  },
+  "Job/kube-system/helm-install-rke2-metrics-server": {
+   "desired": 1,
+   "ready": 1,
+   "available": 0,
+   "conditions": "Suspended=False(JobResumed)"
+  },
+  "Job/kube-system/helm-install-rke2-runtimeclasses": {
+   "desired": 1,
+   "ready": 1,
+   "available": 0,
+   "conditions": "Suspended=False(JobResumed)"
+  },
+  "Job/kube-system/helm-install-rke2-snapshot-controller": {
+   "desired": 1,
+   "ready": 1,
+   "available": 0,
+   "conditions": "Suspended=False(JobResumed)"
+  },
+  "Job/kube-system/helm-install-rke2-snapshot-controller-crd": {
+   "desired": 1,
+   "ready": 1,
+   "available": 0,
+   "conditions": "Suspended=False(JobResumed)"
+  },
+  "Job/kube-system/helm-install-rke2-traefik": {
+   "desired": 1,
+   "ready": 1,
+   "available": 0,
+   "conditions": "Suspended=False(JobResumed)"
+  },
+  "Job/kube-system/helm-install-rke2-traefik-crd": {
+   "desired": 1,
+   "ready": 1,
+   "available": 0,
+   "conditions": "Suspended=False(JobResumed)"
+  },
+  "Deployment/agent-eval-k1/idle": {
+   "desired": 0,
+   "ready": 0,
+   "available": 0,
+   "conditions": "-"
+  }
+ },
+ "expected": {
+  "faults": []
+ }
+}

@@ -1,0 +1,37 @@
+# ADR 0002 runtime spike, build cluster, 2026-11-24
+# Method: eval/spike/run_spike.py, 5 candidates x 4 fixtures x 1 greedy run, thinking off, the
+#   status reporter's tool loop on fixture tool outputs (eval/spike/fixtures: healthy recorded
+#   read-only 11/24, f04/f06/k1 constructed from it), caps: 8 tool calls, 3,500 chars per
+#   result, 1,024 completion tokens (5 runs first made at 512 were redone at 1,024:
+#   eval/spike/rerun_select.py; meta.json lists them). Every request through eval/spike/proxy.py
+#   (proxy.jsonl.gz). Scored by eval/spike/score.py. Endpoint: local-airgap-LLM with
+#   --ctx-checkpoints 4 (ADR 0007 there). attempt1-runs.jsonl: the first attempt (10 runs,
+#   stopped by a plain loop without a turn cap), kept for the failure record.
+
+| Candidate | Runs | Success | Invalid tool calls | Exceptions | Tool calls emitted / executed (mean) | Requests (mean) | Prompt tokens (mean) | Completion tokens (mean) | Wall s (median) | Expected fault found | False faults in agent-eval-* | Faults reported (mean) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| plain-stdlib | 4 | 4/4 | 0 | 0 | 13.0 / 8.0 | 7.8 | 41954 | 1557 | 221 | 1/2 | 0 | 6.8 |
+| plain-openai | 4 | 4/4 | 0 | 0 | 16.5 / 8.0 | 7.8 | 42884 | 1725 | 167 | 1/2 | 0 | 6.8 |
+| pydantic-ai | 4 | 0/4 | 0 | 4 | 0.0 / 0.0 | 2.0 | 4276 | 2048 | 176 | 0/2 | 0 | 0.0 |
+| langgraph | 4 | 3/4 | 0 | 1 | 13.0 / 6.0 | 6.8 | 31869 | 1968 | 290 | 1/2 | 0 | 6.5 |
+| smolagents | 4 | 2/4 | 0 | 1 | 8.0 / 6.0 | 13.0 | 83529 | 2851 | 278 | 2/2 | 0 | 4.2 |
+
+## Per fixture: successes / runs
+
+| Candidate | f04-crash-loop | f06-admission-denied | healthy | k1-keda-zero |
+|---|---|---|---|---|
+| plain-stdlib | 1/1, same calls, same report | 1/1, same calls, same report | 1/1, same calls, same report | 1/1, same calls, same report |
+| plain-openai | 1/1, same calls, same report | 1/1, same calls, same report | 1/1, same calls, same report | 1/1, same calls, same report |
+| pydantic-ai | 0/1, same calls, same report | 0/1, same calls, same report | 0/1, same calls, same report | 0/1, same calls, same report |
+| langgraph | 1/1, same calls, same report | 0/1, same calls, same report | 1/1, same calls, same report | 1/1, same calls, same report |
+| smolagents | 1/1, same calls, same report | 1/1, same calls, same report | 0/1, same calls, same report | 0/1, same calls, same report |
+
+## Failures
+
+- pydantic-ai / f04-crash-loop / 0: UnexpectedModelBehavior('Exceeded maximum output retries (1)')
+- pydantic-ai / f06-admission-denied / 0: UnexpectedModelBehavior('Exceeded maximum output retries (1)')
+- pydantic-ai / k1-keda-zero / 0: UnexpectedModelBehavior('Exceeded maximum output retries (1)')
+- pydantic-ai / healthy / 0: UnexpectedModelBehavior('Exceeded maximum output retries (1)')
+- langgraph / f06-admission-denied / 0: LengthFinishReasonError('Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=1024, prompt_tokens=6468, total_tokens=7492, completion_tokens_details=None, prompt_tokens_details=PromptTokensDetails(audio_tokens=None, cache_write_tokens=None, cached_toke
+- smolagents / k1-keda-zero / 0: no report
+- smolagents / healthy / 0: run timed out after 900 s

@@ -1,0 +1,37 @@
+{
+ "started": "2026-11-24T18:42:35.182364+00:00",
+ "runs_per_fixture": 3,
+ "candidates": [
+  "plain-stdlib",
+  "plain-openai",
+  "pydantic-ai",
+  "langgraph",
+  "smolagents"
+ ],
+ "fixtures": [
+  "healthy",
+  "f04-crash-loop",
+  "f06-admission-denied",
+  "k1-keda-zero"
+ ],
+ "config": {
+  "base_url": "http://127.0.0.1:18090/v1",
+  "model": "qwen3.5-4b",
+  "api_key_env": ""
+ },
+ "caps": {
+  "max_tool_calls": 8,
+  "max_result_chars": 3500,
+  "max_tokens": 512,
+  "temperature": 0,
+  "thinking": "server default (off)"
+ },
+ "python": {
+  "plain-stdlib": "Python 3.14.10",
+  "plain-openai": "Python 3.14.10",
+  "pydantic-ai": "Python 3.14.10",
+  "langgraph": "Python 3.14.10",
+  "smolagents": "Python 3.14.10"
+ },
+ "egress_trap": "HTTP(S)_PROXY/ALL_PROXY=http://127.0.0.1:9, NO_PROXY=127.0.0.1,localhost"
+}
