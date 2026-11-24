@@ -7,14 +7,20 @@ platform, calling the CPU-only, airgapped LLM endpoint from
 identity, read-only tools behind NetworkPolicy and Kyverno, retrieval over
 the platform's runbooks, every model and tool call traced, delivered through
 the same signed supply chain and deployed to an airgapped cluster with no
-internet. First agent: incident triage, measured on an evaluation set of
-real incidents.
+internet. First agent: a read-only platform status reporter, scored
+automatically by fault injection
+([ADR 0003](docs/adr/0003-first-agent-status-reporter.md)); second
+(stretch): incident triage, measured on an evaluation set of real
+incidents.
 
 **Status:** Week 1 (11/23), in progress: VMs sized (12 vCPU / 20 GiB,
 [resource plan](docs/resource-plan.md)), endpoint access decided
 ([ADR 0001](docs/adr/0001-endpoint-access-networkpolicy-only.md)),
 evaluation set v0 of 22 real incidents with its scoring method
-([eval.md](docs/eval.md)); the model-alone baseline is running. See
+([eval.md](docs/eval.md)); model-alone baseline reviewed (points of 88:
+thinking off 38 greedy / 30 sampled, on 49 / 42; 8 unflagged answers
+pending spot-check). First agent changed to a status reporter
+([ADR 0003](docs/adr/0003-first-agent-status-reporter.md)). See
 [ROADMAP.md](ROADMAP.md).
 
 ## How it fits

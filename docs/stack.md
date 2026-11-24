@@ -31,7 +31,7 @@ Keep this page current every week.
 | Component | Version | What it does here | Why |
 |---|---|---|---|
 | Agent runtime | *planned, Week 1* (candidates measured offline: [scans/week1-runtime-footprint.txt](scans/week1-runtime-footprint.txt)) | | ADR 0002 |
-| Tools | *planned, Week 2* | | |
+| Tools | *planned, Week 2*: status reporter's read-only Kubernetes API tools (get/list/watch; pods, events, workloads, namespaces, nodes, PVCs, Argo CD Applications, KEDA objects), results capped | | [ADR 0003](adr/0003-first-agent-status-reporter.md) |
 | Endpoint access | NetworkPolicy (Canal), no API key | Agent namespaces and agent pods labelled `inference.local-airgap-llm/client: "true"` (both required by the interceptor's policy); tools unlabelled | [ADR 0001](adr/0001-endpoint-access-networkpolicy-only.md) |
 | Identity and policy | *planned, Week 2* | | |
 | Retrieval: embedding model, vector store, index | *planned, Week 3* | | |

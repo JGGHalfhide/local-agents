@@ -3,11 +3,13 @@
 Status: v0 (Week 1, 11/23). 22 cases; scoring method accepted by the
 user (11/23).
 
-The triage agent is measured on real incidents from platform-lab (Phase 1)
-and local-airgap-LLM (Phase 2) whose causes and fixes are known. The same
-set scores every configuration: the model alone (Week 1 baseline), with
-tools, with retrieval, with and without thinking (Weeks 2-4), and on the
-airgapped cluster (Week 5).
+This set measures agent 2, incident triage (stretch; ADR 0003), on real
+incidents from platform-lab (Phase 1) and local-airgap-LLM (Phase 2) whose
+causes and fixes are known: the model alone (Week 1 baseline), then with
+known-issue retrieval (Week 3), where 6-8 of these incidents are held out
+of the index. Agent 1, the status reporter, is scored automatically by
+fault injection instead: [eval-status.md](eval-status.md). Thinking stays
+off by default; opt-in is tested on agent 1 once it works (Week 4).
 
 ## Cases
 
@@ -133,3 +135,41 @@ and free; the human pass catches what patterns miss. Revisit if review time
 becomes the bottleneck: the Week 1 baseline is 22 cases x 4
 configurations (thinking off/on x greedy/Qwen's sampling) = 88 answers;
 if half come back as proposed 0s, about 50 to review.
+
+## Week 1 baseline: the model alone
+
+Run 11/23 (results/week1-baseline/: meta.json, raw answers, scores.yaml,
+review.md, summary.md). Qwen3.5 4B Q4_K_M on the endpoint, no tools, no
+retrieval, system prompt eval/prompts/baseline-system.txt, 22 cases x 4
+configurations, sequential. Thinking off: max_tokens 1024; on: 2048, the
+server's 1024-token thinking cap. Greedy = temperature 0; Qwen = the model
+card's sampling for each mode. Sampled configurations ran once.
+
+Review: all 80 flagged answers reviewed by the user (11/24). The 8
+unflagged answers (pattern 2/2, ids not 1 mod 4) keep their pattern score
+and are pending the user's spot-check: off-greedy c16, off-qwen c20,
+on-greedy c04, c06, c10, c16, c20, on-qwen c16. Not final until then.
+
+All 22 cases (max 88 points):
+
+| Config | Cause = 2 | Fix = 2 | Both | Points | Harmful | Unreviewed answers (points) | Latency p50 / p95 (s) | Completion tokens (mean) |
+|---|---|---|---|---|---|---|---|---|
+| off-greedy | 6 | 5 | 1 | 38 | 0 | 1 (4) | 28.28 / 36.55 | 378 |
+| off-qwen | 6 | 2 | 2 | 30 | 1 | 1 (4) | 26.49 / 37.87 | 339 |
+| on-greedy | 11 | 7 | 6 | 49 | 1 | 5 (20) | 93.49 / 103.95 | 1325 |
+| on-qwen | 6 | 5 | 2 | 42 | 2 | 1 (4) | 86.62 / 100.51 | 1232 |
+
+The 17 cases reviewed in all four configurations (all but c04, c06, c10,
+c16, c20; max 68 points):
+
+| Config | Cause = 2 | Fix = 2 | Both | Points | Harmful |
+|---|---|---|---|---|---|
+| off-greedy | 3 | 4 | 0 | 28 | 0 |
+| off-qwen | 4 | 0 | 0 | 18 | 1 |
+| on-greedy | 6 | 2 | 1 | 29 | 1 |
+| on-qwen | 3 | 3 | 0 | 29 | 2 |
+
+Harmful: off-qwen c18; on-greedy c13; on-qwen c07, c13. No-fault cases
+(c02, c08) scored 2/2 in no configuration; cause/fix: off-greedy 1/2, 1/2;
+off-qwen 0/0, 1/0; on-greedy 0/0, 1/0; on-qwen 1/2, 1/1. 0 errors, 0
+answers cut at max_tokens.

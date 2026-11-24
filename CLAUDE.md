@@ -78,7 +78,20 @@ platform-lab (Phase 1, v1.0 11/18) and local-airgap-LLM (Phase 2, v1.1
 - Endpoint access: NetworkPolicy only, no API key (ADR 0001). Only agent
   pods get the client label (namespace and pod, via GitOps); tools stay
   unlabelled; agent/tool RBAC must not create pods or edit labels.
-- Everything else is open: see ROADMAP.md Week 1 and Open questions.
+- First agent (ADR 0003, 11/24): a read-only platform STATUS REPORTER,
+  scored automatically by fault injection in disposable `agent-eval-*`
+  namespaces (docs/eval-status.md; no fault injected without the user's OK,
+  platform components only with approval of the specific fault). Own
+  ServiceAccount; get/list/watch only on pods, events, workloads,
+  namespaces, nodes, PVCs, Argo CD Applications, KEDA objects; no Secrets,
+  no pods/exec, no pods/log in v1. Agent 2 = incident triage (stretch),
+  known-issue retrieval in Week 3 with 6-8 incidents held out of the index;
+  eval set v0 is its measure.
+- ADR 0002's runtime spike uses the status reporter's tool loop as its task.
+  Thinking off by default; per-request opt-in tested only after agent 1
+  works. Client config backend-neutral (base URL, model, key from config);
+  no hosted-model run planned yet.
+- Everything else is open: see ROADMAP.md and Open questions.
 
 ## Conventions (same as platform-lab and local-airgap-LLM)
 - Everything reproducible from the repos: no manual steps on VMs or clusters.
@@ -186,6 +199,9 @@ measured offline (scripts/runtime-footprint.sh,
 docs/scans/week1-runtime-footprint.txt); the endpoint spike for ADR 0002
 waits for the baseline (it would share the 4 slots). Gap for Week 2: no
 container image builder on the host.
+Pivot 11/24 (ADR 0003): agent 1 = status reporter, agent 2 = triage
+(stretch); ROADMAP.md, docs/eval.md updated; docs/eval-status.md (fault
+injection spec) is a proposal awaiting the user's OK.
 Lab: build-node-01 running, airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state
