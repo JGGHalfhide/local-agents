@@ -30,7 +30,11 @@ cases:
     also_accept: [crash-loop]
     objects: [Deployment/hungry, ReplicaSet/hungry-*, Pod/hungry-*]
   f06:
-    title: Admission denial by Kyverno (digest not in the registry)
+    # Kyverno rejects the object at creation: the only evidence is its PolicyViolation
+    # event, filed under the policy (namespace default); located if the case
+    # namespace appears in the finding's namespace, object or evidence.
+    locate_by_text: true
+    title: Admission denial by Kyverno (digest not in the registry; the Deployment is rejected)
     kind: fault
     category: admission-denied
     objects: [Deployment/unsigned, ReplicaSet/unsigned-*]
@@ -40,7 +44,11 @@ cases:
     category: unschedulable
     objects: [Deployment/greedy, ReplicaSet/greedy-*, Pod/greedy-*]
   f08:
-    title: DaemonSet with 0 pods, rejected by Pod Security (hostNetwork)
+    # Kyverno rejects the object at creation: the only evidence is its PolicyViolation
+    # event, filed under the policy (namespace default); located if the case
+    # namespace appears in the finding's namespace, object or evidence.
+    locate_by_text: true
+    title: DaemonSet rejected at admission (hostNetwork; Kyverno pod-security-restricted)
     kind: fault
     category: admission-denied
     objects: [DaemonSet/hostnet]

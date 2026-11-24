@@ -45,6 +45,9 @@ def score_case(cid, case, run):
         accepted = case["objects"]
         cats = {case["category"], *case.get("also_accept", [])}
         located = [f for f in here if any(fnmatch.fnmatch(f["object"], pat) for pat in accepted)]
+        if case.get("locate_by_text"):
+            located += [f for f in findings if f not in located and (
+                ns in f["namespace"] or ns in f["object"] or any(ns in e.get("excerpt", "") for e in f.get("evidence") or []))]
         checks["detect"] = run.get("status") == "fault"
         checks["locate"] = bool(located)
         checks["classify"] = any(f["category"] in cats for f in located)

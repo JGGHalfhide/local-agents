@@ -17,7 +17,7 @@ import json
 import pathlib
 
 MAX_RESULT_CHARS = 3500
-KINDS = ["Pod", "Deployment", "StatefulSet", "DaemonSet", "ReplicaSet", "Job", "ScaledObject", "Node"]
+KINDS = ["Pod", "Deployment", "StatefulSet", "DaemonSet", "ReplicaSet", "Job", "CronJob", "ScaledObject", "Node"]
 
 
 def _now(src):
@@ -342,6 +342,15 @@ def call(cluster, name, args):
                        ["pod", "container", "cpu", "memory", "memory_limit"])
     if name == "get_status":
         kind, nm = args["kind"], args["name"]
+        if kind == "CronJob":
+            hit = [c for c in cluster.src.items("cronjobs.batch")
+                   if c["metadata"]["name"] == nm and c["metadata"]["namespace"] == ns]
+            if not hit:
+                return f"not found: CronJob/{ns or ''}/{nm}"
+            sp, st = hit[0].get("spec") or {}, hit[0].get("status") or {}
+            return json.dumps({"schedule": sp.get("schedule"), "suspend": sp.get("suspend", False),
+                               "active_jobs": len(st.get("active") or []), "last_schedule": st.get("lastScheduleTime"),
+                               "last_success": st.get("lastSuccessfulTime")})
         pool = {"Pod": cluster.pods(), "ScaledObject": cluster.keda(), "Node": cluster.nodes()}.get(kind) or \
             [w for w in cluster.workloads() if w["kind"] == kind]
         hit = [r for r in pool if r["name"] == nm and (kind == "Node" or r.get("namespace") == ns)]

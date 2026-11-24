@@ -27,6 +27,7 @@ PATHS = {
     "daemonsets.apps": "/apis/apps/v1/daemonsets",
     "replicasets.apps": "/apis/apps/v1/replicasets",
     "jobs.batch": "/apis/batch/v1/jobs",
+    "cronjobs.batch": "/apis/batch/v1/cronjobs",
     "scaledobjects.keda.sh": "/apis/keda.sh/v1alpha1/scaledobjects",
     "httpscaledobjects.http.keda.sh": "/apis/http.keda.sh/v1alpha1/httpscaledobjects",
     "persistentvolumeclaims": "/api/v1/persistentvolumeclaims",

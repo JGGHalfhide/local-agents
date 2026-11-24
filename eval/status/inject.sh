@@ -37,7 +37,19 @@ others="$(kubectl apply --dry-run=client -f "$manifest" -o jsonpath='{range .ite
 
 [[ "${CHECK_ONLY:-0}" == 1 ]] && { echo "CHECK_ONLY=1: $case_id passes the guards; nothing applied"; exit 0; }
 echo "==> $case_id: applying $manifest into $ns"
-kubectl apply -f "$manifest" >/dev/null
+case "$case_id" in
+  f06|f08)
+    # Kyverno rejects the workload itself at admission (autogen applies the
+    # pod rules to Deployments and DaemonSets; platform-lab supply-chain.md):
+    # the rejection is the fault. Only the namespace is created; the fault is
+    # visible as Kyverno's PolicyViolation event naming the object.
+    if out="$(kubectl apply -f "$manifest" 2>&1)"; then
+      echo "expected an admission denial for $case_id, but the apply succeeded" >&2; exit 1
+    fi
+    grep -q "denied the request" <<<"$out" || { echo "apply failed for another reason: $out" >&2; exit 1; }
+    ;;
+  *) kubectl apply -f "$manifest" >/dev/null ;;
+esac
 
 k() { kubectl -n "$ns" "$@" 2>/dev/null; }
 visible() {
@@ -46,11 +58,11 @@ visible() {
     f02) k get pods -l app.kubernetes.io/name=puller -o jsonpath='{.items[*].status.containerStatuses[*].state.waiting.reason}' | grep -qE 'ErrImagePull|ImagePullBackOff' ;;
     f04) k get pods -l app.kubernetes.io/name=crashy -o jsonpath='{.items[*].status.containerStatuses[*].state.waiting.reason}' | grep -q CrashLoopBackOff ;;
     f05) k get pods -l app.kubernetes.io/name=hungry -o jsonpath='{.items[*].status.containerStatuses[*].lastState.terminated.reason}' | grep -q OOMKilled ;;
-    f06) k get rs -l app.kubernetes.io/name=unsigned -o jsonpath='{.items[*].status.conditions[?(@.type=="ReplicaFailure")].status}' | grep -q True ;;
+    f06|f08) kubectl get events -A --field-selector reason=PolicyViolation -o jsonpath='{range .items[*]}{.message}{"\n"}{end}' 2>/dev/null | grep -q "$ns/" ;;
     f07) k get pods -l app.kubernetes.io/name=greedy -o jsonpath='{.items[*].status.conditions[?(@.type=="PodScheduled")].reason}' | grep -q Unschedulable ;;
-    f08) k get events --field-selector involvedObject.kind=DaemonSet,reason=FailedCreate -o name | grep -q . ;;
     f10) k get pvc data -o jsonpath='{.status.phase}' | grep -qx Pending && k get pod claimer -o jsonpath='{.status.phase}' | grep -qx Pending ;;
-    k1) k get scaledobject idle -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' | grep -qx True && k get deploy idle -o jsonpath='{.status.replicas}' | grep -qvE '[1-9]' ;;
+    k1) k get scaledobject idle -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' | grep -qx True &&
+        [[ "$(k get deploy idle -o jsonpath='{.status.replicas}')" =~ ^0?$ ]] ;;   # empty = 0 replicas
     k2) kubectl get --raw "/apis/metrics.k8s.io/v1beta1/namespaces/$ns/pods" 2>/dev/null | grep -q '"memory"' ;;
     k3) k get job done -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}' | grep -qx True ;;
     k4) k get deploy web -o jsonpath='{.status.availableReplicas}' | grep -qx 1 ;;
