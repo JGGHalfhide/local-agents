@@ -1,0 +1,248 @@
+"""The status reporter's read-only tools (ADR 0003, docs/eval-status.md).
+
+Each tool reads raw list JSON from agent/k8s.py and returns compact text
+rows, capped at MAX_RESULT_CHARS (~1,000 tokens). Pod specs, env values and
+Secret names are never returned.
+
+Built in from the ADR 0002 spike (every report there listed 4-7 false
+faults):
+- list_events shows only warnings whose object is NOT healthy now (and says
+  how many resolved ones it hid);
+- workload rows say when a KEDA ScaledObject scales them; a KEDA workload
+  at zero replicas is marked as expected;
+- list_nodes exists, so node health is read, not guessed.
+"""
+import datetime as dt
+import json
+import pathlib
+
+MAX_RESULT_CHARS = 3500
+KINDS = ["Pod", "Deployment", "StatefulSet", "DaemonSet", "ReplicaSet", "Job", "ScaledObject", "Node"]
+
+
+def _now(src):
+    rec = getattr(src, "path", None)
+    if rec and (pathlib.Path(rec) / "recorded-at.txt").exists():
+        return dt.datetime.fromisoformat((pathlib.Path(rec) / "recorded-at.txt").read_text().strip().replace("Z", "+00:00"))
+    return dt.datetime.now(dt.UTC)
+
+
+def _age(now, ts):
+    if not ts:
+        return ""
+    s = (now - dt.datetime.fromisoformat(ts.replace("Z", "+00:00"))).total_seconds()
+    return f"{int(s // 86400)}d" if s >= 86400 else f"{int(s // 3600)}h" if s >= 3600 else f"{int(s // 60)}m"
+
+
+def _bad_conditions(conds):
+    return ",".join(f"{c['type']}={c['status']}" + (f"({c.get('reason')})" if c.get("reason") else "")
+                    for c in conds or [] if c.get("status") != "True" and c["type"] != "Progressing") or "-"
+
+
+class Cluster:
+    """Rows derived from one snapshot of the cluster (cached per run)."""
+
+    def __init__(self, src):
+        self.src, self.now = src, _now(src)
+        self._pods = self._wl = self._keda = None
+
+    def keda(self):
+        if self._keda is None:
+            self._keda = []
+            for kind, res in (("ScaledObject", "scaledobjects.keda.sh"), ("HTTPScaledObject", "httpscaledobjects.http.keda.sh")):
+                for o in self.src.items(res):
+                    sp = o.get("spec", {})
+                    conds = {c["type"]: c["status"] for c in o.get("status", {}).get("conditions") or []}
+                    tgt = sp.get("scaleTargetRef", {})
+                    self._keda.append({
+                        "namespace": o["metadata"]["namespace"], "kind": kind, "name": o["metadata"]["name"],
+                        "target": f"{tgt.get('kind', 'Deployment')}/{tgt.get('name')}",
+                        "min": sp.get("minReplicaCount", (sp.get("replicas") or {}).get("min", "")),
+                        "max": sp.get("maxReplicaCount", (sp.get("replicas") or {}).get("max", "")),
+                        "ready": conds.get("Ready", "-"), "active": conds.get("Active", "-"),
+                        "paused": conds.get("Paused", "-")})
+        return self._keda
+
+    def pods(self):
+        if self._pods is None:
+            self._pods = []
+            for p in self.src.items("pods"):
+                st = p.get("status", {})
+                cs = st.get("containerStatuses") or []
+                ready = sum(bool(c.get("ready")) for c in cs)
+                waiting = ",".join(c["state"]["waiting"].get("reason", "") for c in cs if "waiting" in c.get("state", {})) or "-"
+                last = ",".join(f"{c['lastState']['terminated'].get('reason')}({c['lastState']['terminated'].get('exitCode')})"
+                                for c in cs if "terminated" in c.get("lastState", {})) or "-"
+                phase = st.get("phase", "")
+                ok = phase == "Succeeded" or (phase == "Running" and ready == len(cs) and waiting == "-")
+                self._pods.append({
+                    "namespace": p["metadata"]["namespace"], "name": p["metadata"]["name"], "phase": phase,
+                    "ready": f"{ready}/{len(cs)}", "restarts": sum(c.get("restartCount", 0) for c in cs),
+                    "waiting": waiting, "last_terminated": last, "ok": ok,
+                    "owner": ",".join(f"{o['kind']}/{o['name']}" for o in p["metadata"].get("ownerReferences", [])) or "-"})
+        return self._pods
+
+    def workloads(self):
+        if self._wl is None:
+            scaled = {(k["namespace"], k["target"]): k for k in self.keda()}
+            self._wl = []
+            for kind, res in (("Deployment", "deployments.apps"), ("StatefulSet", "statefulsets.apps"),
+                              ("DaemonSet", "daemonsets.apps"), ("ReplicaSet", "replicasets.apps"), ("Job", "jobs.batch")):
+                for o in self.src.items(res):
+                    s, sp = o.get("status", {}), o.get("spec", {})
+                    if kind == "DaemonSet":
+                        desired, ready = s.get("desiredNumberScheduled", 0), s.get("numberReady", 0)
+                    elif kind == "Job":
+                        desired, ready = sp.get("completions", 1), s.get("succeeded", 0)
+                    else:
+                        desired, ready = sp.get("replicas", 0), s.get("readyReplicas", 0)
+                    if kind == "ReplicaSet" and desired == 0 and not s.get("replicas"):
+                        continue                    # old ReplicaSets of a Deployment
+                    ns, name = o["metadata"]["namespace"], o["metadata"]["name"]
+                    k = scaled.get((ns, f"{kind}/{name}"))
+                    note = "-"
+                    if k:
+                        note = f"scaled by KEDA {k['kind']}/{k['name']} ({k['min']}-{k['max']})"
+                        if desired == 0:
+                            note += "; at zero by design, not a fault"
+                    conds = _bad_conditions(s.get("conditions"))
+                    complete = kind == "Job" and any(c["type"] == "Complete" and c["status"] == "True" for c in s.get("conditions") or [])
+                    ok = complete or (ready >= desired and conds in ("-",)) or (k is not None and desired == 0)
+                    self._wl.append({"namespace": ns, "kind": kind, "name": name, "desired": desired, "ready": ready,
+                                     "conditions": conds, "autoscaler": note, "ok": ok})
+        return self._wl
+
+    def nodes(self):
+        rows = []
+        for n in self.src.items("nodes"):
+            conds = {c["type"]: c["status"] for c in n.get("status", {}).get("conditions") or []}
+            pressure = [t for t in ("MemoryPressure", "DiskPressure", "PIDPressure") if conds.get(t) == "True"]
+            rows.append({"name": n["metadata"]["name"], "ready": conds.get("Ready", "Unknown"),
+                         "pressure": ",".join(pressure) or "-",
+                         "unschedulable": bool(n.get("spec", {}).get("unschedulable"))})
+        return rows
+
+    def object_now(self, ns, kind, name):
+        """Is the object an event is about healthy now? ok / NOT OK / gone / ?"""
+        if kind == "Pod":
+            rows = [p for p in self.pods() if p["namespace"] == ns and p["name"] == name]
+            return "gone" if not rows else ("ok" if rows[0]["ok"] else "NOT OK")
+        if kind in ("Deployment", "StatefulSet", "DaemonSet", "ReplicaSet", "Job"):
+            rows = [w for w in self.workloads() if w["namespace"] == ns and w["kind"] == kind and w["name"] == name]
+            return "gone" if not rows else ("ok" if rows[0]["ok"] else "NOT OK")
+        if kind == "HorizontalPodAutoscaler" and name.startswith("keda-hpa-"):
+            target = name[len("keda-hpa-"):]
+            rows = [k for k in self.keda() if k["namespace"] == ns and k["name"] == target]
+            return "gone" if not rows else ("ok" if rows[0]["ready"] == "True" else "NOT OK")
+        if kind == "Node":
+            rows = [n for n in self.nodes() if n["name"] == name]
+            return "gone" if not rows else ("ok" if rows[0]["ready"] == "True" else "NOT OK")
+        return "?"
+
+    def events(self, include_resolved=False):
+        seen = {}
+        for e in self.src.items("events"):
+            if e.get("type") != "Warning":
+                continue
+            io = e.get("involvedObject", {})
+            ns = io.get("namespace") or e["metadata"]["namespace"]
+            key = (ns, io.get("kind"), io.get("name"), e.get("reason"))
+            ts = e.get("lastTimestamp") or e.get("eventTime") or e["metadata"].get("creationTimestamp") or ""
+            if key not in seen or ts > seen[key]["ts"]:
+                seen[key] = {"namespace": ns, "object": f"{io.get('kind')}/{io.get('name')}", "reason": e.get("reason"),
+                             "count": e.get("count") or 1, "ts": ts, "age": _age(self.now, ts),
+                             "now": self.object_now(ns, io.get("kind"), io.get("name")),
+                             "message": " ".join((e.get("message") or "").split())[:200]}
+        rows = sorted(seen.values(), key=lambda r: r["ts"], reverse=True)
+        shown = rows if include_resolved else [r for r in rows if r["now"] not in ("ok", "gone")]
+        return shown, len(rows) - len(shown)
+
+
+def _render(header, rows, cols, footer=""):
+    lines = ["\t".join(cols)] + ["\t".join(str(r.get(c, "")) for c in cols) for r in rows]
+    out, n = [], 0
+    for line in lines:
+        if n + len(line) + 1 > MAX_RESULT_CHARS - 120:
+            out.append(f"... {len(lines) - len(out)} more rows omitted; narrow by namespace")
+            break
+        out.append(line)
+        n += len(line) + 1
+    return header + "\n" + "\n".join(out) + (("\n" + footer) if footer else "")
+
+
+def _ns(rows, ns):
+    return [r for r in rows if r.get("namespace") == ns] if ns else rows
+
+
+_NS = {"namespace": {"type": "string", "description": "Namespace; omit for all namespaces"}}
+SPECS = [
+    ("list_namespaces", "List namespaces and their phase.", {}, []),
+    ("list_nodes", "List nodes: Ready, pressure conditions, unschedulable.", {}, []),
+    ("list_pods", "List pods: phase, ready, restarts, waiting reason, last termination. Not-ready pods first.", _NS, []),
+    ("list_workloads", "List Deployments, StatefulSets, DaemonSets, ReplicaSets and Jobs: desired/ready, conditions that are not True, and whether KEDA scales them. Unhealthy first.", _NS, []),
+    ("list_events", "List Warning events whose object is NOT healthy now (resolved ones are hidden and counted), newest first.", _NS, []),
+    ("list_keda_objects", "List KEDA ScaledObjects and HTTPScaledObjects: target, min/max replicas, Ready, Active, Paused.", _NS, []),
+    ("get_status", "Status of one object.",
+     {"kind": {"type": "string", "enum": KINDS}, "namespace": {"type": "string", "description": "Namespace (empty for a Node)"},
+      "name": {"type": "string"}}, ["kind", "name"]),
+]
+NAMES = [s[0] for s in SPECS]
+
+
+def openai_tools():
+    return [{"type": "function", "function": {"name": n, "description": d, "parameters": {
+        "type": "object", "properties": p, "required": r, "additionalProperties": False}}} for n, d, p, r in SPECS]
+
+
+def validate_args(name, args):
+    spec = next((s for s in SPECS if s[0] == name), None)
+    if spec is None:
+        return f"unknown tool {name}"
+    if not isinstance(args, dict):
+        return "arguments must be a JSON object"
+    props, req = spec[2], spec[3]
+    for k in req:
+        if not args.get(k) and k != "namespace":
+            return f"missing {k}"
+    for k, v in args.items():
+        if k not in props:
+            return f"unknown argument {k}"
+        if not isinstance(v, str):
+            return f"{k} must be a string"
+        if "enum" in props[k] and v not in props[k]["enum"]:
+            return f"{k} must be one of {props[k]['enum']}"
+    return None
+
+
+def call(cluster, name, args):
+    err = validate_args(name, args)
+    if err:
+        return f"error: {err}"
+    ns = args.get("namespace") or None
+    if name == "list_namespaces":
+        return _render("namespaces", [{"name": n["metadata"]["name"], "phase": n["status"]["phase"]}
+                                      for n in cluster.src.items("namespaces")], ["name", "phase"])
+    if name == "list_nodes":
+        return _render("nodes", cluster.nodes(), ["name", "ready", "pressure", "unschedulable"])
+    if name == "list_pods":
+        rows = sorted(_ns(cluster.pods(), ns), key=lambda r: (r["ok"], r["namespace"], r["name"]))
+        return _render("pods", rows, ["namespace", "name", "phase", "ready", "restarts", "waiting", "last_terminated", "owner"])
+    if name == "list_workloads":
+        rows = sorted(_ns(cluster.workloads(), ns), key=lambda r: (r["ok"], r["namespace"], r["kind"], r["name"]))
+        return _render("workloads", rows, ["namespace", "kind", "name", "desired", "ready", "conditions", "autoscaler"])
+    if name == "list_events":
+        rows, hidden = cluster.events()
+        rows = _ns(rows, ns)
+        return _render("warning events about objects that are not healthy now", rows,
+                       ["namespace", "object", "reason", "count", "age", "now", "message"],
+                       f"({hidden} warning events about objects that are healthy now or gone were hidden)")
+    if name == "list_keda_objects":
+        return _render("keda objects", _ns(cluster.keda(), ns),
+                       ["namespace", "kind", "name", "target", "min", "max", "ready", "active", "paused"])
+    if name == "get_status":
+        kind, nm = args["kind"], args["name"]
+        pool = {"Pod": cluster.pods(), "ScaledObject": cluster.keda(), "Node": cluster.nodes()}.get(kind) or \
+            [w for w in cluster.workloads() if w["kind"] == kind]
+        hit = [r for r in pool if r["name"] == nm and (kind == "Node" or r.get("namespace") == ns)]
+        return json.dumps(hit[0])[:MAX_RESULT_CHARS] if hit else f"not found: {kind}/{ns or ''}/{nm}"
+    return "error: unknown tool"

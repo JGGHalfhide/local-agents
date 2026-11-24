@@ -1,0 +1,33 @@
+# Status reporter, first live run, build cluster, 2026-11-24
+# Method: python -m agent (agent/ at this commit), openai 3.46.0 (locked version), thinking off,
+#   temperature 0, 1024 completion tokens; cluster read through a local kubectl proxy (GET only);
+#   endpoint through a port-forward to the KEDA interceptor and eval/spike/proxy.py (Host header).
+# Cluster state: healthy apart from one Kyverno PolicyViolation event left by the unsigned-image
+#   admission dry run 3 min earlier (docs/scans/week2-agent-image-admission.txt).
+# Compare: the ADR 0002 spike's healthy fixture gave 4-7 false faults per report in 167-221 s.
+
+## trace (stderr)
+tool list_namespaces {} -> 259 chars
+tool list_nodes {} -> 66 chars
+tool list_pods {} -> 3379 chars
+tool list_workloads {} -> 3401 chars
+tool list_events {} -> 428 chars
+tool list_keda_objects {} -> 250 chars
+{"tool_calls": [{"name": "list_namespaces", "args": {}, "chars": 259}, {"name": "list_nodes", "args": {}, "chars": 66}, {"name": "list_pods", "args": {}, "chars": 3379}, {"name": "list_workloads", "args": {}, "chars": 3401}, {"name": "list_events", "args": {}, "chars": 428}, {"name": "list_keda_objects", "args": {}, "chars": 250}], "invalid_calls": 0, "turns": 2, "looked_first_nudge": false, "seconds": 75.8}
+
+## report (stdout)
+{
+ "faults": [
+  {
+   "namespace": "default",
+   "kind": "Pod",
+   "name": "agent-admission-unsigned",
+   "category": "admission-denied",
+   "evidence": [
+    "ImageValidatingPolicy/verify-platform-images PolicyViolation: Pod default/agent-admission-unsigned: [verify-platform-images] fail (blocked); image is not signed with the platform-lab cosign key (pki/cosign.pub); publish it with `make image`"
+   ]
+  }
+ ],
+ "summary": "1 fault found: Pod agent-admission-unsigned in default namespace is being blocked by ImageValidatingPolicy due to unsigned images.",
+ "ungrounded": []
+}

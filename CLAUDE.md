@@ -226,7 +226,12 @@ platform-lab's supply chain (`make image IMAGE=oci-layout:<dir>
 NAME=<repo>:<tag>`, platform-lab 47c3d56): local-agents/agent:0.1.0 signed
 and admitted; an unsigned test copy (tag 0.1.0-unsigned-test) is rejected
 and stays in Zot as a test image. Gap for Week 2: no container image
-builder on the host -> closed. Next: step 2, the status reporter's tools.
+builder on the host -> closed.
+Week 2 step 2 done (11/24): the status reporter (agent/: k8s.py stdlib API
+access GET only, tools.py 7 tools with the spike's lessons, loop.py openai
+loop with turn cap, sanitising, look-first and grounding). First live run:
+6 tool calls, 76 s, 0 false faults (docs/scans/week2-status-reporter-live.txt).
+Next: step 3, identity (ServiceAccount, read-only ClusterRole, client labels).
 Lab: build-node-01 running, airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state
