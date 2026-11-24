@@ -10,7 +10,12 @@ the same signed supply chain and deployed to an airgapped cluster with no
 internet. First agent: incident triage, measured on an evaluation set of
 real incidents.
 
-**Status:** Week 0: planning. See [ROADMAP.md](ROADMAP.md).
+**Status:** Week 1 (11/23), in progress: VMs sized (12 vCPU / 20 GiB,
+[resource plan](docs/resource-plan.md)), endpoint access decided
+([ADR 0001](docs/adr/0001-endpoint-access-networkpolicy-only.md)),
+evaluation set v0 of 22 real incidents with its scoring method
+([eval.md](docs/eval.md)); the model-alone baseline is running. See
+[ROADMAP.md](ROADMAP.md).
 
 ## How it fits
 

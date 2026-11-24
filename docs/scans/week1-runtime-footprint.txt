@@ -1,0 +1,149 @@
+# runtime-footprint 2026-11-24T02:54:02Z
+# Python 3.14.10, pip 26.2.2, Version: 0.76.2, syft 1.55.0
+
+candidate       pkgs  size MiB   import s    RSS MiB  vulns C/H/M/L
+plain-stdlib       0       0.0       0.09         20  0/0/0/0 (0 pkgs scanned)
+plain-openai      14      45.0       1.21         56  0/0/0/0 (14 pkgs scanned)
+pydantic-ai       26      83.2       2.16         84  0/0/0/0 (26 pkgs scanned)
+langgraph         43     114.1       2.91        106  0/0/0/0 (43 pkgs scanned)
+smolagents        35     116.0       0.92         57  0/0/0/0 (35 pkgs scanned)
+
+## Packages and licences per candidate (from the syft SBOM)
+### plain-stdlib
+### plain-openai
+  annotated-types==0.8.0  MIT
+  anyio==4.16.0  MIT
+  h11==0.16.0  MIT
+  httpcore2==2.16.2  BSD-3-Clause
+  httpx2==2.16.2  BSD-3-Clause
+  idna==3.20  BSD-3-Clause
+  jiter==0.19.0  MIT
+  openai==3.46.0  Apache-2.0
+  pydantic==2.14.4  MIT
+  pydantic-core==2.50.5  MIT
+  sniffio==1.3.1  MIT OR Apache-2.0
+  truststore==0.10.5  MIT
+  typing-extensions==4.16.0  PSF-2.0
+  typing-inspection==0.4.5  MIT
+### pydantic-ai
+  annotated-types==0.8.0  MIT
+  anyio==4.16.0  MIT
+  certifi==2026.11.20  MPL-2.0
+  charset-normalizer==3.5.3  MIT
+  genai-prices==0.2.5  MIT
+  griffelib==2.4.1  ISC
+  h11==0.16.0  MIT
+  httpcore2==2.16.2  BSD-3-Clause
+  httpx2==2.16.2  BSD-3-Clause
+  idna==3.20  BSD-3-Clause
+  jiter==0.19.0  MIT
+  logfire-api==6.0.1  MIT
+  openai==3.58.0  Apache-2.0
+  opentelemetry-api==1.45.2  Apache-2.0
+  pydantic==2.14.4  MIT
+  pydantic-ai-slim==2.66.0  MIT
+  pydantic-core==2.50.5  MIT
+  pydantic-graph==2.66.0  MIT
+  regex==2026.11.23  Apache-2.0 AND CNRI-Python
+  requests==2.34.2  Apache-2.0
+  sniffio==1.3.1  MIT OR Apache-2.0
+  tiktoken==0.14.0  MIT
+  truststore==0.10.5  MIT
+  typing-extensions==4.16.0  PSF-2.0
+  typing-inspection==0.4.5  MIT
+  urllib3==2.8.0  MIT
+### langgraph
+  annotated-types==0.8.0  MIT
+  anyio==4.16.0  MIT
+  certifi==2026.11.20  MPL-2.0
+  charset-normalizer==3.5.3  MIT
+  distro==1.9.0  Apache License, Version 2.0
+  h11==0.16.0  MIT
+  httpcore==1.0.9  BSD-3-Clause
+  httpcore2==2.16.2  BSD-3-Clause
+  httpx==0.28.1  BSD-3-Clause
+  httpx2==2.16.2  BSD-3-Clause
+  idna==3.20  BSD-3-Clause
+  jiter==0.19.0  MIT
+  jsonpatch==1.48  BSD-3-Clause
+  jsonpointer==3.12  BSD-3-Clause
+  langchain-core==1.8.4  MIT
+  langchain-openai==1.7.4  MIT
+  langchain-protocol==0.0.22  MIT
+  langgraph==1.2.20  MIT
+  langgraph-checkpoint==4.3.2  MIT
+  langgraph-prebuilt==1.1.3  MIT
+  langgraph-sdk==0.4.14  MIT
+  langsmith==0.16.1  MIT
+  openai==3.58.0  Apache-2.0
+  orjson==3.13.0  MPL-2.0 AND (Apache-2.0 OR MIT)
+  ormsgpack==1.13.1  Apache-2.0 OR MIT
+  packaging==26.4  Apache-2.0 OR BSD-2-Clause
+  pydantic==2.14.4  MIT
+  pydantic-core==2.50.5  MIT
+  pyyaml==6.0.4  MIT
+  regex==2026.11.23  Apache-2.0 AND CNRI-Python
+  requests==2.34.2  Apache-2.0
+  requests-toolbelt==1.0.0  Apache 2.0
+  sniffio==1.3.1  MIT OR Apache-2.0
+  tenacity==9.2.1  Apache-2.0
+  tiktoken==0.14.0  MIT
+  truststore==0.10.5  MIT
+  typing-extensions==4.16.0  PSF-2.0
+  typing-inspection==0.4.5  MIT
+  urllib3==2.8.0  MIT
+  uuid-utils==0.19.0  BSD-3-Clause
+  websockets==17.4  BSD-3-Clause
+  xxhash==4.1.0  BSD-2-Clause
+  zstandard==0.25.0  BSD-3-Clause
+### smolagents
+  annotated-types==0.8.0  MIT
+  anyio==4.16.0  MIT
+  certifi==2026.11.20  MPL-2.0
+  charset-normalizer==3.5.3  MIT
+  click==8.5.1  BSD-3-Clause
+  filelock==4.3.1  MIT
+  fsspec==2026.9.0  BSD-3-Clause
+  h11==0.16.0  MIT
+  hf-xet==1.8.0  Apache-2.0
+  httpcore2==2.16.2  BSD-3-Clause
+  httpx2==2.16.2  BSD-3-Clause
+  huggingface-hub==2.4.0  Apache-2.0
+  idna==3.20  BSD-3-Clause
+  jinja2==3.1.6  UNKNOWN
+  jiter==0.19.0  MIT
+  markdown-it-py==4.3.0  UNKNOWN
+  markupsafe==3.0.4  BSD-3-Clause
+  mdurl==0.1.2  MIT
+  openai==3.46.0  Apache-2.0
+  packaging==26.4  Apache-2.0 OR BSD-2-Clause
+  pillow==13.0.0  MIT-CMU
+  pydantic==2.14.4  MIT
+  pydantic-core==2.50.5  MIT
+  pygments==2.21.0  BSD-2-Clause
+  python-dotenv==1.2.4  BSD-3-Clause
+  pyyaml==6.0.4  MIT
+  requests==2.34.2  Apache-2.0
+  rich==15.0.0  MIT
+  smolagents==1.26.0  UNKNOWN
+  sniffio==1.3.1  MIT OR Apache-2.0
+  tqdm==4.70.1  MPL-2.0 AND MIT
+  truststore==0.10.5  MIT
+  typing-extensions==4.16.0  PSF-2.0
+  typing-inspection==0.4.5  MIT
+  urllib3==2.8.0  MIT
+
+## Vulnerabilities found (trivy rootfs)
+
+## Notes added by hand (11/23)
+- UNKNOWN licences, read from the packages' own metadata/files:
+  smolagents 1.26.0 Apache-2.0 (dist-info/licenses/LICENSE, no metadata
+  field), jinja2 BSD (classifier), markdown-it-py MIT (classifier).
+- Network clients pulled in: langgraph -> langsmith (LangChain's hosted
+  tracing client); smolagents -> huggingface_hub, hf-xet (Hugging Face Hub).
+- Measured with the host's Python 3.14.10 (no 3.13 on the host); the
+  runtime image's Python is a Week 2 choice.
+- An earlier run used `trivy fs`, which scanned 0 packages (lock files
+  only) and reported 0 vulnerabilities: a false clean. A `trivy rootfs`
+  run before pip was removed found 8 findings, all in pip's vendored
+  copies (msgpack 1.1.2, setuptools 70.3.0, urllib3 2.7.0).

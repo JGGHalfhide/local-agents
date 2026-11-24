@@ -30,13 +30,13 @@ Keep this page current every week.
 
 | Component | Version | What it does here | Why |
 |---|---|---|---|
-| Agent runtime | *planned, Week 1* | | ADR 0001 |
+| Agent runtime | *planned, Week 1* (candidates measured offline: [scans/week1-runtime-footprint.txt](scans/week1-runtime-footprint.txt)) | | ADR 0002 |
 | Tools | *planned, Week 2* | | |
 | Endpoint access | NetworkPolicy (Canal), no API key | Agent namespaces and agent pods labelled `inference.local-airgap-llm/client: "true"` (both required by the interceptor's policy); tools unlabelled | [ADR 0001](adr/0001-endpoint-access-networkpolicy-only.md) |
 | Identity and policy | *planned, Week 2* | | |
 | Retrieval: embedding model, vector store, index | *planned, Week 3* | | |
 | Tracing | *planned, Week 4* | | |
-| Evaluation set and scoring | v0: 22 cases (`eval/cases/`), `eval/check.py` | Real incidents from Phases 1-2 with known cause and fix; automatic first pass by patterns, then human review; leak check in CI | Decide by measurement; no judge model fits the lab ([eval.md](eval.md)) |
+| Evaluation set and scoring | v0: 22 cases (`eval/cases/`), `eval/check.py`, `eval/run_baseline.py`, `eval/review_sheet.py` | Real incidents from Phases 1-2 with known cause and fix; automatic first pass by patterns, then human review; leak check in CI | Decide by measurement; no judge model fits the lab ([eval.md](eval.md)) |
 | Zarf packages | *planned, Week 5* | | |
 
 ## Pipeline

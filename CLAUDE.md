@@ -177,6 +177,13 @@ Eval set v0: 22 cases in eval/cases/ (all reconstructed from the notes,
 error strings verbatim), docs/eval.md, `make eval-check` (also in CI);
 scoring accepted 11/23: pattern first pass + the user's review of every
 0, every harmful flag and 1 in 4 of the 2s.
+Baseline tooling committed (eval/run_baseline.py, eval/review_sheet.py,
+eval/prompts/baseline-system.txt); baseline run 11/23 into
+results/week1-baseline/ (not committed until reviewed). Runtime candidates
+measured offline (scripts/runtime-footprint.sh,
+docs/scans/week1-runtime-footprint.txt); the endpoint spike for ADR 0002
+waits for the baseline (it would share the 4 slots). Gap for Week 2: no
+container image builder on the host.
 Lab: build-node-01 running, airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state

@@ -34,6 +34,7 @@ Acceptance: VMs sized and documented; endpoint access decided; an eval set with 
 Goal: an agent in the cluster that uses read-only tools, under the
 platform's policies.
 
+- [ ] Image build path: nothing in the lab builds images yet (platform-lab `make image` republishes upstream images; no podman/docker/buildah on the host, found 11/23). Decide how agent and tool images are built reproducibly (e.g. buildah or podman on the host, pinned base by digest), then through `make image`; likely a platform-lab change
 - [ ] Tool interface: tools as functions in the agent vs separate tool servers (e.g. MCP); ADR
 - [ ] First read-only tools: pod status, events and logs (Kubernetes API), a Prometheus query, a Loki query
 - [ ] Identity: one ServiceAccount per agent and per tool server, RBAC read-only and namespace-scoped where possible; no Secrets in env
