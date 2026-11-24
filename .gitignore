@@ -1,0 +1,16 @@
+# Personal session notes
+NOTES.txt
+# Model weights, indexes and build outputs never go into git
+models/
+*.gguf
+*.safetensors
+build/
+# Kubeconfigs, Terraform state, local env
+kubeconfig*
+*.tfstate
+*.tfstate.*
+.terraform/
+.env
+# Python
+__pycache__/
+.venv/
