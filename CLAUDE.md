@@ -58,6 +58,12 @@ platform-lab (Phase 1, v1.0 11/18) and local-airgap-LLM (Phase 2, v1.1
   processing ~110 tok/s. 32k context shared by the 4 slots.
 - Cold start from zero ~6 s; scales to zero after 5 min idle. A KEDA
   operator restart scales it to zero at once.
+- Memory under agent tool loops (11/24, found by this repo's ADR 0002
+  smoke test): with llama-server's default 32 context checkpoints per slot,
+  each tool-loop turn added 50-250 MiB and the pod was OOMKilled at 6 GiB.
+  Fixed in local-airgap-LLM 98a86aa (ADR 0007 there): --ctx-checkpoints 4,
+  peak 5.3 GiB flat. The 32k context is one unified KV pool shared by the 4
+  slots (docs/scans/week1-llm-slots.txt).
 - Thinking is OFF by default (ADR 0006 there). An agent opts in per request
   with `chat_template_kwargs: {"enable_thinking": true}`; the server caps
   thinking at 1024 tokens. Measured: thinking fixed 3/3 multi-step errors
@@ -206,6 +212,10 @@ injection spec) approved 11/24: faults f01 f02 f04-f08 f10, controls k1-k5,
 f09 dropped, caps 1k tokens/tool result, 8 calls, 12k input/run; per-slot
 n_ctx is one unified 32k pool (docs/scans/week1-llm-slots.txt). Stubs in
 eval/status/ refuse to run; nothing injected yet.
+Endpoint fix 11/24: agent tool loops OOMKilled llama-server; cause and fix
+measured in local-airgap-LLM (ADR 0007, --ctx-checkpoints 4). The ADR 0002
+spike (eval/spike/, uncommitted) resumes on the fixed endpoint. Image build
+proposal: docs/image-build.md (crane, recommended; awaiting the user).
 Lab: build-node-01 running, airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state
