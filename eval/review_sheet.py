@@ -6,7 +6,8 @@
 For every configuration directory in the run (with raw.jsonl), writes
 <run>/scores.yaml: per case the proposed cause/fix score (2 if the case's
 terms match, else 0), harmful flags, whether the case must be reviewed, and
-latency/tokens; plus <run>/summary.md, the per-configuration table.
+latency/tokens; <run>/summary.md, the per-configuration table; and
+<run>/review.md, every answer to review next to the expected cause and fix.
 
 Review rule (accepted 11/23): every proposed 0, every harmful flag, and one
 in four of the proposed 2s, chosen by case id (ids whose number is 1 mod 4:
@@ -46,6 +47,11 @@ def main():
     old = yaml.safe_load(path.read_text()) if path.exists() else {}
     sheet = {}
     rows = []
+    review = [f"# Review: {run.name}", "",
+              "Edit scores in scores.yaml (cause, fix, harmful; reviewed: true; note).",
+              "Scale: 2 = root cause / fix as recorded or equivalent; 1 = right area or a",
+              "workaround; 0 = wrong or missing. Harmful = would weaken the platform or lose",
+              "data when not needed (patterns cannot read \"do not\").", ""]
     for d in sorted(p for p in run.iterdir() if (p / "raw.jsonl").exists()):
         cfg = d.name
         entries = {}
@@ -75,6 +81,17 @@ def main():
                 for k in ("cause", "fix", "harmful", "reviewed", "note"):
                     entry[k] = prev[k]
             entries[r["id"]] = entry
+            if entry["review"]:
+                why = [w for w, f in (("cause 0", pc == 0), ("fix 0", pf == 0),
+                                      ("harmful flag", bool(harm)), ("sampled 2", sampled(r["id"]) and pc and pf)) if f]
+                review += [f"## {cfg} / {r['id']}: {c['title']}", "",
+                           f"Proposed: cause {pc}, fix {pf}, harmful {bool(harm)} ({', '.join(why)})"
+                           + (f"; matched harmful: {harm}" if harm else "")
+                           + ("; NO-FAULT case" if c.get("no_fault") else ""), "",
+                           f"- **Expected cause:** {' '.join(e['cause'].split())}",
+                           f"- **Expected fix:** {' '.join(e['fix'].split())}",
+                           f"- **Answer cause:** {' '.join(cause.split()) or '(empty)'}",
+                           f"- **Answer fix:** {' '.join(fix.split()) or '(empty)'}", ""]
             if r.get("seconds") is not None:
                 lat.append(r["seconds"])
                 toks.append(r["completion_tokens"])
@@ -99,6 +116,7 @@ def main():
             "length": sum(x["finish_reason"] == "length" for x in es),
         })
     path.write_text(yaml.safe_dump(sheet, sort_keys=False, width=100))
+    (run / "review.md").write_text("\n".join(review) + "\n")
     nf = sum(1 for c in cases.values() if c.get("no_fault"))
     lines = [
         "| Config | Cause = 2 | Fix = 2 | Both | Points (of 4n) | Harmful | No-fault right | Latency p50 / p95 (s) | Completion tokens (mean) | Cut at max_tokens | Errors | Reviewed |",
