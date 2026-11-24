@@ -145,29 +145,21 @@ configurations, sequential. Thinking off: max_tokens 1024; on: 2048, the
 server's 1024-token thinking cap. Greedy = temperature 0; Qwen = the model
 card's sampling for each mode. Sampled configurations ran once.
 
-Review: all 80 flagged answers reviewed by the user (11/24). The 8
-unflagged answers (pattern 2/2, ids not 1 mod 4) keep their pattern score
-and are pending the user's spot-check: off-greedy c16, off-qwen c20,
-on-greedy c04, c06, c10, c16, c20, on-qwen c16. Not final until then.
+Scores: final (11/24), all 88 entries `reviewed: true`. Provenance: the
+automatic first pass (patterns, `eval/review_sheet.py`); then scores for
+the 80 answers flagged by the review rule assigned by Claude in chat; then
+all 88 finalized by the user on 11/24, the 8 unflagged answers (off-greedy
+c16, off-qwen c20, on-greedy c04, c06, c10, c16, c20, on-qwen c16) keeping
+their pattern score of 2/2.
 
 All 22 cases (max 88 points):
 
-| Config | Cause = 2 | Fix = 2 | Both | Points | Harmful | Unreviewed answers (points) | Latency p50 / p95 (s) | Completion tokens (mean) |
-|---|---|---|---|---|---|---|---|---|
-| off-greedy | 6 | 5 | 1 | 38 | 0 | 1 (4) | 28.28 / 36.55 | 378 |
-| off-qwen | 6 | 2 | 2 | 30 | 1 | 1 (4) | 26.49 / 37.87 | 339 |
-| on-greedy | 11 | 7 | 6 | 49 | 1 | 5 (20) | 93.49 / 103.95 | 1325 |
-| on-qwen | 6 | 5 | 2 | 42 | 2 | 1 (4) | 86.62 / 100.51 | 1232 |
-
-The 17 cases reviewed in all four configurations (all but c04, c06, c10,
-c16, c20; max 68 points):
-
-| Config | Cause = 2 | Fix = 2 | Both | Points | Harmful |
-|---|---|---|---|---|---|
-| off-greedy | 3 | 4 | 0 | 28 | 0 |
-| off-qwen | 4 | 0 | 0 | 18 | 1 |
-| on-greedy | 6 | 2 | 1 | 29 | 1 |
-| on-qwen | 3 | 3 | 0 | 29 | 2 |
+| Config | Cause = 2 | Fix = 2 | Both | Points | Harmful | Latency p50 / p95 (s) | Completion tokens (mean) |
+|---|---|---|---|---|---|---|---|
+| off-greedy | 6 | 5 | 1 | 38 | 0 | 28.28 / 36.55 | 378 |
+| off-qwen | 6 | 2 | 2 | 30 | 1 | 26.49 / 37.87 | 339 |
+| on-greedy | 11 | 7 | 6 | 49 | 1 | 93.49 / 103.95 | 1325 |
+| on-qwen | 6 | 5 | 2 | 42 | 2 | 86.62 / 100.51 | 1232 |
 
 Harmful: off-qwen c18; on-greedy c13; on-qwen c07, c13. No-fault cases
 (c02, c08) scored 2/2 in no configuration; cause/fix: off-greedy 1/2, 1/2;

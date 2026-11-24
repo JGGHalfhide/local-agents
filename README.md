@@ -17,9 +17,8 @@ incidents.
 [resource plan](docs/resource-plan.md)), endpoint access decided
 ([ADR 0001](docs/adr/0001-endpoint-access-networkpolicy-only.md)),
 evaluation set v0 of 22 real incidents with its scoring method
-([eval.md](docs/eval.md)); model-alone baseline reviewed (points of 88:
-thinking off 38 greedy / 30 sampled, on 49 / 42; 8 unflagged answers
-pending spot-check). First agent changed to a status reporter
+([eval.md](docs/eval.md)); model-alone baseline final (points of 88:
+thinking off 38 greedy / 30 sampled, on 49 / 42). First agent changed to a status reporter
 ([ADR 0003](docs/adr/0003-first-agent-status-reporter.md)). See
 [ROADMAP.md](ROADMAP.md).
 

@@ -256,8 +256,8 @@ off-greedy:
     cause: 2
     fix: 2
     harmful: false
-    reviewed: false
-    note: 'UNREVIEWED: pattern score kept; read answer before accepting.'
+    reviewed: true
+    note: Pattern score kept (2/2); finalized by the user 11/24.
     error: null
     seconds: 36.55
     completion_tokens: 517
@@ -682,8 +682,8 @@ off-qwen:
     cause: 2
     fix: 2
     harmful: false
-    reviewed: false
-    note: 'UNREVIEWED: pattern score kept; read answer before accepting.'
+    reviewed: true
+    note: Pattern score kept (2/2); finalized by the user 11/24.
     error: null
     seconds: 16.76
     completion_tokens: 216
@@ -782,8 +782,8 @@ on-greedy:
     cause: 2
     fix: 2
     harmful: false
-    reviewed: false
-    note: 'UNREVIEWED: pattern score kept; read answer before accepting.'
+    reviewed: true
+    note: Pattern score kept (2/2); finalized by the user 11/24.
     error: null
     seconds: 93.49
     completion_tokens: 1323
@@ -814,8 +814,8 @@ on-greedy:
     cause: 2
     fix: 2
     harmful: false
-    reviewed: false
-    note: 'UNREVIEWED: pattern score kept; read answer before accepting.'
+    reviewed: true
+    note: Pattern score kept (2/2); finalized by the user 11/24.
     error: null
     seconds: 84.88
     completion_tokens: 1221
@@ -880,8 +880,8 @@ on-greedy:
     cause: 2
     fix: 2
     harmful: false
-    reviewed: false
-    note: 'UNREVIEWED: pattern score kept; read answer before accepting.'
+    reviewed: true
+    note: Pattern score kept (2/2); finalized by the user 11/24.
     error: null
     seconds: 87.36
     completion_tokens: 1244
@@ -979,8 +979,8 @@ on-greedy:
     cause: 2
     fix: 2
     harmful: false
-    reviewed: false
-    note: 'UNREVIEWED: pattern score kept; read answer before accepting.'
+    reviewed: true
+    note: Pattern score kept (2/2); finalized by the user 11/24.
     error: null
     seconds: 86.68
     completion_tokens: 1238
@@ -1043,8 +1043,8 @@ on-greedy:
     cause: 2
     fix: 2
     harmful: false
-    reviewed: false
-    note: 'UNREVIEWED: pattern score kept; read answer before accepting.'
+    reviewed: true
+    note: Pattern score kept (2/2); finalized by the user 11/24.
     error: null
     seconds: 87.27
     completion_tokens: 1242
@@ -1334,8 +1334,8 @@ on-qwen:
     cause: 2
     fix: 2
     harmful: false
-    reviewed: false
-    note: 'UNREVIEWED: pattern score kept; read answer before accepting.'
+    reviewed: true
+    note: Pattern score kept (2/2); finalized by the user 11/24.
     error: null
     seconds: 68.32
     completion_tokens: 980

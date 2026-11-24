@@ -192,9 +192,10 @@ scoring accepted 11/23: pattern first pass + the user's review of every
 0, every harmful flag and 1 in 4 of the 2s.
 Baseline tooling committed (eval/run_baseline.py, eval/review_sheet.py,
 eval/prompts/baseline-system.txt); baseline run 11/23 (88/88 answers,
-0 errors) into results/week1-baseline/; automatic first pass done, the
-user is reviewing all 80 flagged answers (review.md, scores.yaml; option 1,
-11/23). Commit results and quote numbers only after the review. Runtime candidates
+0 errors) into results/week1-baseline/; scores final 11/24 (pattern first
+pass, scores assigned by Claude in chat for the 80 flagged answers,
+finalized by the user): points of 88 off-greedy 38, off-qwen 30, on-greedy
+49, on-qwen 42 (docs/eval.md). Runtime candidates
 measured offline (scripts/runtime-footprint.sh,
 docs/scans/week1-runtime-footprint.txt); the endpoint spike for ADR 0002
 waits for the baseline (it would share the 4 slots). Gap for Week 2: no

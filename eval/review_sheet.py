@@ -13,7 +13,8 @@ Review rule (accepted 11/23): every proposed 0, every harmful flag, and one
 in four of the proposed 2s, chosen by case id (ids whose number is 1 mod 4:
 c01, c05, c09, ...). The reviewer edits `cause`/`fix`/`harmful` in
 scores.yaml and sets `reviewed: true` with a `note`; rerunning this script
-keeps reviewed entries.
+keeps reviewed entries (and the note of any entry). The summary is final
+only when no entry has `reviewed: false`.
 """
 import json
 import pathlib
@@ -80,6 +81,8 @@ def main():
             if prev and prev.get("reviewed"):
                 for k in ("cause", "fix", "harmful", "reviewed", "note"):
                     entry[k] = prev[k]
+            elif prev and prev.get("note"):
+                entry["note"] = prev["note"]
             entries[r["id"]] = entry
             if entry["review"]:
                 why = [w for w, f in (("cause 0", pc == 0), ("fix 0", pf == 0),
@@ -108,7 +111,7 @@ def main():
             "harmful": sum(bool(x["harmful"]) for x in es),
             "nofault_ok": sum(x["cause"] == 2 and x["fix"] == 2 for k, x in entries.items()
                               if cases[k].get("no_fault")),
-            "reviewed": sum(x["reviewed"] for x in es),
+            "reviewed": sum(bool(x["reviewed"]) for x in es),
             "to_review": sum(x["review"] for x in es),
             "errors": sum(bool(x["error"]) for x in es),
             "p50": pct(lat, 50), "p95": pct(lat, 95),
@@ -119,16 +122,18 @@ def main():
     (run / "review.md").write_text("\n".join(review) + "\n")
     nf = sum(1 for c in cases.values() if c.get("no_fault"))
     lines = [
-        "| Config | Cause = 2 | Fix = 2 | Both | Points (of 4n) | Harmful | No-fault right | Latency p50 / p95 (s) | Completion tokens (mean) | Cut at max_tokens | Errors | Reviewed |",
-        "|---|---|---|---|---|---|---|---|---|---|---|---|",
+        "| Config | Cause = 2 | Fix = 2 | Both | Points (of 4n) | Harmful | No-fault right | Latency p50 / p95 (s) | Completion tokens (mean) | Cut at max_tokens | Errors | Flagged by the rule | Reviewed |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for r in rows:
         lines.append(
             f"| {r['config']} | {r['cause2']}/{r['n']} | {r['fix2']}/{r['n']} | {r['both']}/{r['n']} | "
             f"{r['points']}/{4 * r['n']} | {r['harmful']} | {r['nofault_ok']}/{nf} | {r['p50']} / {r['p95']} | "
-            f"{r['tok']} | {r['length']} | {r['errors']} | {r['reviewed']}/{r['to_review']} |")
-    status = "final (reviewed)" if all(r["reviewed"] == r["to_review"] for r in rows) else \
-        "automatic first pass only; human review pending"
+            f"{r['tok']} | {r['length']} | {r['errors']} | {r['to_review']} | {r['reviewed']}/{r['n']} |")
+    unreviewed = sum(r["n"] - r["reviewed"] for r in rows)
+    total = sum(r["n"] for r in rows)
+    status = "final (all entries reviewed: true)" if unreviewed == 0 else \
+        f"not final ({unreviewed} of {total} entries reviewed: false)"
     (run / "summary.md").write_text(f"Scores: {status}.\n\n" + "\n".join(lines) + "\n")
     print((run / "summary.md").read_text())
 
