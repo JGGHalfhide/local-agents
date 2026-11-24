@@ -153,5 +153,14 @@ disk as deleted. The rebuilt ISO has the same content and instance-id, so
 cloud-init does not run again; the root disks were not touched. This
 happens on any apply after a host reboot.
 
-Follow-ups in platform-lab: a per-VM `running` variable so `make up` starts
-only the build VM; until then, apply per VM as above.
+Follow-up, done the same day in platform-lab: Terraform now starts a VM
+only when it creates it (`lifecycle { ignore_changes = [running] }` in
+modules/rocky-vm), and `scripts/vm-power.sh` (`make vm-start` /
+`make vm-stop`) runs the VMs one at a time: it refuses to start one while
+the other runs, or when the host's available memory is below the VM's size
+plus 2 GiB. `make up` and `make rehearsal` run the same check before
+Terraform. Tested 11/23 with build-node-01 running: starting the rehearsal
+VM was refused (build VM running; and, with that check skipped, 6,103 MiB
+available against 22,528 MiB needed); both plans show no changes. The IP
+outputs are null while a VM is off, so `make inventory` falls back to the
+reserved addresses.

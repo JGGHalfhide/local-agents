@@ -43,10 +43,12 @@ platform-lab (Phase 1, v1.0 11/18) and local-airgap-LLM (Phase 2, v1.1
   (limit 6 GiB); about 4.6 CPU / 7.4 GiB of requests left for the agent
   stack (estimated 1.8 CPU / 2.7 GiB). Disk is the next limit: 27 of 39 GiB
   on build-node-01, image GC at 85%.
-- Both terraform modules set running = true: `make up` or a full
-  `terraform apply` in platform-lab starts BOTH VMs (40 GiB on a 28 GiB
-  host). Apply per VM with the other shut off:
-  `terraform apply -target=module.<vm> -var airgap_rehearsal=true`.
+- Switch VMs with platform-lab's `make vm-stop VM=<name>` and
+  `make vm-start VM=<name>` (scripts/vm-power.sh): start refuses while the
+  other lab VM runs or the host lacks the VM's memory + 2 GiB. Terraform
+  starts a VM only when it creates it (rocky-vm ignores `running` after
+  that), and `make up` / `make rehearsal` run the same check first. Never
+  `virsh start` a lab VM directly.
   After a host reboot every apply also replaces each VM's cloud-init seed
   volume (provider ISO in tmpfs /tmp): harmless, same content.
 
