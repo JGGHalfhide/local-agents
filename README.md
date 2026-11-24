@@ -13,14 +13,19 @@ automatically by fault injection
 (stretch): incident triage, measured on an evaluation set of real
 incidents.
 
-**Status:** Week 1 (11/23), in progress: VMs sized (12 vCPU / 20 GiB,
+**Status:** Week 1 done (v0.1, 11/24): VMs sized (12 vCPU / 20 GiB,
 [resource plan](docs/resource-plan.md)), endpoint access decided
 ([ADR 0001](docs/adr/0001-endpoint-access-networkpolicy-only.md)),
 evaluation set v0 of 22 real incidents with its scoring method
 ([eval.md](docs/eval.md)); model-alone baseline final (points of 88:
-thinking off 38 greedy / 30 sampled, on 49 / 42). First agent changed to a status reporter
-([ADR 0003](docs/adr/0003-first-agent-status-reporter.md)). See
-[ROADMAP.md](ROADMAP.md).
+thinking off 38 greedy / 30 sampled, on 49 / 42). First agent: a read-only status reporter
+([ADR 0003](docs/adr/0003-first-agent-status-reporter.md)), scored by fault
+injection ([eval-status.md](docs/eval-status.md), approved, not yet run).
+Agent runtime: a plain tool loop on the openai SDK, chosen by a spike of five
+runtimes ([ADR 0002](docs/adr/0002-agent-runtime-plain-openai-loop.md)). The
+spike found that agent tool loops OOM-killed the endpoint; fixed in
+local-airgap-LLM (its ADR 0007). Next: Week 2, the status reporter's tools,
+identity and image. See [ROADMAP.md](ROADMAP.md).
 
 ## How it fits
 

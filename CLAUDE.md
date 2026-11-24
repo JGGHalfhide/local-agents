@@ -75,7 +75,7 @@ platform-lab (Phase 1, v1.0 11/18) and local-airgap-LLM (Phase 2, v1.1
   with the same label (both, one `from` entry in platform-lab
   gitops/keda/networkpolicy-interceptor.yaml).
 
-## Decisions so far (11/23)
+## Decisions so far (11/24)
 - Separate repo; same conventions as the other two.
 - The endpoint stays fast, bounded and predictable by default; this repo
   decides when to pay for slower, better answers (thinking, longer
@@ -93,7 +93,7 @@ platform-lab (Phase 1, v1.0 11/18) and local-airgap-LLM (Phase 2, v1.1
   no pods/exec, no pods/log in v1. Agent 2 = incident triage (stretch),
   known-issue retrieval in Week 3 with 6-8 incidents held out of the index;
   eval set v0 is its measure.
-- ADR 0002's runtime spike uses the status reporter's tool loop as its task.
+- Agent runtime (ADR 0002, 11/24): a plain tool loop on the openai SDK.
   Thinking off by default; per-request opt-in tested only after agent 1
   works. Client config backend-neutral (base URL, model, key from config);
   no hosted-model run planned yet.
@@ -213,9 +213,15 @@ f09 dropped, caps 1k tokens/tool result, 8 calls, 12k input/run; per-slot
 n_ctx is one unified 32k pool (docs/scans/week1-llm-slots.txt). Stubs in
 eval/status/ refuse to run; nothing injected yet.
 Endpoint fix 11/24: agent tool loops OOMKilled llama-server; cause and fix
-measured in local-airgap-LLM (ADR 0007, --ctx-checkpoints 4). The ADR 0002
-spike (eval/spike/, uncommitted) resumes on the fixed endpoint. Image build
-proposal: docs/image-build.md (crane, recommended; awaiting the user).
+measured in local-airgap-LLM (ADR 0007, --ctx-checkpoints 4).
+ADR 0002 (11/24): agent runtime = plain tool loop on the openai SDK (spike of
+5 runtimes, eval/spike/, docs/scans/week1-runtime-spike.txt; plain loops 4/4,
+langgraph 3/4, smolagents 2/4, pydantic-ai 0/4). Endpoint quirks every loop
+must handle are in the ADR. Report quality was weak for all (false faults
+from boot-time warnings and KEDA scale-to-zero): Week 2 tool design.
+MVP scope (user, 11/24): proof of concept; smallest test that decides.
+Week 1 tagged v0.1 (11/24; employer check signed off by the user). Image
+build proposal: docs/image-build.md (crane, recommended; awaiting the user).
 Lab: build-node-01 running, airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state

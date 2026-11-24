@@ -30,7 +30,7 @@ Keep this page current every week.
 
 | Component | Version | What it does here | Why |
 |---|---|---|---|
-| Agent runtime | *planned, Week 1* (candidates measured offline: [scans/week1-runtime-footprint.txt](scans/week1-runtime-footprint.txt)) | | ADR 0002 |
+| Agent runtime | openai SDK 3.46.0, a plain tool loop (spike adapter: eval/spike/run_openai.py); runtime image and lock file in Week 2 | Runs the status reporter's tool loop against the endpoint: turn cap, malformed tool arguments replaced before resending, final structured request ending on a user turn | 4/4 valid reports in the spike, fastest median, 14 wheels / 6 MiB, backend-neutral config ([ADR 0002](adr/0002-agent-runtime-plain-openai-loop.md), [spike](scans/week1-runtime-spike.txt), [footprint](scans/week1-runtime-footprint.txt)) |
 | Tools | *planned, Week 2*: status reporter's read-only Kubernetes API tools (get/list/watch; pods, events, workloads, namespaces, nodes, PVCs, Argo CD Applications, KEDA objects), results capped | | [ADR 0003](adr/0003-first-agent-status-reporter.md) |
 | Endpoint access | NetworkPolicy (Canal), no API key | Agent namespaces and agent pods labelled `inference.local-airgap-llm/client: "true"` (both required by the interceptor's policy); tools unlabelled | [ADR 0001](adr/0001-endpoint-access-networkpolicy-only.md) |
 | Identity and policy | *planned, Week 2* | | |
