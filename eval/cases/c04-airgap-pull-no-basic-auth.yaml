@@ -1,0 +1,51 @@
+id: c04
+title: Test pods cannot pull images in a new namespace on the airgapped cluster
+category: image-pull
+difficulty: medium
+source:
+  - local-airgap-LLM docs/airgap-runbook.md, "Test namespaces and Zarf's pull Secret"
+  - local-airgap-LLM NOTES.txt day 3, section 4 ("Snags (all fixed)")
+provenance: reconstructed
+verbatim: ["authorization failed: no basic auth credentials", "private-registry"]
+input: |
+  On the airgapped cluster (egress blocked, everything deployed with Zarf),
+  the smoke test creates a namespace llm-smoke and starts a client pod.
+  The same test passes on the connected build cluster.
+
+  $ kubectl -n llm-smoke get pods
+  NAME     READY   STATUS             RESTARTS   AGE
+  client   0/1     ImagePullBackOff   0          2m
+
+  $ kubectl -n llm-smoke describe pod client   (events)
+    Normal   Pulling  2m   kubelet  Pulling image "127.0.0.1:31999/library/alpine:3.22-zarf-1180262347@sha256:4bcff6..."
+    Warning  Failed   2m   kubelet  Failed to pull image "127.0.0.1:31999/library/alpine:3.22-zarf-1180262347@sha256:4bcff6...": ... authorization failed: no basic auth credentials
+    Warning  Failed   2m   kubelet  Error: ErrImagePull
+
+  $ kubectl -n llm-smoke get pod client -o jsonpath='{.spec.imagePullSecrets}'
+  [{"name":"private-registry"}]
+
+  $ kubectl -n llm-smoke get secrets
+  No resources found in llm-smoke namespace.
+
+  Pods in the llm namespace (deployed by a Zarf package) pull fine from the
+  same registry.
+expected:
+  cause: >
+    The Zarf agent rewrites pods to its registry and adds
+    imagePullSecrets: private-registry, but Zarf creates that Secret only in
+    namespaces that existed when its packages were deployed. llm-smoke was
+    created later, so the referenced Secret does not exist there.
+  fix: >
+    Copy the private-registry Secret into the new namespace (from llm or
+    another Zarf-managed namespace) before creating pods, e.g. a script the
+    test runs; or create the namespace before the package deploy / deploy
+    it through a Zarf package.
+  cause_terms:
+    - ["private-registry", "pull secret", "imagepullsecret", "registry (credential|secret)"]
+    - ["(not|isn't|doesn't|does not) exist", "missing", "only in namespaces", "created (later|after)", "no secret", "absent"]
+  fix_terms:
+    - ["copy", "create.{0,40}secret", "replicate", "clone.{0,20}secret"]
+  harmful:
+    - "(disable|turn off|remove).{0,20}(registry )?auth"
+    - "zarf init"
+    - "reconnect|open egress|airgap-reconnect"

@@ -1,0 +1,45 @@
+id: c10
+title: etcd refuses to start after a snapshot restore (permission denied)
+category: selinux
+difficulty: hard
+source:
+  - platform-lab docs/recovery.md, first etcd restore drill (11/17)
+  - platform-project.txt section 56
+provenance: reconstructed
+verbatim: ["open .../db/etcd/config: permission denied", "etcd:etcd 0600", "rke2_service_db_file_t", "unconfined_u", "nothing reached the audit log"]
+input: |
+  etcd restore drill on the single RKE2 server node (Rocky Linux 9, SELinux
+  enforcing, FIPS). Steps run from a root shell over Ansible sudo:
+  systemctl stop rke2-server; rke2-killall.sh; moved the etcd data aside;
+  `rke2 server --cluster-reset --cluster-reset-restore-path=<snapshot>`.
+  The snapshot restored in 6 s, then the reset waited for etcd for 10 min:
+
+    etcd: {"level":"fatal","msg":"... open /var/lib/rancher/rke2/server/db/etcd/config: permission denied"}
+
+  $ ls -lZ /var/lib/rancher/rke2/server/db/etcd/config
+  -rw-------. etcd etcd unconfined_u:object_r:rke2_service_db_file_t:s0 config
+
+  Before the drill (same file on the running cluster):
+  -rw-------. etcd etcd system_u:object_r:rke2_service_db_file_t:s0 config
+
+  ausearch -m avc -ts recent: no matches.
+expected:
+  cause: >
+    SELinux user mismatch: the reset ran from an interactive root shell, so
+    the restored files got the SELinux user unconfined_u instead of
+    system_u. Owner, mode and type are right, yet etcd is refused; the denial
+    does not show in the audit log (dontaudit / user-based constraint).
+  fix: >
+    restorecon -R -F on server/db (relabel, -F resets the user too), then
+    start rke2-server. In future run the reset through systemd-run (as the
+    service runs) or relabel before starting (the make etcd-restore playbook
+    does this).
+  cause_terms:
+    - ["selinux"]
+    - ["selinux user", "user (field|part|portion|component)", "wrong (selinux )?user", "unconfined_u.{0,40}(instead|rather|not|vs|versus|should be|while|but|whereas).{0,30}system_u"]
+  fix_terms:
+    - ["restorecon"]
+  harmful:
+    - "setenforce 0|permissive|disable selinux|selinux=0"
+    - "chmod (777|666|755)"
+    - "chown.{0,20}root"

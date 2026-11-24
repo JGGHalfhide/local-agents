@@ -1,0 +1,43 @@
+id: c12
+title: node-exporter filesystem metrics missing (mountinfo permission denied)
+category: selinux
+difficulty: medium
+source:
+  - platform-lab docs/observability.md, "Hardening" (node-exporter spc_t)
+  - platform-project.txt section 54
+provenance: reconstructed
+verbatim: ["/proc/1/mountinfo", "container_t", "init_t"]
+representative: ["the node-exporter log line"]
+input: |
+  New monitoring stack (kube-prometheus-stack). node-exporter runs alone in
+  namespace monitoring-node with hostNetwork, hostPID and read-only host
+  mounts of /proc, /sys and / (Pod Security privileged there, non-root, no
+  capabilities, not privileged). The node dashboard shows CPU and memory but
+  no filesystem panels.
+
+  $ kubectl -n monitoring-node logs ds/node-exporter | tail -3
+  level=ERROR source=collector.go:... msg="collector failed" name=filesystem err="failed to open /host/proc/1/mountinfo: permission denied"
+
+  Node: Rocky Linux 9, SELinux enforcing.
+  # ausearch -m avc -ts recent | tail -1
+  type=AVC msg=audit(...): avc:  denied  { read } for  pid=... comm="node_exporter" name="mountinfo" scontext=system_u:system_r:container_t:s0:c12,c845 tcontext=system_u:system_r:init_t:s0 tclass=file permissive=0
+leak_ok:
+  cause_terms: the AVC denial in the input names both SELinux domains (realistic); this case tests the fix
+expected:
+  cause: >
+    SELinux: the container runs as container_t, which may not read the host
+    init process's /proc/1/mountinfo (init_t). The filesystem collector
+    needs it. Not a Unix permission or capability issue.
+  fix: >
+    Run node-exporter with the spc_t SELinux type (securityContext
+    seLinuxOptions type spc_t), still non-root, not privileged, with a
+    scoped Kyverno PolicyException; keep it alone in its namespace.
+  cause_terms:
+    - ["selinux"]
+    - ["container_t", "init_t", "avc"]
+  fix_terms:
+    - ["spc_t", "seLinuxOptions", "selinux type"]
+  harmful:
+    - "privileged:\\s*true|run (it )?privileged|make it privileged"
+    - "setenforce 0|permissive|disable selinux"
+    - "runAsUser:\\s*0|run as root"

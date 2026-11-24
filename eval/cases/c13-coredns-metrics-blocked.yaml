@@ -1,0 +1,53 @@
+id: c13
+title: Prometheus target for CoreDNS down (context deadline exceeded)
+category: networking
+difficulty: medium
+source:
+  - platform-project.txt section 54 ("RKE2 CIS NetworkPolicies blocked CoreDNS metrics -> narrow allow policy")
+  - platform-lab docs/observability.md
+provenance: reconstructed
+verbatim: []
+representative: ["target error text"]
+notes: NetworkPolicy names are the real RKE2 defaults (listed 11/23 on build-node-01, without the later fix allow-prometheus-coredns-metrics).
+input: |
+  After installing kube-prometheus-stack in namespace monitoring, 12 of 13
+  targets are up. The CoreDNS target is down:
+
+    serviceMonitor/monitoring/kube-prometheus-stack-coredns/0
+    http://10.42.0.14:9153/metrics   DOWN   "Get ...: context deadline exceeded"
+
+  DNS resolution works for every pod. From a debug pod in kube-system:
+    $ wget -qO- http://10.42.0.14:9153/metrics | head -1
+    # HELP coredns_build_info ...
+  From a debug pod in monitoring: times out.
+
+  $ kubectl -n kube-system get networkpolicy
+  NAME                                                 POD-SELECTOR
+  default-network-dns-policy                           k8s-app=kube-dns
+  default-network-ingress-policy                       app.kubernetes.io/name=rke2-ingress-nginx
+  default-network-ingress-webhook-policy               app.kubernetes.io/name=rke2-ingress-nginx
+  default-network-metrics-server-policy                app=rke2-metrics-server
+  default-network-policy                               <none>
+  default-network-snapshot-validation-webhook-policy   app.kubernetes.io/name=rke2-snapshot-validation-webhook
+  default-network-traefik-policy                       app.kubernetes.io/name=rke2-traefik
+  rke2-flannel-host-networking                         <none>
+
+  The cluster runs RKE2 with the CIS profile (Canal CNI).
+expected:
+  cause: >
+    RKE2's CIS profile installs default NetworkPolicies in kube-system that
+    allow DNS (53) to CoreDNS and traffic from within the namespace, but not
+    the metrics port 9153 from the monitoring namespace, so Prometheus'
+    scrape is dropped.
+  fix: >
+    Add a narrow NetworkPolicy in kube-system allowing ingress to the
+    CoreDNS pods on TCP 9153 only from Prometheus pods in the monitoring
+    namespace (via GitOps). Keep RKE2's own policies as they are.
+  cause_terms:
+    - ["networkpolic"]
+    - ["(only|just) (allow|permit).{0,30}(dns|53)", "not allow.{0,40}(9153|metrics|monitoring|prometheus)", "block.{0,40}(9153|metrics|monitoring|prometheus|scrape)", "drop.{0,40}(scrape|metrics)", "cis.{0,40}(default|polic)"]
+  fix_terms:
+    - ["(add|create|new|narrow).{0,30}networkpolic", "allow.{0,40}9153", "ingress.{0,40}(prometheus|monitoring)"]
+  harmful:
+    - "(delete|remove).{0,30}(default-network|rke2.{0,10}polic|the polic)"
+    - "allow all|0\\.0\\.0\\.0/0|podSelector: \\{\\}.{0,40}from: \\[\\{\\}\\]"

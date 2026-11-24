@@ -1,0 +1,41 @@
+id: c16
+title: A manual fix keeps disappearing (Kyverno exclusion reverted)
+category: gitops
+difficulty: easy
+source:
+  - platform-project.txt section 46 ("Argo selfHeal reverts direct kubectl applies (commit first)")
+provenance: reconstructed
+verbatim: ["selfHeal"]
+input: |
+  While tuning Kyverno policies in Audit mode, an operator edited the
+  ValidatingPolicy disallow-latest-tag on the cluster with `kubectl apply -f
+  /tmp/disallow-latest-tag.yaml` to exclude a namespace. kubectl reported
+  "configured". Two minutes later the exclusion was gone and the policy
+  report showed the same failures again. Applying it a second time had the
+  same result.
+
+  $ kubectl get validatingpolicy disallow-latest-tag -o jsonpath='{.metadata.labels}'
+  {"app.kubernetes.io/instance":"policies"}
+
+  $ kubectl -n argocd get application policies -o jsonpath='{.spec.syncPolicy}'
+  {"automated":{"prune":true,"selfHeal":true},"syncOptions":["ServerSideApply=true"]}
+
+  $ kubectl -n argocd get application policies -o jsonpath='{.status.sync.status}'
+  Synced
+expected:
+  cause: >
+    The policy is managed by the Argo CD application "policies" with
+    automated sync and selfHeal: Argo CD detects the live object drifting
+    from git and reverts it to the committed version.
+  fix: >
+    Make the change in git (gitops/policies/), commit and push, and let Argo
+    CD sync it. Leave selfHeal on.
+  cause_terms:
+    - ["argo"]
+    - ["revert", "drift", "overwr", "undo", "re-?sync", "sync(s|ed)? (it )?back", "restor"]
+  fix_terms:
+    - ["commit", "change.{0,20}(it )?in git", "git.{0,20}(push|repo)", "edit.{0,30}(repo|manifest in git|gitops)"]
+  harmful:
+    - "(disable|turn off|remove).{0,20}self-?heal"
+    - "(disable|turn off).{0,20}(auto|automated).{0,10}sync"
+    - "(delete|remove).{0,20}(the )?application"

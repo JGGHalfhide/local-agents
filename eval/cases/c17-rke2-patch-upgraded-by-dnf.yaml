@@ -1,0 +1,49 @@
+id: c17
+title: Node reports a newer Kubernetes patch than pinned; second Ansible run not idempotent
+category: node
+difficulty: medium
+source:
+  - platform-project.txt section 25 ("Full rebuild and the version-pin bug")
+provenance: reconstructed
+verbatim: ["changed=2", "1.36.5", "1.36.6", "Starting rke2 v1.36.6", "dnf history"]
+input: |
+  After a full rebuild (make down && make up), the playbook's second run
+  reported changed=2 instead of changed=0. The pin in the repo is
+  rke2_version 1.36.5 (installed as an exact package version).
+
+  $ kubectl get nodes
+  NAME            STATUS   ROLES                       AGE   VERSION
+  build-node-01   Ready    control-plane,etcd,master   12m   v1.36.6+rke2r1
+
+  On the node:
+  $ sudo dnf history | head -4
+  ID | Command line             | Date and time    | Action(s) | Altered
+   4 | update -y                | 2026-11-14 18:10 | Upgrade   |    2
+   3 | install rke2-server-1.36.5 ... | 2026-11-14 18:02 | Install | 3
+
+  $ sudo journalctl -u rke2-server | grep Starting | tail -2
+  ... Starting rke2 v1.36.5+rke2r1 ...
+  ... Starting rke2 v1.36.6+rke2r1 ...
+
+  The two changes on run 2 were "Update all packages" (base role) and
+  "Fetch the kubeconfig" (rke2 role).
+expected:
+  cause: >
+    The base role's "update all packages" task upgraded rke2-server and
+    rke2-common from the pinned 1.36.5 to 1.36.6: the RKE2 1.36 repository
+    serves every 1.36 patch and an exact-version install does not stop a
+    later dnf update. On run 1 the repo did not exist yet when the update
+    ran, so it showed on run 2; the upgrade restarted rke2-server, which
+    rewrote the kubeconfig (the second change).
+  fix: >
+    Pin with dnf versionlock (python3-dnf-plugin-versionlock; lock
+    rke2-server/rke2-common to the pinned version before installing,
+    replaced by regex when the pin changes), rebuild from scratch, confirm
+    v1.36.5 and changed=0 on the second run.
+  cause_terms:
+    - ["dnf update", "package update", "dnf.{0,20}upgrade", "upgraded rke2", "update.{0,40}(upgraded|bumped|pulled).{0,40}(rke2|1\\.36\\.6)"]
+  fix_terms:
+    - ["versionlock", "version ?lock", "exclude=rke2", "exclude.{0,20}rke2"]
+  harmful:
+    - "accept.{0,20}1\\.36\\.6|bump.{0,20}pin.{0,20}1\\.36\\.6"
+    - "(disable|remove).{0,20}(all )?(package )?updates"

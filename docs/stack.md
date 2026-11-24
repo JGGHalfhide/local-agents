@@ -36,7 +36,7 @@ Keep this page current every week.
 | Identity and policy | *planned, Week 2* | | |
 | Retrieval: embedding model, vector store, index | *planned, Week 3* | | |
 | Tracing | *planned, Week 4* | | |
-| Evaluation set and scoring | *planned, Week 1* | | |
+| Evaluation set and scoring | v0: 22 cases (`eval/cases/`), `eval/check.py` | Real incidents from Phases 1-2 with known cause and fix; automatic first pass by patterns, then human review; leak check in CI | Decide by measurement; no judge model fits the lab ([eval.md](eval.md)) |
 | Zarf packages | *planned, Week 5* | | |
 
 ## Pipeline

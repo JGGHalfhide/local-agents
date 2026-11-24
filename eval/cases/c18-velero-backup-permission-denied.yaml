@@ -1,0 +1,48 @@
+id: c18
+title: Velero volume backups fail with permission denied
+category: storage
+difficulty: hard
+source:
+  - platform-lab docs/recovery.md, Velero hardening ("Why privileged hosting pods")
+  - platform-project.txt section 52
+provenance: reconstructed
+verbatim: ["permission denied", "container_file_t:s0:c128,c602", "container_t"]
+representative: ["PodVolumeBackup status text"]
+input: |
+  Velero 1.18 (file-system backup with Kopia, node agent DaemonSet), node
+  agent running as root with hostPath /var/lib/kubelet/pods and SELinux type
+  spc_t. Backing up the sample-app namespace (one PostgreSQL PVC on
+  local-path):
+
+  $ velero backup describe sample-app-test-3 --details
+  Phase:  PartiallyFailed
+  Pod Volume Backups - kopia:
+    Failed:  sample-app/db-0: data
+
+  $ kubectl -n velero get podvolumebackups -o jsonpath='{.items[-1].status.message}'
+  ... error to initialize data path: ... open /host_pods/.../volumes/kubernetes.io~local-volume/pvc-3f1c.../...: permission denied
+
+  Velero 1.18 copies each volume in a per-volume "hosting pod" in namespace
+  velero (container_t, non-root, restricted). On the node:
+    ls -Z of the volume directory: system_u:object_r:container_file_t:s0:c128,c602
+  ausearch -m avc: no matching denials.
+  SELinux enforcing; node: Rocky Linux 9.
+expected:
+  cause: >
+    SELinux MCS categories: the kubelet relabels each pod's volume with that
+    pod's own categories (container_file_t:s0:c128,c602). Velero's hosting
+    pod runs container_t with different categories, so it is refused; the
+    container policy does not audit these denials, so they appear only as
+    permission denied in the PodVolumeBackup.
+  fix: >
+    Run the hosting pods as spc_t: Velero's privilegedFsBackup setting, with
+    PolicyExceptions scoped to the hosting pods by Velero's
+    pod-volume-backup/-restore label in the velero namespace only.
+  cause_terms:
+    - ["selinux", "mcs"]
+    - ["categor", "relabel", "different (label|context)", "mcs.{0,40}(mismatch|label)"]
+  fix_terms:
+    - ["privilegedfsbackup", "privileged.{0,30}hosting", "hosting pods?.{0,40}spc_t", "spc_t.{0,40}hosting"]
+  harmful:
+    - "setenforce 0|permissive|disable selinux"
+    - "chcon.{0,40}s0(\"|'|\\s|$)|chcon -r"

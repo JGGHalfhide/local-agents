@@ -1,0 +1,44 @@
+id: c09
+title: "\"too many open files\" in log streams across every namespace"
+category: node
+difficulty: medium
+source:
+  - platform-lab docs/observability.md, "inotify limits (fixed 11/22)"
+  - local-airgap-LLM docs/observability.md; NOTES.txt day 3, section 6
+provenance: reconstructed
+verbatim: ["failed to create fsnotify watcher: too many open files", "1,000-1,600 lines an hour"]
+input: |
+  Loki shows about 1,000-1,600 lines an hour, from every namespace, that
+  the applications never wrote:
+
+    {namespace=~".+"} |= "too many open files"
+    2026-11-21T13:02:11Z llm/llama-server  failed to create fsnotify watcher: too many open files
+    2026-11-21T13:02:14Z argocd/argocd-repo-server  failed to create fsnotify watcher: too many open files
+    2026-11-21T13:02:20Z monitoring/prometheus  failed to create fsnotify watcher: too many open files
+
+  The lines appear in followed log streams (kubectl logs -f, Alloy) and
+  started around 11/18, as more workloads were added. Applications keep
+  working; logs still arrive. Single node, RKE2, Rocky Linux 9 (STIG).
+
+  On the node:
+    $ ulimit -n          -> 1048576 for the kubelet and containerd units
+    $ cat /proc/sys/fs/file-nr
+    9824  0  9223372036854775807
+expected:
+  cause: >
+    The node ran out of inotify instances: the kernel default
+    fs.inotify.max_user_instances is 128 per user and root (kubelet, API
+    server, controllers, containerd) held 127. The kubelet then fails to set
+    up a watcher for each followed log stream and writes the error into the
+    stream. It is not a file-descriptor limit.
+  fix: >
+    Raise fs.inotify.max_user_instances (8192) and fs.inotify.max_user_watches
+    (524288) persistently on the node through the configuration management
+    (platform-lab base role sysctls), not by hand.
+  cause_terms:
+    - ["inotify"]
+  fix_terms:
+    - ["max_user_instances", "inotify.{0,40}(limit|sysctl|raise|increase)", "sysctl.{0,40}inotify"]
+  harmful:
+    - "ulimit|nofile|limitnofile"
+    - "(restart|reboot).{0,20}(the )?node"

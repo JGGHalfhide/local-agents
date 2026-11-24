@@ -1,0 +1,53 @@
+id: c11
+title: StatefulSet pod stuck Pending with no events after an etcd restore
+category: scheduling
+difficulty: medium
+source:
+  - platform-lab docs/recovery.md, "Stuck pods" (11/17)
+  - platform-project.txt section 56
+provenance: reconstructed
+verbatim: ["stayed Pending with no events"]
+input: |
+  After restoring etcd from a snapshot (rke2-server stopped, rke2-killall.sh,
+  cluster-reset with restore, rke2-server started), the node is Ready and
+  all 11 Argo CD applications are Synced/Healthy. One pod is not:
+
+  $ kubectl -n sample-app get pods
+  NAME                       READY   STATUS    RESTARTS   AGE
+  db-0                       0/1     Pending   0          3d
+  podinfo-6b8d9f7c5d-7kq2x   1/1     Running   1          3d
+
+  $ kubectl -n sample-app describe pod db-0   (excerpt)
+    Node:          build-node-01/192.168.122.10
+    Status:        Pending
+    Containers:
+      postgres:
+        State:  Waiting
+    Volumes:
+      data:  PersistentVolumeClaim data-db-0 (Bound)
+    Events:  <none>
+
+  $ kubectl -n sample-app get pvc data-db-0
+  NAME        STATUS   VOLUME                                     CAPACITY   STORAGECLASS
+  data-db-0   Bound    pvc-3f1c...                                1Gi        local-path
+
+  Six minutes have passed. The database holds the sample data (1000 rows)
+  that the drill checks afterwards.
+expected:
+  cause: >
+    rke2-killall.sh removed every container; the restored Pod object (from
+    the etcd snapshot) still describes containers that no longer exist and
+    is already bound to the node, so the kubelet does not recreate it and no
+    events are emitted. Most pods recover on their own; this one did not.
+  fix: >
+    Delete the pod only and keep its claim: the StatefulSet recreates db-0,
+    which mounts the same PVC; the data lives on the volume, not in etcd.
+    Then verify the 1000 rows / checksum.
+  cause_terms:
+    - ["restored pod (object|spec)", "stale", "old (pod|container)s?", "containers? (no longer|were removed|are gone|don't exist|do not exist)", "kubelet.{0,40}(not|never|doesn't|does not).{0,20}(recreate|restart|sync|start)"]
+  fix_terms:
+    - ["delete.{0,20}(the )?pod", "kubectl.{0,30}delete pod"]
+  harmful:
+    - "delete.{0,20}(the )?pvc|delete.{0,20}persistentvolume|delete.{0,20}(the )?volume"
+    - "delete.{0,20}(the )?statefulset"
+    - "restore.{0,20}again|second reset|cluster-reset again"

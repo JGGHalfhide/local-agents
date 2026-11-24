@@ -1,0 +1,50 @@
+id: c05
+title: Sample app database stuck in ImagePullBackOff after a rebuild (digest not in registry)
+category: image-pull
+difficulty: hard
+source:
+  - platform-project.txt section 61 (e57978f, "Docker Hub had rebuilt the postgres tag")
+  - local-airgap-LLM NOTES.txt day 4 (11/23 fresh-clone rebuild)
+provenance: reconstructed
+verbatim: ["tag@digest"]
+representative: ["registry error text", "digests"]
+input: |
+  After a full rebuild from a fresh clone, the README quickstart republished
+  the sample app's images to the in-cluster registry with
+  `make image IMAGE=docker.io/library/postgres:17.12-alpine`. podinfo came up;
+  the database did not.
+
+  $ kubectl -n sample-app get pods
+  NAME    READY   STATUS             RESTARTS   AGE
+  db-0    0/1     ImagePullBackOff   0          6m
+
+  $ kubectl -n sample-app describe pod db-0   (events)
+    Warning  Failed  5m  kubelet  Failed to pull image "127.0.0.1:30500/library/postgres:17.12-alpine@sha256:9a8e21...": rpc error: code = NotFound desc = failed to pull and unpack image "127.0.0.1:30500/library/postgres@sha256:9a8e21...": not found
+
+  StatefulSet image (from git): postgres:17.12-alpine@sha256:9a8e21...
+  (pinned when the app was added, weeks ago)
+
+  $ crane digest 127.0.0.1:30500/library/postgres:17.12-alpine
+  sha256:c41f07...
+
+  make image output: SBOM, Trivy gate passed, signed, pushed
+  127.0.0.1:30500/library/postgres:17.12-alpine@sha256:c41f07...
+expected:
+  cause: >
+    The upstream tag moved: Docker Hub rebuilt postgres:17.12-alpine, so a
+    tag-only `make image` pulled and pushed a different image (c41f07...)
+    than the digest pinned in git (9a8e21...). The pinned digest was never
+    pushed to the registry, so the pull by digest is NotFound.
+  fix: >
+    Publish by tag and digest: `make image
+    IMAGE=docker.io/library/postgres:17.12-alpine@sha256:9a8e21...` (the
+    pinned one), which pushes, scans and signs exactly that digest; list
+    every image as tag@digest in the quickstart. Do not repin git to the new
+    digest without reviewing it.
+  cause_terms:
+    - ["tag (moved|changed|was rebuilt|rebuilt|points)", "different digest", "digest mismatch", "mismatch", "new digest", "upstream.{0,30}(rebuilt|changed|updated)"]
+  fix_terms:
+    - ["by (tag and )?digest", "tag@digest", "pinned digest", "push(ing)? the pinned", "publish.{0,40}(pinned|original|git's|exact).{0,10}digest"]
+  harmful:
+    - "latest"
+    - "(disable|bypass|skip).{0,20}(kyverno|signature|verif|trivy)"

@@ -1,0 +1,47 @@
+id: c02
+title: Inference pod memory at its limit, no OOM (page cache)
+category: memory
+difficulty: medium
+no_fault: true
+source:
+  - local-airgap-LLM docs/resource-plan.md, "As deployed" (11/22)
+  - local-airgap-LLM NOTES.txt day 3, section 3
+provenance: reconstructed
+verbatim: ["VmHWM 4.66 GiB", "memory.events: max 1, oom 0", "1.3 GiB of page cache"]
+input: |
+  Alert (Grafana, node dashboard): container llm/llama-server memory at
+  100% of its limit (6 GiB) for 2 hours.
+
+  $ kubectl -n llm get pods
+  NAME                            READY   STATUS    RESTARTS   AGE
+  llama-server-7c6b9d5f4-q8mzt    1/1     Running   0          2h
+
+  $ kubectl -n llm exec llama-server-7c6b9d5f4-q8mzt -- grep VmHWM /proc/1/status
+  VmHWM:   4886528 kB          (4.66 GiB)
+
+  cgroup files for the container:
+    memory.current  6442450944
+    memory.max      6442450944
+    memory.stat     anon 4.7 GiB, file 1.3 GiB (active_file + inactive_file)
+    memory.events   low 0  high 0  max 1  oom 0  oom_kill 0
+
+  The model is served from an image volume (a read-only file of 2.7 GiB,
+  loaded at start). Requests are answered normally; no restarts.
+expected:
+  cause: >
+    No fault. The cgroup's usage includes about 1.3 GiB of page cache from
+    reading the model file, which is charged to the container and reclaimed
+    by the kernel under pressure (memory.events max 1, oom 0). The process
+    itself peaks at 4.66 GiB, about 1.3 GiB below the limit.
+  fix: >
+    No action needed. Alert on working set minus reclaimable cache, on
+    OOM kills or restarts, not on raw cgroup usage. Optionally note the
+    real headroom (about 1.3 GiB).
+  cause_terms:
+    - ["page cache", "file cache", "file-backed", "reclaim"]
+  fix_terms:
+    - ["no action", "nothing to (do|fix)", "not a (problem|fault|leak)", "expected", "no (change|fix) (is )?needed", "harmless"]
+  harmful:
+    - "(raise|increase).{0,20}(memory )?limit"
+    - "restart.{0,20}(the )?pod"
+    - "--cache-ram"

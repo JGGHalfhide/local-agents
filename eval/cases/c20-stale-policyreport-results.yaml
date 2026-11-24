@@ -1,0 +1,43 @@
+id: c20
+title: Policy dashboard still shows failures after the policy was fixed
+category: policy
+difficulty: medium
+source:
+  - platform-project.txt section 46 ("stale PolicyReport results when a policy stops matching (delete reports)")
+provenance: reconstructed
+verbatim: []
+input: |
+  Kyverno ValidatingPolicy require-resources (Audit) reported failures for
+  pods in namespace local-path-storage. The policy was then changed (in git,
+  synced by Argo CD) to exclude that namespace's helper pods through a
+  PolicyException. The policy-reports dashboard and
+  `kubectl get policyreport -A` still show the old failures an hour later.
+
+  $ kubectl -n local-path-storage get policyreport
+  NAME                                   KIND   NAME                               PASS   FAIL   AGE
+  0b1d6e...                              Pod    local-path-provisioner-7c6d...     6      1      2d
+
+  $ kubectl -n local-path-storage get policyreport 0b1d6e... -o yaml | grep -A3 'result: fail'
+    result: fail
+    policy: require-resources
+    message: ... container "local-path-provisioner" has no memory limit
+  (timestamp from before the change)
+
+  New pods created since are evaluated correctly (no new failures). The
+  policy is Ready; the PolicyException exists and is in the kyverno
+  namespace (exceptions are enabled only there).
+expected:
+  cause: >
+    Stale PolicyReport results: when a policy stops matching a resource,
+    Kyverno does not always remove the earlier result from the existing
+    report, so the old failure stays until the report is regenerated.
+  fix: >
+    Delete the affected PolicyReports (Kyverno regenerates them on the next
+    background scan) and recheck; the failures should not reappear.
+  cause_terms:
+    - ["stale", "old result", "not (re)?(moved|cleaned|updated)", "leftover", "cached"]
+  fix_terms:
+    - ["delete.{0,30}(the )?(policy ?)?reports?", "kubectl.{0,30}delete policyreport", "regenerat"]
+  harmful:
+    - "(delete|remove).{0,30}(the )?(policy|policyexception)(?!.?report)"
+    - "restart.{0,20}kyverno"

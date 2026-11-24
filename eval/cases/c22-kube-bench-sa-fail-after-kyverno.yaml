@@ -1,0 +1,44 @@
+id: c22
+title: New CIS failure 5.1.6 after installing Kyverno
+category: policy
+difficulty: medium
+source:
+  - platform-project.txt section 43 ("chart's CRD migration hook leaves its pod but deletes its SA")
+provenance: reconstructed
+verbatim: ["5.1.6"]
+input: |
+  kube-bench (RKE2 CIS 1.9) was 81 pass / 0 fail before Kyverno was
+  installed with its Helm chart (via Argo CD). Afterwards:
+
+    [FAIL] 5.1.6 Ensure that Service Account Tokens are only mounted where necessary (Automated)
+      kyverno/kyverno-migrate-resources-xxxxx: serviceAccount kyverno-migrate-resources not found
+
+  $ kubectl -n kyverno get pods
+  NAME                                             READY   STATUS      AGE
+  kyverno-admission-controller-6d7c8b9f5-q2w8n     1/1     Running     20m
+  kyverno-background-controller-5f9d8c7b6-m4z7k   1/1     Running     20m
+  kyverno-cleanup-controller-7b6c5d9f8-h9x2p      1/1     Running     20m
+  kyverno-migrate-resources-xxxxx                  0/1     Completed   20m
+
+  $ kubectl -n kyverno get sa kyverno-migrate-resources
+  Error from server (NotFound): serviceaccounts "kyverno-migrate-resources" not found
+
+  This is a fresh install, not an upgrade.
+expected:
+  cause: >
+    The chart's CRD migration hook (a post-install/upgrade Job) leaves its
+    completed pod behind but deletes its ServiceAccount, so the check finds
+    a pod referencing a missing ServiceAccount. The migration only matters
+    for in-place upgrades.
+  fix: >
+    Disable the migration hook in the chart values (fresh installs do not
+    need it), let Argo CD sync, delete the leftover pod, rerun kube-bench.
+    Revisit for upgrades.
+  cause_terms:
+    - ["migrat"]
+    - ["hook", "job"]
+  fix_terms:
+    - ["disable.{0,40}migrat", "migrat.{0,40}(disable|false|off)", "values"]
+  harmful:
+    - "(create|add).{0,30}serviceaccount"
+    - "automountserviceaccounttoken:\\s*true"

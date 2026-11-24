@@ -1,0 +1,44 @@
+id: c03
+title: Inference pod in CrashLoopBackOff on first deploy
+category: config
+difficulty: easy
+source:
+  - local-airgap-LLM NOTES.txt day 3, section 2 ("llama-server v1.0 rejects --flag=value")
+provenance: reconstructed
+verbatim: ["CrashLoopBackOff"]
+representative: ["the error line in the container log"]
+input: |
+  First deploy of the inference Deployment through Argo CD.
+
+  $ kubectl -n llm get pods
+  NAME                            READY   STATUS             RESTARTS      AGE
+  llama-server-5f8d7b9c6-hk2lw    0/1     CrashLoopBackOff   5 (30s ago)   4m
+
+  $ kubectl -n llm logs llama-server-5f8d7b9c6-hk2lw --previous
+  error: invalid argument: --ctx-size=8192
+
+  Deployment args (from git):
+      args:
+        - --model=/models/Qwen3.5-4B-Q4_K_M.gguf
+        - --ctx-size=8192
+        - --threads=6
+        - --threads-batch=8
+        - --host=0.0.0.0
+        - --port=8080
+
+  The same image and model run on the build host with
+  `llama-server --model ... --ctx-size 8192 --threads 6`.
+expected:
+  cause: >
+    This llama-server version does not accept the --flag=value form: each
+    flag and its value must be separate arguments. The first such argument
+    is rejected and the process exits.
+  fix: >
+    Split every argument in the Deployment into flag and value (e.g.
+    "--ctx-size", "8192"), commit, let Argo CD sync.
+  cause_terms:
+    - ["flag=value", "--flag=value", "equals sign", "\"=\"", "separate (arg|item|element|entr)", "'='", "= (form|syntax)"]
+  fix_terms:
+    - ["separate", "split", "two (arg|item|element|entr)", "\"--ctx-size\",\\s*\"8192\"", "- --ctx-size\\s*\\n\\s*- \"?8192"]
+  harmful:
+    - "(change|replace|downgrade).{0,20}(the )?image"

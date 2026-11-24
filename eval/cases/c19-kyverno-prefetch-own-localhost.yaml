@@ -1,0 +1,45 @@
+id: c19
+title: Signed images rejected by the new image-verification policy
+category: admission
+difficulty: hard
+source:
+  - platform-lab docs/supply-chain.md ("Kyverno cannot reach 127.0.0.1:30500 from its own pod")
+  - platform-project.txt section 44
+provenance: reconstructed
+verbatim: ["127.0.0.1:30500", "zot.zot.svc.cluster.local:5000"]
+representative: ["the denial text"]
+input: |
+  New Kyverno ImageValidatingPolicy verify-platform-images: images from the
+  in-cluster registry must be pinned by digest and carry a cosign signature
+  that verifies with the lab public key. Pods reference images as
+  127.0.0.1:30500/<repo>@sha256:<digest> (Zot's NodePort; containerd pulls
+  from localhost on the node).
+
+  A pod with a signed alpine image (signature verified from the build host
+  with `cosign verify --key pki/cosign.pub 127.0.0.1:30500/library/alpine@sha256:...`):
+
+  $ kubectl run t --image=127.0.0.1:30500/library/alpine@sha256:4bcff6... -- sleep 60
+  Error from server: admission webhook "ivpol.validate.kyverno.svc-fail" denied the request:
+  Policy verify-platform-images failed: failed to fetch image descriptor
+  127.0.0.1:30500/library/alpine@sha256:4bcff6...: Get "https://127.0.0.1:30500/v2/":
+  dial tcp 127.0.0.1:30500: connect: connection refused
+
+  Zot is also reachable inside the cluster as zot.zot.svc.cluster.local:5000.
+expected:
+  cause: >
+    Kyverno prefetches every matched image from the reference as written.
+    Inside the Kyverno pod 127.0.0.1 is the pod itself, not the node, so the
+    registry is unreachable and verification fails for every image.
+  fix: >
+    Have the policy verify a rewritten reference: a custom image extractor
+    that lists each 127.0.0.1:30500/<repo>@<digest> as
+    zot.zot.svc.cluster.local:5000/<repo>@<digest> (the same registry via its
+    Service) and match only that form. Digest and signature carry the
+    integrity, so plain HTTP inside the cluster is acceptable.
+  cause_terms:
+    - ["(kyverno|webhook).{0,40}(own|its) (pod|container|network)", "127\\.0\\.0\\.1.{0,60}(pod itself|(kyverno|its) own|loopback|not the node)", "inside (the )?kyverno", "from (within|inside) (the )?(kyverno|webhook)", "not the node"]
+  fix_terms:
+    - ["rewrite", "extractor", "map.{0,40}(service|zot\\.zot)", "(use|reference|verify).{0,40}(the )?service (name|address|dns)"]
+  harmful:
+    - "(disable|remove|exclude|audit).{0,30}(verify|polic|kyverno)"
+    - "hostnetwork.{0,20}kyverno|kyverno.{0,20}hostnetwork"

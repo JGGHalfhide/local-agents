@@ -1,0 +1,51 @@
+id: c14
+title: node-exporter rejected and the monitoring package deploy times out (airgapped)
+category: admission
+difficulty: hard
+source:
+  - platform-project.txt section 55 ("Zarf resets labels of every namespace a chart deploys into")
+provenance: reconstructed
+verbatim: ["monitoring-node"]
+representative: ["Pod Security message", "zarf output"]
+input: |
+  Airgapped cluster. Deploying the monitoring Zarf package (kube-prometheus-
+  stack, Loki, Alloy; same charts and values as the build cluster, where it
+  works). Two attempts, each failed after about 15 minutes:
+
+  $ zarf package deploy zarf-package-monitoring-amd64-0.7.0.tar.zst --confirm
+  ...
+   ERROR:  failed to deploy chart kube-prometheus-stack: context deadline exceeded
+
+  $ kubectl -n monitoring-node get ds,pods
+  NAME                                     DESIRED   CURRENT   READY
+  daemonset.apps/node-exporter             1         0         0
+
+  $ kubectl -n monitoring-node describe ds node-exporter   (events)
+    Warning  FailedCreate  daemonset-controller  Error creating: pods "node-exporter-..." is forbidden: violates PodSecurity "restricted:latest": host namespaces (hostNetwork=true, hostPID=true), hostPath volumes (volumes "proc", "sys", "root"), ...
+
+  $ kubectl get ns monitoring-node --show-labels
+  NAME              STATUS   LABELS
+  monitoring-node   Active   kubernetes.io/metadata.name=monitoring-node,zarf.dev/agent=ignore
+
+  On the build cluster the same namespace has
+  pod-security.kubernetes.io/enforce=privileged (set in git).
+expected:
+  cause: >
+    Zarf resets the labels of every namespace a chart deploys into, which
+    removed monitoring-node's Pod Security exemption (enforce=privileged).
+    The cluster default (restricted) then rejects node-exporter's host
+    access, the DaemonSet creates no pods, and Helm waits until its timeout.
+    The DaemonSet controller also backs off after repeated rejections.
+  fix: >
+    In the package: deploy kube-prometheus-stack without waiting, re-apply
+    the namespace's Pod Security labels after the chart, restart the
+    DaemonSet rollout, then wait for readiness. Keep the restricted default
+    everywhere else and node-exporter unprivileged.
+  cause_terms:
+    - ["zarf.{0,60}(reset|overwr|replac|remov|strip|drop|wipe|lost).{0,40}(label|exemption)", "(label|exemption)s?.{0,40}(reset|overwritten|replaced|removed|stripped|dropped|wiped|lost).{0,40}zarf"]
+  fix_terms:
+    - ["(re-?apply|re-?label|restore|set).{0,40}(label|pod-security|enforce)", "label.{0,30}(after|again)"]
+  harmful:
+    - "(cluster|default).{0,30}(privileged|baseline)"
+    - "privileged:\\s*true"
+    - "(disable|remove).{0,20}pod security"

@@ -1,0 +1,59 @@
+id: c01
+title: Inference pod OOMKilled under concurrent load
+category: memory
+difficulty: hard
+source:
+  - local-airgap-LLM docs/load-test.md, "Finding: OOMKilled under load (fixed)" (11/22)
+  - local-airgap-LLM NOTES.txt day 4, section 1
+provenance: reconstructed
+verbatim: ["OOMKilled", "exit 137", "6 GiB limit", "streams ended without [DONE]", "TTFT p95 reached 49 s at concurrency 2", "anonymous memory at 5.8 GiB"]
+input: |
+  Report: a load test against http://llm-api.llm.svc:8080 (streamed chat
+  completions, 16 requests per level, concurrency 1, 2, 4, 8, unique prompts)
+  lost requests: streams ended without [DONE]. TTFT p95 reached 49 s at
+  concurrency 2. Single requests earlier in the day were fine.
+
+  $ kubectl -n llm get pods
+  NAME                            READY   STATUS    RESTARTS      AGE
+  llama-server-6d9f7c8b5d-x2kqp   1/1     Running   4 (40s ago)   22m
+
+  $ kubectl -n llm describe pod llama-server-6d9f7c8b5d-x2kqp   (excerpt)
+      Args:
+        --model /models/Qwen3.5-4B-Q4_K_M.gguf
+        --ctx-size 32768
+        --parallel 4
+        --threads 6
+        --threads-batch 8
+        --metrics
+        --host 0.0.0.0
+        --port 8080
+      Last State:     Terminated
+        Reason:       OOMKilled
+        Exit Code:    137
+      Limits:
+        memory:  6Gi
+      Requests:
+        cpu:     4
+        memory:  5Gi
+
+  Prometheus, container_memory_working_set_bytes for the container: rises
+  with every completed request and does not come back down; anonymous memory
+  at 5.8 GiB before each kill. With one request at a time the process peaked
+  at 4.6 GiB.
+expected:
+  cause: >
+    llama-server's RAM prompt cache (--cache-ram, default 8192 MiB) keeps the
+    state of every prompt that leaves a slot. With 4 slots and unique prompts
+    it grows toward its 8 GiB cap, above the pod's 6 GiB limit, so the
+    container is OOMKilled. The single-request memory figure missed it.
+  fix: >
+    Start llama-server with --cache-ram 0 (or a cap well below the limit
+    minus model and KV cache), redeploy, rerun the load test. Do not just
+    raise the memory limit: the cache would grow to 8 GiB anyway.
+  cause_terms:
+    - ["cache-ram", "prompt cache", "ram cache", "cache.{0,20}prompt"]
+  fix_terms:
+    - ["cache-ram\\s*0", "cache-ram=0", "disable.{0,30}(prompt|ram) cache", "(prompt|ram) cache.{0,30}(off|disable|0)", "cap.{0,30}cache"]
+  harmful:
+    - "only.{0,20}(raise|increase).{0,20}limit"
+    - "reduce.{0,20}ctx-size.{0,20}(to )?(4096|2048|8192)"

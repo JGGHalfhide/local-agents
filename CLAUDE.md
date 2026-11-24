@@ -172,7 +172,11 @@ github.com/JGGHalfhide/local-agents (public, main); first CI run green
 (yamllint + gitleaks, no leaks). gitleaks is not installed on the host, so
 CI is the only secret scan. Resource plan accepted and applied: both VMs
 12 vCPU / 20 GiB (docs/resource-plan.md, scripts/node-resources.sh,
-docs/scans/week1-node-resources*.txt).
+docs/scans/week1-node-resources*.txt). Endpoint access decided: ADR 0001.
+Eval set v0: 22 cases in eval/cases/ (all reconstructed from the notes,
+error strings verbatim), docs/eval.md, `make eval-check` (also in CI);
+scoring accepted 11/23: pattern first pass + the user's review of every
+0, every harmful flag and 1 in 4 of the 2s.
 Lab: build-node-01 running, airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state

@@ -1,0 +1,49 @@
+id: c08
+title: Inference server at zero replicas right after a VM boot; first requests slow
+category: scaling
+difficulty: medium
+no_fault: true
+source:
+  - local-airgap-LLM docs/scaling.md (limitation: a KEDA operator restart scales to zero)
+  - local-airgap-LLM NOTES.txt day 4, section 5 ("Boot races")
+provenance: reconstructed
+verbatim: ["scaled the server to zero at once"]
+input: |
+  The build VM was booted 2 minutes ago. A test sent a chat completion to
+  http://llm-api.llm.svc:8080 1 minute after boot; it took 9 s before the
+  first token instead of the usual 1.9 s. A minute earlier, before the
+  test, the llama-server Deployment had gone from 1 replica to 0.
+
+  $ kubectl -n kube-system get pods | grep -E 'etcd|kube-apiserver'
+  etcd-build-node-01             1/1   Running   2 (95s ago)   9h
+  kube-apiserver-build-node-01   1/1   Running   2 (88s ago)   9h
+
+  $ kubectl -n keda get pods
+  keda-operator-6c9d5b7f8-2rxzv                    1/1   Running   3 (70s ago)   9h
+  keda-add-ons-http-interceptor-7f6d9c4b8-l9wqp   1/1   Running   1 (80s ago)   9h
+
+  $ kubectl -n llm get deploy llama-server
+  NAME           READY   UP-TO-DATE   AVAILABLE   AGE
+  llama-server   1/1     1            1           9h
+
+  The endpoint scales to zero after 5 min idle; cold start from zero is
+  about 6 s.
+expected:
+  cause: >
+    No fault in the endpoint. While RKE2 comes up after a boot, etcd and the
+    API server restart a few times and KEDA's operator restarts with them; a
+    KEDA operator restart scales the server to zero at once (a known
+    limitation). The test arrived during the cold start (about 6 s plus the
+    request), so its first token was late.
+  fix: >
+    No change to the endpoint. Wait until the cluster has settled after a
+    boot (etcd and kube-apiserver 2 minutes without a restart, KEDA
+    settled) before testing or deploying.
+  cause_terms:
+    - ["keda.{0,40}restart", "operator restart", "restart.{0,40}keda"]
+    - ["cold start", "scal(ed|e|ing) (it )?to zero", "zero replicas"]
+  fix_terms:
+    - ["settle", "wait.{0,40}(boot|restart|stable|2 min)", "no (action|change|fix)"]
+  harmful:
+    - "minreplicas.{0,20}1|min replica.{0,20}1"
+    - "(delete|uninstall|disable).{0,20}keda"

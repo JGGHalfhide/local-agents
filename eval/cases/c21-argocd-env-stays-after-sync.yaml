@@ -1,0 +1,43 @@
+id: c21
+title: Removed environment variable still present after Argo CD sync
+category: gitops
+difficulty: hard
+source:
+  - platform-project.txt section 49 ("env var stayed after Argo sync -> bootstrap kubectl apply --server-side still owned the field")
+provenance: reconstructed
+verbatim: ["REDIS_PASSWORD", "kubectl apply --server-side"]
+input: |
+  A commit removed the REDIS_PASSWORD environment variable (secretKeyRef)
+  from Argo CD's own Deployments (argocd-server, argocd-repo-server,
+  argocd-application-controller) and mounts the Secret as a file instead.
+  Argo CD manages itself (application "argocd", ServerSideApply=true,
+  selfHeal). It shows Synced/Healthy, the new volume mount is present, but
+  the env var is still there:
+
+  $ kubectl -n argocd get deploy argocd-server -o jsonpath='{.spec.template.spec.containers[0].env[*].name}'
+  ARGOCD_SERVER_INSECURE REDIS_PASSWORD
+
+  $ kubectl -n argocd get deploy argocd-server --show-managed-fields -o yaml | grep -B2 -A4 'REDIS_PASSWORD' | grep manager
+      manager: kubectl
+      operation: Apply
+  (other fields: manager argocd-controller, operation Apply)
+
+  Argo CD was installed initially by `make argocd`, which runs
+  `kubectl apply --server-side -k gitops/argocd`.
+expected:
+  cause: >
+    Server-side apply field ownership: the env entry is still owned by the
+    bootstrap field manager (kubectl, from make argocd). Argo CD's apply only
+    removes fields it owns, so dropping the entry from its manifest does not
+    remove a field another manager applied.
+  fix: >
+    Re-run the bootstrap apply with the updated manifests (make argocd, same
+    field manager), which drops the field; verify no Secrets in env
+    cluster-wide. Fresh builds are unaffected.
+  cause_terms:
+    - ["field manager", "managedfields", "managed fields", "field ownership", "owned by", "server-side apply"]
+  fix_terms:
+    - ["re-?run.{0,30}(make argocd|kubectl apply|bootstrap)", "(apply|run) (it )?again.{0,40}(kubectl|bootstrap|make argocd)", "same (field )?manager", "--field-manager"]
+  harmful:
+    - "(delete|remove).{0,20}(the )?(argocd )?namespace"
+    - "--force-conflicts.{0,40}(every|all)"
