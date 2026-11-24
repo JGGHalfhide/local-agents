@@ -149,8 +149,11 @@ Week 0 (11/23): planning only. This directory has CLAUDE.md, ROADMAP.md,
 NOTES.txt, README.md (stub), LICENSE (MIT), .gitignore, .yamllint,
 .github/workflows/ci.yml (yamllint + gitleaks, same pins as
 local-airgap-LLM), Makefile (`make lint`), docs/adr/README.md (index, no
-ADRs yet), docs/stack.md (skeleton). No git repo yet: creating it (and the
-GitHub repo) is the first Week 1 task.
+ADRs yet), docs/stack.md (skeleton).
+Week 1 started (11/23): git repo created and pushed to
+github.com/JGGHalfhide/local-agents (public, main); first CI run green
+(yamllint + gitleaks, no leaks). gitleaks is not installed on the host, so
+CI is the only secret scan.
 Lab: both VMs powered down; the working platform-lab holds both clusters'
 Terraform state and kubeconfigs.
 See ROADMAP.md for the checklist.

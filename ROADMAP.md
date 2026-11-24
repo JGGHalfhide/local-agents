@@ -19,7 +19,7 @@ Goal: repo, sized VMs, decided endpoint access, and an evaluation set with
 a baseline before any agent code. (v1.1 of local-airgap-LLM showed that
 thinking, sampling and model choices cannot be judged without one.)
 
-- [ ] Git repo (GitHub), push the scaffold (README stub, LICENSE, .gitignore, .yamllint, CI); first CI run green
+- [x] Git repo (GitHub), push the scaffold (README stub, LICENSE, .gitignore, .yamllint, CI); first CI run green (11/23)
 - [ ] Resource plan: memory budget per node for the inference pod (5-6 GiB) + agents + tools + embedding model + vector store + tracing; resize the VMs in platform-lab if needed (still one at a time, ~28 GiB host). Record in docs/resource-plan.md.
 - [ ] Endpoint access: keep NetworkPolicy-only, or add an API key (Vault) to llama-server? Decide (ADR); if yes, the change is made in local-airgap-LLM.
 - [ ] Evaluation set v0: 15-25 triage cases from real incidents in Phases 1-2 with known causes and fixes (sources: platform-project.txt, local-airgap-LLM NOTES.txt and docs, e.g. the --cache-ram OOMKill, the moved postgres tag / digest NotFound, zarf init denied by Kyverno, KEDA restart scaling to zero, the inotify limit, Zarf's pull Secret in new namespaces, the etcd restore SELinux labels). Each case: input (alert, events, logs), expected cause, expected fix. Scoring method decided and written down.
