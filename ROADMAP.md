@@ -20,7 +20,7 @@ a baseline before any agent code. (v1.1 of local-airgap-LLM showed that
 thinking, sampling and model choices cannot be judged without one.)
 
 - [x] Git repo (GitHub), push the scaffold (README stub, LICENSE, .gitignore, .yamllint, CI); first CI run green (11/23)
-- [ ] Resource plan: memory budget per node for the inference pod (5-6 GiB) + agents + tools + embedding model + vector store + tracing; resize the VMs in platform-lab if needed (still one at a time, ~28 GiB host). Record in docs/resource-plan.md.
+- [x] Resource plan: memory budget per node for the inference pod (5-6 GiB) + agents + tools + embedding model + vector store + tracing; resize the VMs in platform-lab if needed (still one at a time, ~28 GiB host). Record in docs/resource-plan.md. (11/23: both VMs 12 vCPU / 20 GiB, applied and measured.)
 - [ ] Endpoint access: keep NetworkPolicy-only, or add an API key (Vault) to llama-server? Decide (ADR); if yes, the change is made in local-airgap-LLM.
 - [ ] Evaluation set v0: 15-25 triage cases from real incidents in Phases 1-2 with known causes and fixes (sources: platform-project.txt, local-airgap-LLM NOTES.txt and docs, e.g. the --cache-ram OOMKill, the moved postgres tag / digest NotFound, zarf init denied by Kyverno, KEDA restart scaling to zero, the inotify limit, Zarf's pull Secret in new namespaces, the etcd restore SELinux labels). Each case: input (alert, events, logs), expected cause, expected fix. Scoring method decided and written down.
 - [ ] Baseline: the model alone on the eval set (no tools, no retrieval): thinking off vs on (1024 budget), greedy vs Qwen's recommended sampling. Latency and tokens per case.
@@ -99,7 +99,7 @@ Acceptance: a fresh clone of the three repos reproduces the agents on both clust
 ## Open questions
 
 - Endpoint access: NetworkPolicy only, or an API key from Vault (Week 1)? Changes go in local-airgap-LLM.
-- VM size: how much more than 16 GiB per VM do agents, embeddings, a vector store and tracing need, still running one VM at a time (Week 1)?
+- ~~VM size: how much more than 16 GiB per VM do agents, embeddings, a vector store and tracing need, still running one VM at a time (Week 1)?~~ Answered 11/23: 12 vCPU / 20 GiB, one at a time (docs/resource-plan.md); estimates replaced by measurements in Weeks 2-4. Disk on build-node-01 (69%) is the next limit.
 - When should an agent opt in to thinking (per step type), with which sampling settings (Qwen recommends sampling, not greedy, in thinking mode), and should reasoning be kept across turns (`--reasoning-preserve`, context growth)? Answered by the eval set (Weeks 1 and 4).
 - One model or two: is Qwen3.5 4B enough for triage, or does a larger model for hard steps earn its memory? (Week 1 baseline, Week 4)
 - Agent runtime: plain loop vs a framework; tools in-process vs tool servers (MCP) (Weeks 1-2).

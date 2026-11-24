@@ -1,0 +1,86 @@
+# node-resources 2026-11-24T01:49:46Z node=build-node-01
+
+## kubectl version
+  Client Version: v1.37.2
+  Kustomize Version: v5.8.1
+  Server Version: v1.36.5+rke2r1
+
+## Capacity and allocatable
+capacity:    cpu=12 memory=20212540Ki
+allocatable: cpu=12 memory=20212540Ki
+
+## Allocated resources (kubectl describe node)
+Allocated resources:
+  (Total limits may be over 100 percent, i.e., overcommitted.)
+  Resource           Requests      Limits
+  --------           --------      ------
+  cpu                3350m (27%)   6300m (52%)
+  memory             6976Mi (35%)  17712Mi (89%)
+  ephemeral-storage  0 (0%)        0 (0%)
+  hugepages-1Gi      0 (0%)        0 (0%)
+  hugepages-2Mi      0 (0%)        0 (0%)
+
+## Requests and limits per namespace (MiB, millicores; running pods)
+namespace                pods  cpu req  mem req  cpu lim  mem lim
+argocd                      7      215     1392        0     3712
+keda                        6      600      600     6000     6000
+kube-system                12     1575     2520      200      192
+kyverno                     4      400      320        0      768
+local-path-storage          1       10       64        0      128
+monitoring                  6      280     1376        0     3968
+monitoring-node             1       10       32        0       64
+sample-app                  2       60      160        0      320
+velero                      2      100      256        0     1536
+zot                         1      100      256        0     1024
+TOTAL                      42     3350     6976     6200    17712
+
+## Actual usage: kubectl top node
+  build-node-01   512m   4%    8332Mi   42%   
+
+## Actual usage per namespace (kubectl top pods, MiB / millicores)
+namespace                     cpu      mem
+argocd                         23     1212
+keda                           15      468
+kube-system                   180     2826
+kyverno                        11      508
+local-path-storage              1       51
+monitoring                     46     1786
+monitoring-node                 5       29
+sample-app                      7       87
+velero                          2      175
+zot                             4      214
+TOTAL                         294     7356
+
+## Guest memory (free -m on build-node-01)
+  ** WARNING: connection is not using a post-quantum key exchange algorithm.
+  ** This session may be vulnerable to "store now, decrypt later" attacks.
+  ** The server may need to be upgraded. See https://openssh.com/pq.html
+  Authorized use only. Activity on this system is monitored and logged.
+                 total        used        free      shared  buff/cache   available
+  Mem:           19738        6296        9368          24        4424       13442
+  Swap:              0           0           0
+
+## Guest disk (df -h / /var on build-node-01)
+  Filesystem      Size  Used Avail Use% Mounted on
+  /dev/vda4        39G   27G   13G  68% /
+  /dev/vda4        39G   27G   13G  68% /
+
+## Host memory (free -m on the build host)
+                 total        used        free      shared  buff/cache   available
+  Mem:           28884       21669         263          48        7393        7214
+  Swap:          16383        2269       14114
+
+## Running libvirt domains
+   Id   Name            State
+  -------------------------------
+   2    build-node-01   running
+  
+
+## libvirt domain size and qemu RSS (host side)
+  Name:           build-node-01
+  CPU(s):         12
+  Max memory:     20971520 KiB
+  qemu pid 14535 rss 19121 MiB
+
+## Inference pod resources (llm/llama-server spec; replicas may be 0)
+  replicas=0 resources={"limits":{"memory":"6Gi"},"requests":{"cpu":"4","memory":"5Gi"}}

@@ -33,13 +33,22 @@ platform-lab (Phase 1, v1.0 11/18) and local-airgap-LLM (Phase 2, v1.1
   AVX-512, 32 GB RAM, ~28 GiB usable), Arch Linux, libvirt/QEMU/KVM at
   qemu:///system. Radeon 780M iGPU unused (CPU-only; iGPU deferred).
 - build-node-01 (192.168.122.10) and airgap-rehearsal (192.168.122.20):
-  both 8 vCPU / 16 GiB today (platform-lab terraform vars vcpus, memory_mib,
-  rehearsal_vcpus, rehearsal_memory_mib), run ONE AT A TIME (2 x 16 GiB does
-  not fit in 28 GiB with the host). Zarf packages are built while the build
-  VM runs, then the VMs are switched.
-- The inference pod takes 5-6 GiB (limit 6 GiB) of a 16 GiB node. Agents,
-  tools, an embedding model and a vector store must fit next to it: sizing
-  is a Week 1 decision (bigger VMs, still one at a time).
+  both 12 vCPU / 20 GiB since 11/23 (platform-lab terraform vars vcpus,
+  memory_mib, rehearsal_vcpus, rehearsal_memory_mib; docs/resource-plan.md),
+  run ONE AT A TIME: one VM leaves the host about 5 GiB of its 28 GiB;
+  2 x 20 GiB does not fit. Zarf packages are built while the build VM runs,
+  then the VMs are switched.
+- Node budget (docs/resource-plan.md): 12 CPU / 19.3 GiB allocatable;
+  platform requests 3.35 CPU / 6.8 GiB, inference pod 4 CPU / 5 GiB
+  (limit 6 GiB); about 4.6 CPU / 7.4 GiB of requests left for the agent
+  stack (estimated 1.8 CPU / 2.7 GiB). Disk is the next limit: 27 of 39 GiB
+  on build-node-01, image GC at 85%.
+- Both terraform modules set running = true: `make up` or a full
+  `terraform apply` in platform-lab starts BOTH VMs (40 GiB on a 28 GiB
+  host). Apply per VM with the other shut off:
+  `terraform apply -target=module.<vm> -var airgap_rehearsal=true`.
+  After a host reboot every apply also replaces each VM's cloud-init seed
+  volume (provider ISO in tmpfs /tmp): harmless, same content.
 
 ## Inherited facts about the endpoint (local-airgap-LLM v1.1)
 - One stream: 14.3 tok/s, TTFT 1.9 s (213-token prompt). 4 slots; 18.2 tok/s
@@ -153,7 +162,11 @@ ADRs yet), docs/stack.md (skeleton).
 Week 1 started (11/23): git repo created and pushed to
 github.com/JGGHalfhide/local-agents (public, main); first CI run green
 (yamllint + gitleaks, no leaks). gitleaks is not installed on the host, so
-CI is the only secret scan.
-Lab: both VMs powered down; the working platform-lab holds both clusters'
-Terraform state and kubeconfigs.
+CI is the only secret scan. Resource plan accepted and applied: both VMs
+12 vCPU / 20 GiB (docs/resource-plan.md, scripts/node-resources.sh,
+docs/scans/week1-node-resources*.txt).
+Lab: build-node-01 running, airgap-rehearsal off (a libvirt domain named
+`laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
+it alone); the working platform-lab holds both clusters' Terraform state
+and kubeconfigs.
 See ROADMAP.md for the checklist.
