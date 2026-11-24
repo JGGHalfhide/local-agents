@@ -84,7 +84,9 @@ echo "==> Import check (host CPython $(python3 -c 'import sys; print(sys.version
 python3 -S -c "
 import sys
 sys.path[:0] = ['$OUT/stage/opt/agent/site-packages', '$OUT/stage/opt/agent/app']
+sys.argv = ['agent', '--version']
 import agent.__main__ as m
+import agent.loop, agent.tools, agent.k8s  # every module imports, not only the entry point
 sys.exit(m.main())"
 
 echo "$digest" >"$OUT/digest"

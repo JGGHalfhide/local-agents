@@ -1,0 +1,12 @@
+# Restricted Pod Security. The client label lets pods that also carry it
+# reach the inference endpoint (ADR 0001: both namespace and pod labels,
+# one `from` entry in platform-lab gitops/keda/networkpolicy-interceptor.yaml).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agents
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/audit: restricted
+    inference.local-airgap-llm/client: "true"

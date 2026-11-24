@@ -1,0 +1,55 @@
+# Default deny in and out. The status reporter may reach only: DNS, the
+# inference endpoint (llm-api.llm.svc is an ExternalName for the KEDA
+# interceptor's Service, so the connection goes to the interceptor pods on
+# 8080), and the Kubernetes API server (Canal matches egress after the
+# Service address is translated, so the rule names the API server's real
+# endpoint: port 6443 on the lab network, build-node-01 192.168.122.10 or
+# the airgap VM 192.168.122.20). Nothing outside the cluster and the lab
+# network.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: status-reporter-egress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: status-reporter
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: keda
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: http
+              app.kubernetes.io/instance: interceptor
+      ports:
+        - protocol: TCP
+          port: 8080
+    - to:
+        - ipBlock:
+            cidr: 192.168.122.0/24
+      ports:
+        - protocol: TCP
+          port: 6443

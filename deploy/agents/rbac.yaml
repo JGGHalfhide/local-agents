@@ -1,0 +1,57 @@
+# The status reporter's identity (ADR 0003, docs/eval-status.md): its own
+# ServiceAccount and a ClusterRole with get, list and watch only. No
+# Secrets, no pods/exec, no pods/log, no create/update/patch/delete, so it
+# can neither create pods nor change labels (ADR 0001).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: status-reporter
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: local-agents-status-reporter
+rules:
+  - apiGroups: [""]
+    resources: [namespaces, nodes, pods, events, persistentvolumeclaims, services]
+    verbs: [get, list, watch]
+  - apiGroups: [events.k8s.io]
+    resources: [events]
+    verbs: [get, list, watch]
+  - apiGroups: [apps]
+    resources: [deployments, statefulsets, daemonsets, replicasets]
+    verbs: [get, list, watch]
+  - apiGroups: [batch]
+    resources: [jobs, cronjobs]
+    verbs: [get, list, watch]
+  - apiGroups: [discovery.k8s.io]
+    resources: [endpointslices]
+    verbs: [get, list, watch]
+  - apiGroups: [storage.k8s.io]
+    resources: [storageclasses]
+    verbs: [get, list, watch]
+  - apiGroups: [argoproj.io]
+    resources: [applications]
+    verbs: [get, list, watch]
+  - apiGroups: [keda.sh]
+    resources: [scaledobjects, scaledjobs]
+    verbs: [get, list, watch]
+  - apiGroups: [http.keda.sh]
+    resources: [httpscaledobjects]
+    verbs: [get, list, watch]
+  - apiGroups: [metrics.k8s.io]
+    resources: [pods]
+    verbs: [get, list]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: local-agents-status-reporter
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: local-agents-status-reporter
+subjects:
+  - kind: ServiceAccount
+    name: status-reporter
+    namespace: agents

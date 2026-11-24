@@ -1,0 +1,73 @@
+# The status reporter (ADR 0003): once an hour, one run of `python -m agent`
+# writes a JSON report to its log (collected by Loki). Each run wakes the
+# inference endpoint for about two minutes (it scales to zero after 5 min
+# idle). The image is built with `make agent-image` (ADR 0004) and published
+# with platform-lab's `make image`; pinned by digest, verified by Kyverno.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: status-reporter-config
+data:
+  # Backend-neutral client config (ADR 0002); the lab endpoint needs no key
+  # (ADR 0001).
+  config.json: |
+    {"base_url": "http://llm-api.llm.svc:8080/v1", "model": "qwen3.5-4b", "api_key_env": ""}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: status-reporter
+  labels:
+    app.kubernetes.io/name: status-reporter
+    app.kubernetes.io/part-of: local-agents
+spec:
+  schedule: "0 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 900
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: status-reporter
+            app.kubernetes.io/part-of: local-agents
+            inference.local-airgap-llm/client: "true"
+        spec:
+          serviceAccountName: status-reporter
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: status-reporter
+              # local-agents/agent:d0b286f (make agent-image at d0b286f)
+              image: 127.0.0.1:30500/local-agents/agent@sha256:5826aca199d9a46358643da7c62a75c0a63bc91839fa2cdaa2b3882918a65834
+              env:
+                - name: AGENT_CONFIG
+                  value: /opt/agent/config/config.json
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  memory: 256Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: [ALL]
+              volumeMounts:
+                - name: config
+                  mountPath: /opt/agent/config
+                  readOnly: true
+          volumes:
+            - name: config
+              configMap:
+                name: status-reporter-config

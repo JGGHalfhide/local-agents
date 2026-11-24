@@ -1,0 +1,8 @@
+# Agents, synced by the Argo CD Application `local-agents` in platform-lab's
+# root app (gitops/apps/local-agents.yaml there).
+#   agents/   namespace agents: the status reporter (ADR 0003), its
+#             ServiceAccount and read-only ClusterRole, NetworkPolicies
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - agents
