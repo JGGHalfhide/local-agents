@@ -107,8 +107,11 @@ spec:
       targetPort: http
 ---
 # Hourly: `agentctl status` against the Service. agentctl exits 0 healthy,
-# 1 fault, 2 error; a fault is a successful run (rc <= 1), so a fault in the
-# cluster does not fail this Job (which the reporter would then report).
+# 1 fault, 2 error, 3 busy (429: an operator or eval run holds the agent).
+# A fault is a successful run, so a fault in the cluster does not fail this
+# Job (which the reporter would then report); busy is a skipped run, not a
+# failure (Week 2 eval: 429s during eval runs left failed Jobs that every
+# later run reported as gitops-unhealthy).
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -146,7 +149,7 @@ spec:
               image: 127.0.0.1:30500/local-agents/agent@sha256:7c29634333a1eb0c3cd8c459fc0ac4dfd1e5b22b7e31bd78f1d257cb9babf1ba
               command: [/bin/sh, -c]
               args:
-                - python3 /opt/agent/app/agent/agentctl.py status; rc=$?; [ "$rc" -le 1 ]
+                - python3 /opt/agent/app/agent/agentctl.py status; rc=$?; [ "$rc" -le 1 ] || [ "$rc" -eq 3 ]
               env:
                 - name: AGENTCTL_ENDPOINT
                   value: http://status-reporter.agents.svc:8080

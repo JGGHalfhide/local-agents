@@ -13,6 +13,7 @@ faults):
 - list_nodes exists, so node health is read, not guessed.
 """
 import datetime as dt
+import re
 import json
 import pathlib
 
@@ -34,9 +35,21 @@ def _age(now, ts):
     return f"{int(s // 86400)}d" if s >= 86400 else f"{int(s // 3600)}h" if s >= 3600 else f"{int(s // 60)}m"
 
 
+# Conditions where False is the healthy state (a Job that is not suspended and
+# has not failed): reported only when True. Week 2 eval: a completed Job's
+# Suspended=False(JobResumed) was printed as a bad condition and reported.
+NEGATIVE_CONDITIONS = {"Suspended", "Failed", "FailureTarget", "ReplicaFailure"}
+
+
 def _bad_conditions(conds):
     return ",".join(f"{c['type']}={c['status']}" + (f"({c.get('reason')})" if c.get("reason") else "")
-                    for c in conds or [] if c.get("status") != "True" and c["type"] != "Progressing") or "-"
+                    for c in conds or [] if c["type"] != "Progressing"
+                    and (c.get("status") == "True" if c["type"] in NEGATIVE_CONDITIONS else c.get("status") != "True")) or "-"
+
+
+# Kyverno files a PolicyViolation event under the policy (namespace default)
+# and names the blocked object only in the message: "DaemonSet agent-eval-f08/hostnet: fail (blocked); ...".
+_POLICY_TARGET = re.compile(r"^([A-Z][A-Za-z]+) ([a-z0-9]([-a-z0-9]*[a-z0-9])?)/([a-z0-9]([-.a-z0-9]*[a-z0-9])?): ")
 
 
 class Cluster:
@@ -44,7 +57,7 @@ class Cluster:
 
     def __init__(self, src):
         self.src, self.now = src, _now(src)
-        self._pods = self._wl = self._keda = None
+        self._pods = self._wl = self._keda = self._ns = None
 
     def keda(self):
         if self._keda is None:
@@ -119,6 +132,11 @@ class Cluster:
                     self._wl.append({"namespace": ns, "kind": kind, "name": name, "desired": desired, "ready": ready,
                                      "conditions": conds, "autoscaler": note, "ok": ok})
         return self._wl
+
+    def namespaces(self):
+        if self._ns is None:
+            self._ns = {n["metadata"]["name"] for n in self.src.items("namespaces")}
+        return self._ns
 
     def keda_managed(self, ns, kind, name):
         """True if a KEDA object scales this workload (or is this object)."""
@@ -195,14 +213,26 @@ class Cluster:
             if e.get("type") != "Warning":
                 continue
             io = e.get("involvedObject", {})
-            ns = io.get("namespace") or e["metadata"]["namespace"]
-            key = (ns, io.get("kind"), io.get("name"), e.get("reason"))
+            ns, kind, name = io.get("namespace") or e["metadata"]["namespace"], io.get("kind"), io.get("name")
+            message = " ".join((e.get("message") or "").split())
+            m = _POLICY_TARGET.match(message) if e.get("reason") == "PolicyViolation" else None
+            if m:
+                # Locate the finding at the object Kyverno checked, not at the policy.
+                ns, kind, name = m.group(2), m.group(1), m.group(4)
+                message = f"{io.get('kind')}/{io.get('name')}: {message[m.end():]}"
+                now = self.object_now(ns, kind, name)
+                if ns not in self.namespaces():
+                    now = "gone"                    # its namespace was deleted: resolved
+                elif now == "gone" and "(blocked)" in message:
+                    now = "blocked at admission"    # rejected, never created: still the current state
+            else:
+                now = self.object_now(ns, kind, name)
+            key = (ns, kind, name, e.get("reason"))
             ts = e.get("lastTimestamp") or e.get("eventTime") or e["metadata"].get("creationTimestamp") or ""
             if key not in seen or ts > seen[key]["ts"]:
-                seen[key] = {"namespace": ns, "object": f"{io.get('kind')}/{io.get('name')}", "reason": e.get("reason"),
+                seen[key] = {"namespace": ns, "object": f"{kind}/{name}", "reason": e.get("reason"),
                              "count": e.get("count") or 1, "ts": ts, "age": _age(self.now, ts),
-                             "now": self.object_now(ns, io.get("kind"), io.get("name")),
-                             "message": " ".join((e.get("message") or "").split())[:200]}
+                             "now": now, "message": message[:200]}
         rows = sorted(seen.values(), key=lambda r: r["ts"], reverse=True)
         shown = rows if include_resolved else [r for r in rows if r["now"] not in ("ok", "gone")]
         return shown, len(rows) - len(shown)

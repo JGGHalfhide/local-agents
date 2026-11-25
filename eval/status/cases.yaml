@@ -31,9 +31,9 @@ cases:
     objects: [Deployment/hungry, ReplicaSet/hungry-*, Pod/hungry-*]
   f06:
     # Kyverno rejects the object at creation: the only evidence is its PolicyViolation
-    # event, filed under the policy (namespace default); located if the case
-    # namespace appears in the finding's namespace, object or evidence.
-    locate_by_text: true
+    # event, filed under the policy (namespace default). Since Week 3 the tools
+    # locate it at the blocked object, so it is scored like any other case
+    # (Week 2 accepted the case namespace anywhere in the finding: locate_by_text).
     title: Admission denial by Kyverno (digest not in the registry; the Deployment is rejected)
     kind: fault
     category: admission-denied
@@ -45,9 +45,9 @@ cases:
     objects: [Deployment/greedy, ReplicaSet/greedy-*, Pod/greedy-*]
   f08:
     # Kyverno rejects the object at creation: the only evidence is its PolicyViolation
-    # event, filed under the policy (namespace default); located if the case
-    # namespace appears in the finding's namespace, object or evidence.
-    locate_by_text: true
+    # event, filed under the policy (namespace default). Since Week 3 the tools
+    # locate it at the blocked object, so it is scored like any other case
+    # (Week 2 accepted the case namespace anywhere in the finding: locate_by_text).
     title: DaemonSet rejected at admission (hostNetwork; Kyverno pod-security-restricted)
     kind: fault
     category: admission-denied

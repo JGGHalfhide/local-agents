@@ -143,8 +143,9 @@ only), `--timeout SECONDS` (default 330), `--endpoint URL` (default
 `$AGENTCTL_ENDPOINT`, else `http://127.0.0.1:8080`).
 
 Exit codes: **0** healthy, **1** fault found, **2** error or unknown (also
-429, 504, connection failure, bad arguments). `runs`, `trace` and `health`
-exit 0 on success, 2 on error.
+504, connection failure, bad arguments), **3** busy (429: another run in
+progress, nothing was run; Week 3, so the CronJob counts it as a skipped
+run). `runs`, `trace` and `health` exit 0 on success, 2 on error.
 
 Operator use: `kubectl -n agents port-forward svc/status-reporter 8080:8080`
 in one terminal, `agentctl status` in another.
@@ -227,5 +228,5 @@ rules:
 | Persist runs across restarts | No (emptyDir). The eval's results are committed under results/; Loki keeps the CronJob's logs. A PVC adds backup and airgap work for no MVP need. |
 | Auth beyond NetworkPolicy | None for the MVP: one user, access by port-forward gated by RBAC. Revisit (new ADR) with a second user or any exposure beyond port-forward (Ingress), as ADR 0001 says for the endpoint. |
 | Trace backend (Week 4) | Keep the run JSON's `tool_calls` as the trace for now; Week 4's ADR picks an OpenTelemetry backend. Recommendation for that ADR: one that runs airgapped and already fits the platform (Grafana Tempo, alongside Loki and Grafana), decided by measurement there. |
-| Queue instead of 429 | 429. A queue of synchronous 5-minute requests ties up connections and clients' timeouts; agentctl and the scorer retry after `Retry-After`. |
+| Queue instead of 429 | 429. A queue of synchronous 5-minute requests ties up connections and clients' timeouts; the scorer retries once after `Retry-After`; agentctl exits 3 (busy) and the CronJob counts that as a skipped run. |
 | Thinking flag | In the contract now, default off, untested until Week 4. |

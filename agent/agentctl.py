@@ -12,8 +12,9 @@
   --endpoint URL default $AGENTCTL_ENDPOINT, else http://127.0.0.1:8080
                  (kubectl -n agents port-forward svc/status-reporter 8080:8080)
 
-Exit codes: 0 healthy, 1 fault found, 2 error or unknown. runs, trace and
-health: 0 on success, 2 on error.
+Exit codes: 0 healthy, 1 fault found, 2 error or unknown, 3 busy (another
+run in progress, HTTP 429: nothing was run). runs, trace and health: 0 on
+success, 2 on error.
 """
 import argparse
 import json
@@ -22,7 +23,7 @@ import sys
 import urllib.error
 import urllib.request
 
-OK, FAULT, ERROR = 0, 1, 2
+OK, FAULT, ERROR, BUSY = 0, 1, 2, 3
 
 
 def request(endpoint, method, path, body=None, timeout=330):
@@ -103,7 +104,7 @@ def main(argv=None):
         if not a.json:
             print(f"busy: run {body.get('run_id')} in progress; retry after {headers.get('Retry-After', '30')} s",
                   file=sys.stderr)
-        return ERROR
+        return BUSY
     if code not in (200, 504):
         if not a.json:
             print(f"agentctl: HTTP {code}: {body.get('error', body)}", file=sys.stderr)
