@@ -90,9 +90,9 @@ Goal: the same agents on the disconnected VM.
 - [x] Signatures verified via the Zarf registry; unsigned image rejected (present in the registry, denied for the signature); 0 pull errors from the deploys (boot-time KEDA pulls recovered) (docs/scans/week5-airgap-verify.txt)
 - [x] Eval run on the airgapped cluster (11/25): 8/8, 5/5, no ambient findings, median 47.7 s, matching the build cluster after a boot-warning fix (854e81c; first pass kept) (results/week5-airgap-status-eval/)
 - [x] docs/airgap-runbook.md (11/25)
-- [ ] Tag v0.5
+- [x] Tag v0.5 (11/25; rebuild check: fresh clone lint + eval-check, image at 854e81c rebuilt byte-identical to the deployed digest sha256:26e744ae; CI green again after a gitleaks false positive was ignored by fingerprint, user's OK; employer check signed off)
 
-Acceptance: status reports on the airgapped VM with egress blocked, everything verified, no pull errors.
+Acceptance: status reports on the airgapped VM with egress blocked, everything verified, no pull errors. (11/25: met; eval there 8/8, 5/5, no ambient findings, median 47.7 s.)
 
 ## Week 6: Safety, results, publish
 
