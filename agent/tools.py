@@ -219,7 +219,11 @@ class Cluster:
             if m:
                 # Locate the finding at the object Kyverno checked, not at the policy.
                 ns, kind, name = m.group(2), m.group(1), m.group(4)
-                message = f"{io.get('kind')}/{io.get('name')}: {message[m.end():]}"
+                rest = message[m.end():]
+                # Say it plainly: without the policy as the object, an image policy's
+                # "GET .../manifests/..." reads as a pull error (Week 3 eval, f06).
+                message = (f"blocked at admission by {io.get('kind')}/{io.get('name')}: {rest}" if "(blocked)" in rest
+                           else f"{io.get('kind')}/{io.get('name')}: {rest}")
                 now = self.object_now(ns, kind, name)
                 if ns not in self.namespaces():
                     now = "gone"                    # its namespace was deleted: resolved
