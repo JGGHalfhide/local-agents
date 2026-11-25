@@ -1,0 +1,159 @@
+{
+ "run_id": "r-20261124T233028Z-4554",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f01",
+   "object": "Deployment/podinfo",
+   "category": "scaled-to-zero",
+   "summary": "Deployment podinfo is scaled to zero and has no running pods.",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "0 replicas, not autoscaled; Service/podinfo selects it and has no pods"
+    }
+   ]
+  },
+  {
+   "namespace": "default",
+   "object": "Pod/agent-admission-unsigned",
+   "category": "admission-denied",
+   "summary": "Pod agent-admission-unsigned was rejected by ImageValidatingPolicy due to unsigned image.",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Pod default/agent-admission-unsigned: [verify-platform-images] fail (blocked); image is not signed with the platform-lab cosign key (pki/cosign.pub); publish it with `make image`"
+    }
+   ]
+  },
+  {
+   "namespace": "agents",
+   "object": "CronJob/status-reporter",
+   "category": "gitops-unhealthy",
+   "summary": "CronJob status-reporter has a warning event indicating it did not create the expected Job api-smoke-1.",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Saw a job that the controller did not create or forgot: api-smoke-1"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "Found 3 faults: 1 scaled-to-zero workload, 1 admission-denied pod, and 1 gitops-unhealthy CronJob.",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 54/54 healthy; workloads 77/78 healthy; warning events (object not healthy now) 1/3 healthy; pvcs 4/4 healthy; argo cd apps 14/14 healthy\n\nworkloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f01\tDeployment\tpodinfo\t0\t0\t-\t0 replicas, not autoscaled; Service/podinfo selects it and has no pods\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagents\tCronJob/status-reporter\tUnexpectedJob\t5\t0m\tSaw a job that the controller did not create or forgot: api-smoke-1\ndefault\tImageValidatingPolicy/verify-platform-images\tPolicyViolation\t1\t49m\tPod default/agent-admission-unsigned: [verify-platform-images] fail (blocked); image is not signed with the platform-lab cosign key (pki/cosign.pub); publish it with `make image`",
+   "result_chars": 804,
+   "truncated": false,
+   "duration_ms": 85,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agent-eval-f01"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f01\tDeployment\tpodinfo\t0\t0\t-\t0 replicas, not autoscaled; Service/podinfo selects it and has no pods",
+   "result_chars": 176,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agents"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagents\tDeployment\tstatus-reporter\t1\t1\t-\t-\nagents\tJob\tapi-smoke-1\t1\t1\t-\t-\nagents\tJob\tstatus-reporter-smoke-1\t1\t1\t-\t-\nagents\tReplicaSet\tstatus-reporter-584dbc6886\t1\t1\t-\t-",
+   "result_chars": 234,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "default"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\ndefault\tImageValidatingPolicy/verify-platform-images\tPolicyViolation\t1\t49m\t?\tPod default/agent-admission-unsigned: [verify-platform-images] fail (blocked); image is not signed with the platform-lab cosign key (pki/cosign.pub); publish it with `make image`\n(1 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 429,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "default"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner",
+   "result_chars": 70,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t6",
+   "tool": "list_pods",
+   "arguments": {},
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagents\tapi-smoke-1-4svgw\tSucceeded\t0/1\t0\t-\t-\tJob/api-smoke-1\nagents\tstatus-reporter-584dbc6886-8bk6l\tRunning\t1/1\t0\t-\t-\tReplicaSet/status-reporter-584dbc6886\nagents\tstatus-reporter-smoke-1-nrn2z\tSucceeded\t0/1\t0\t-\t-\tJob/status-reporter-smoke-1\nargocd\targocd-application-controller-0\tRunning\t1/1\t5\t-\tUnknown(255)\tStatefulSet/argocd-application-controller\nargocd\targocd-applicationset-controller-76bd7bf48d-7qkpl\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-applicationset-controller-76bd7bf48d\nargocd\targocd-dex-server-6fb66cc6ff-mlj5k\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-dex-server-6fb66cc6ff\nargocd\targocd-notifications-controller-df77dddcb-gv6xw\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-notifications-controller-df77dddcb\nargocd\targocd-redis-798c57b5ff-8g4p2\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-redis-798c57b5ff\nargocd\targocd-repo-server-8dc7449bc-glg97\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-repo-server-8dc7449bc\nargocd\targocd-server-55dc66fbb9-hlzw8\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-server-55dc66fbb9\nkeda\tkeda-add-ons-http-interceptor-5d586bf6fc-hdlgd\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/keda-add-ons-http-interceptor-5d586bf6fc\nkeda\tkeda-add-ons-http-operator-9d4944f68-9c8j9\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/keda-add-ons-http-operator-9d4944f68\nkeda\tkeda-add-ons-http-scaler-5676f47f5f-mqxw9\tRunning\t1/1\t7\t-\tCompleted(0)\tReplicaSet/keda-add-ons-http-scaler-5676f47f5f\nkeda\tkeda-admission-85b5f686f5-4sncr\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/keda-admission-85b5f686f5\nkeda\tkeda-metrics-apiserver-774888449-8hnx9\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/keda-metrics-apiserver-774888449\nkeda\tkeda-operator-59f65cfb46-sgpjx\tRunning\t1/1\t6\t-\tUnknown(255)\tReplicaSet/keda-operator-59f65cfb46\nkube-system\tcloud-controller-manager-build-node-01\tRunning\t1/1\t10\t-\tError(2)\tNode/build-node-01\nkube-system\tetcd-build-node-01\tRunning\t1/1\t12\t-\tUnknown(255)\tNode/build-nod",
+   "result_chars": 3337,
+   "truncated": true,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t7",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agent-eval-f01"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner",
+   "result_chars": 70,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t8",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "default"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner",
+   "result_chars": 70,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849"
+ },
+ "timings": {
+  "started": "2026-11-24T23:30:28Z",
+  "finished": "2026-11-24T23:31:45Z",
+  "total_s": 77.4,
+  "model_s": 77.3,
+  "tools_s": 0.09,
+  "turns": 6
+ },
+ "error": null
+}

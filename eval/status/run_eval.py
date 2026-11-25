@@ -58,6 +58,8 @@ def main():
     log = open(out / "run.log", "a")
 
     def say(msg):
+        # repo-relative paths: inject.sh errors carry absolute paths (home directory)
+        msg = msg.replace(str(ROOT) + "/", "").replace(str(pathlib.Path.home()), "~")
         line = f"{dt.datetime.now(dt.UTC):%H:%M:%S} {msg}"
         print(line, flush=True)
         log.write(line + "\n")

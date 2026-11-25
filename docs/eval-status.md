@@ -1,10 +1,37 @@
 # Status reporter evaluation: fault injection
 
-Status: **approved by the user** (Week 1, 11/24), not yet implemented or
-run. Approved cases: faults f01, f02, f04, f05, f06, f07, f08, f10;
-controls k1-k5; the context caps below. f09 (Argo CD) dropped. All cases
-stay in `agent-eval-*` namespaces; a fault outside them needs the user's
-approval of that specific fault. Nothing is injected until the user says go.
+Status: **implemented and run** (Week 2, 11/24; approved 11/24). Approved
+cases: faults f01, f02, f04, f05, f06, f07, f08, f10; controls k1-k5; the
+context caps below. f09 (Argo CD) dropped. All cases stay in `agent-eval-*`
+namespaces; a fault outside them needs the user's approval of that specific
+fault. Code: eval/status/ (cases.yaml, cases/*.yaml, inject.sh, cleanup.sh,
+score.py, run_eval.py); every run goes through the operator API (ADR 0005).
+
+## Results (11/24, results/week2-status-eval/)
+
+Faults 8/8 found, located and classified; controls 5/5 with nothing
+reported in their namespace; every run grounded, 7-8 valid tool calls,
+56-128 s. One greedy run per case (MVP scope; no variance study).
+
+- First pass (results/week2-status-eval/first-pass/): faults 6/6, controls
+  3/4. f06 and f08 could not be injected as specified (below); k1's
+  visibility check misread zero replicas; k2 failed tool validity (the model
+  asked get_status for a CronJob, which the tool did not accept). Fixed
+  (agent image e6ae522, eval scripts) and those four cases rerun.
+- f06 and f08 as run: Kyverno rejects the Deployment and the DaemonSet
+  themselves at admission (autogen applies the pod rules to workloads;
+  platform-lab supply-chain.md says so for unsigned images). Nothing is
+  created; the fault is visible only as Kyverno's PolicyViolation event,
+  filed under the policy in namespace `default`. They are scored as located
+  when the case namespace appears in the finding's namespace, object or
+  evidence. The rerun's events overlapped the first pass's (events live
+  about an hour). A DaemonSet that exists with 0 pods (the c14 symptom)
+  cannot be produced in an ordinary namespace under these policies.
+- Ambient findings (outside agent-eval-*, not scored) in most runs: the
+  earlier unsigned-image admission test, the CronJob's warning about Jobs
+  created by hand, the hourly Job that got 429 while an eval run held the
+  API, and twice a healthy kube-system object (a completed Job whose
+  JobResumed=False condition is printed). Follow-ups in ROADMAP.md.
 
 Agent 1, the read-only status reporter (ADR 0003), is scored automatically:
 a known fault is created in a disposable namespace, the agent reports on

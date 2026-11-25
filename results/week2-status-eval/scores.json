@@ -1,0 +1,317 @@
+[
+ {
+  "case": "f01",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "scaled-to-zero Deployment/podinfo"
+  ],
+  "ambient": [
+   "admission-denied default/Pod/agent-admission-unsigned",
+   "gitops-unhealthy agents/CronJob/status-reporter"
+  ],
+  "tool_calls": 8,
+  "seconds": 77.4,
+  "run_id": "r-20261124T233028Z-4554"
+ },
+ {
+  "case": "f02",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "image-pull Pod/puller-6979648498-jjj6l",
+   "image-pull Deployment/puller"
+  ],
+  "ambient": [
+   "gitops-unhealthy agents/CronJob/status-reporter",
+   "admission-denied default/ImageValidatingPolicy/verify-platform-images"
+  ],
+  "tool_calls": 8,
+  "seconds": 63.1,
+  "run_id": "r-20261124T233156Z-123d"
+ },
+ {
+  "case": "f04",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "crash-loop Pod/crashy-7dfc58bc6d-fp6k9",
+   "crash-loop Deployment/crashy"
+  ],
+  "ambient": [
+   "admission-denied default/Pod/agent-admission-unsigned",
+   "gitops-unhealthy agents/CronJob/status-reporter"
+  ],
+  "tool_calls": 8,
+  "seconds": 76.5,
+  "run_id": "r-20261124T233315Z-e91c"
+ },
+ {
+  "case": "f05",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "oom-killed Pod/hungry-5486775455-fgxkg"
+  ],
+  "ambient": [
+   "admission-denied default/Pod/agent-admission-unsigned",
+   "gitops-unhealthy agents/CronJob/status-reporter"
+  ],
+  "tool_calls": 8,
+  "seconds": 64.9,
+  "run_id": "r-20261124T233448Z-b3d2"
+ },
+ {
+  "case": "f06",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [],
+  "ambient": [
+   "admission-denied default/Deployment/agent-eval-f06",
+   "admission-denied default/DaemonSet/agent-eval-f08",
+   "gitops-unhealthy agents/CronJob/status-reporter"
+  ],
+  "tool_calls": 8,
+  "seconds": 75.5,
+  "run_id": "r-20261124T235618Z-4f1d"
+ },
+ {
+  "case": "f07",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "unschedulable Pod/greedy-658b9c4b58-rlfx2",
+   "unschedulable Deployment/greedy"
+  ],
+  "ambient": [
+   "image-pull default/ImageValidatingPolicy/verify-platform-images",
+   "gitops-unhealthy agents/CronJob/status-reporter"
+  ],
+  "tool_calls": 8,
+  "seconds": 92.1,
+  "run_id": "r-20261124T233609Z-7452"
+ },
+ {
+  "case": "f08",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [],
+  "ambient": [
+   "admission-denied default/DaemonSet/agent-eval-f08",
+   "image-pull default/Deployment/agent-eval-f06",
+   "gitops-unhealthy agents/CronJob/status-reporter",
+   "other kube-system/DaemonSet/rke2-canal",
+   "other kube-system/Job/helm-install-rke2-snapshot-controller"
+  ],
+  "tool_calls": 8,
+  "seconds": 127.7,
+  "run_id": "r-20261124T235739Z-e3c4"
+ },
+ {
+  "case": "f10",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "storage-unbound Pod/claimer",
+   "storage-unbound PersistentVolumeClaim/data"
+  ],
+  "ambient": [
+   "admission-denied default/ValidatingPolicy/pod-security-restricted",
+   "admission-denied default/ImageValidatingPolicy/verify-platform-images"
+  ],
+  "tool_calls": 8,
+  "seconds": 68.7,
+  "run_id": "r-20261124T233753Z-54aa"
+ },
+ {
+  "case": "k1",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [],
+  "ambient": [
+   "admission-denied default/DaemonSet/agent-eval-f08",
+   "image-pull default/Deployment/agent-eval-f06",
+   "gitops-unhealthy agents/CronJob/status-reporter"
+  ],
+  "tool_calls": 8,
+  "seconds": 68.1,
+  "run_id": "r-20261124T235953Z-e936"
+ },
+ {
+  "case": "k2",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [],
+  "ambient": [
+   "crash-loop agents/Job/status-reporter-29926080",
+   "admission-denied default/ValidatingPolicy/pod-security-restricted",
+   "admission-denied default/ImageValidatingPolicy/verify-platform-images",
+   "gitops-unhealthy agents/CronJob/status-reporter"
+  ],
+  "tool_calls": 8,
+  "seconds": 72.3,
+  "run_id": "r-20261125T000127Z-ada7"
+ },
+ {
+  "case": "k3",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [],
+  "ambient": [
+   "admission-denied default/ValidatingPolicy/pod-security-restricted",
+   "admission-denied default/ImageValidatingPolicy/verify-platform-images",
+   "other agents/CronJob/status-reporter"
+  ],
+  "tool_calls": 7,
+  "seconds": 82.1,
+  "run_id": "r-20261124T234553Z-eb6c"
+ },
+ {
+  "case": "k4",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [],
+  "ambient": [
+   "admission-denied default/DaemonSet/agent-eval-f08",
+   "admission-denied default/Deployment/agent-eval-f06",
+   "other agents/CronJob/status-reporter"
+  ],
+  "tool_calls": 8,
+  "seconds": 56.1,
+  "run_id": "r-20261124T234726Z-e956"
+ },
+ {
+  "case": "k5",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [],
+  "ambient": [
+   "admission-denied default/DaemonSet/agent-eval-f08",
+   "admission-denied default/Deployment/agent-eval-f06",
+   "gitops-unhealthy agents/Job/api-smoke-1"
+  ],
+  "tool_calls": 8,
+  "seconds": 61.4,
+  "run_id": "r-20261124T234839Z-22aa"
+ }
+]

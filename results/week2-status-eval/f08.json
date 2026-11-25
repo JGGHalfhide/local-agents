@@ -1,0 +1,171 @@
+{
+ "run_id": "r-20261124T235739Z-e3c4",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "default",
+   "object": "DaemonSet/agent-eval-f08",
+   "category": "admission-denied",
+   "summary": "DaemonSet agent-eval-f08 blocked by pod security policy due to hostNetwork, hostPID, and hostIPC settings",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "DaemonSet agent-eval-f08/hostnet: fail (blocked); hostNetwork, hostPID and hostIPC must not be set"
+    }
+   ]
+  },
+  {
+   "namespace": "default",
+   "object": "Deployment/agent-eval-f06",
+   "category": "image-pull",
+   "summary": "Deployment agent-eval-f06 blocked by image validation policy due to failed image evaluation",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Deployment agent-eval-f06/unsigned: [evaluation] error (blocked); failed to evaluate policy: GET http://zot.zot.svc.cluster.local:5000/v2/library/alpine/manifests/sha256:000000000000000000000000000000"
+    }
+   ]
+  },
+  {
+   "namespace": "agents",
+   "object": "CronJob/status-reporter",
+   "category": "gitops-unhealthy",
+   "summary": "CronJob status-reporter has an unexpected job api-smoke-1 that it did not create",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "CronJob/status-reporter UnexpectedJob 5 27m Saw a job that the controller did not create or forgot: api-smoke-1"
+    }
+   ]
+  },
+  {
+   "namespace": "kube-system",
+   "object": "DaemonSet/rke2-canal",
+   "category": "other",
+   "summary": "rke2-canal pods show Unknown errors but are running",
+   "evidence": [
+    {
+     "tool_call_id": "t3",
+     "excerpt": "kube-system\tDaemonSet\trke2-canal\t1\t1\t-\t-"
+    }
+   ]
+  },
+  {
+   "namespace": "kube-system",
+   "object": "Job/helm-install-rke2-snapshot-controller",
+   "category": "other",
+   "summary": "Job helm-install-rke2-snapshot-controller completed with an error",
+   "evidence": [
+    {
+     "tool_call_id": "t3",
+     "excerpt": "kube-system\tJob\thelm-install-rke2-snapshot-controller\t1\t1\tSuspended=False(JobResumed)\t-"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "Found 5 faults: 1 admission-denied DaemonSet, 1 image-pull Deployment, 1 gitops-unhealthy CronJob, and 2 other issues with DaemonSet and Job.",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 54/54 healthy; workloads 77/77 healthy; warning events (object not healthy now) 2/5 healthy; pvcs 4/4 healthy; argo cd apps 14/14 healthy\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\ndefault\tValidatingPolicy/pod-security-restricted\tPolicyViolation\t1\t0m\tDaemonSet agent-eval-f08/hostnet: fail (blocked); hostNetwork, hostPID and hostIPC must not be set\ndefault\tImageValidatingPolicy/verify-platform-images\tPolicyViolation\t1\t1m\tDeployment agent-eval-f06/unsigned: [evaluation] error (blocked); failed to evaluate policy: GET http://zot.zot.svc.cluster.local:5000/v2/library/alpine/manifests/sha256:000000000000000000000000000000\nagents\tCronJob/status-reporter\tUnexpectedJob\t5\t27m\tSaw a job that the controller did not create or forgot: api-smoke-1",
+   "result_chars": 817,
+   "truncated": false,
+   "duration_ms": 80,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_events",
+   "arguments": {},
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\ndefault\tValidatingPolicy/pod-security-restricted\tPolicyViolation\t1\t0m\t?\tDaemonSet agent-eval-f08/hostnet: fail (blocked); hostNetwork, hostPID and hostIPC must not be set\ndefault\tImageValidatingPolicy/verify-platform-images\tPolicyViolation\t1\t1m\t?\tDeployment agent-eval-f06/unsigned: [evaluation] error (blocked); failed to evaluate policy: GET http://zot.zot.svc.cluster.local:5000/v2/library/alpine/manifests/sha256:000000000000000000000000000000\nagents\tCronJob/status-reporter\tUnexpectedJob\t5\t27m\t?\tSaw a job that the controller did not create or forgot: api-smoke-1\n(2 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 742,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_workloads",
+   "arguments": {},
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagents\tDeployment\tstatus-reporter\t1\t1\t-\t-\nagents\tJob\tapi-smoke-1\t1\t1\t-\t-\nagents\tJob\tstatus-reporter-smoke-1\t1\t1\t-\t-\nagents\tReplicaSet\tstatus-reporter-568f46bb6b\t1\t1\t-\t-\nargocd\tDeployment\targocd-applicationset-controller\t1\t1\t-\t-\nargocd\tDeployment\targocd-dex-server\t1\t1\t-\t-\nargocd\tDeployment\targocd-notifications-controller\t1\t1\t-\t-\nargocd\tDeployment\targocd-redis\t1\t1\t-\t-\nargocd\tDeployment\targocd-repo-server\t1\t1\t-\t-\nargocd\tDeployment\targocd-server\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-applicationset-controller-76bd7bf48d\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-dex-server-6fb66cc6ff\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-notifications-controller-df77dddcb\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-redis-798c57b5ff\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-repo-server-8dc7449bc\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-server-55dc66fbb9\t1\t1\t-\t-\nargocd\tStatefulSet\targocd-application-controller\t1\t1\t-\t-\nkeda\tDeployment\tkeda-add-ons-http-interceptor\t1\t1\t-\tscaled by KEDA ScaledObject/keda-add-ons-http-interceptor (1-1)\nkeda\tDeployment\tkeda-add-ons-http-operator\t1\t1\t-\t-\nkeda\tDeployment\tkeda-add-ons-http-scaler\t1\t1\t-\t-\nkeda\tDeployment\tkeda-admission\t1\t1\t-\t-\nkeda\tDeployment\tkeda-metrics-apiserver\t1\t1\t-\t-\nkeda\tDeployment\tkeda-operator\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-add-ons-http-interceptor-5d586bf6fc\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-add-ons-http-operator-9d4944f68\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-add-ons-http-scaler-5676f47f5f\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-admission-85b5f686f5\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-metrics-apiserver-774888449\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-operator-59f65cfb46\t1\t1\t-\t-\nkube-system\tDaemonSet\trke2-canal\t1\t1\t-\t-\nkube-system\tDaemonSet\trke2-traefik\t1\t1\t-\t-\nkube-system\tDeployment\trke2-coredns-rke2-coredns\t1\t1\t-\t-\nkube-system\tDeployment\trke2-coredns-rke2-coredns-autoscaler\t1\t1\t-\t-\nkube-system\tDeployment\trke2-metrics-server\t1\t1\t-\t-\nkube-system\tDeployment\trke2-snapshot-controller\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-canal\t1\t1\tSuspended=False(JobResumed)\t-\nku",
+   "result_chars": 3381,
+   "truncated": true,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_pods",
+   "arguments": {},
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagents\tapi-smoke-1-4svgw\tSucceeded\t0/1\t0\t-\t-\tJob/api-smoke-1\nagents\tstatus-reporter-568f46bb6b-2qbfr\tRunning\t1/1\t0\t-\t-\tReplicaSet/status-reporter-568f46bb6b\nagents\tstatus-reporter-smoke-1-nrn2z\tSucceeded\t0/1\t0\t-\t-\tJob/status-reporter-smoke-1\nargocd\targocd-application-controller-0\tRunning\t1/1\t5\t-\tUnknown(255)\tStatefulSet/argocd-application-controller\nargocd\targocd-applicationset-controller-76bd7bf48d-7qkpl\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-applicationset-controller-76bd7bf48d\nargocd\targocd-dex-server-6fb66cc6ff-mlj5k\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-dex-server-6fb66cc6ff\nargocd\targocd-notifications-controller-df77dddcb-gv6xw\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-notifications-controller-df77dddcb\nargocd\targocd-redis-798c57b5ff-8g4p2\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-redis-798c57b5ff\nargocd\targocd-repo-server-8dc7449bc-glg97\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-repo-server-8dc7449bc\nargocd\targocd-server-55dc66fbb9-hlzw8\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-server-55dc66fbb9\nkeda\tkeda-add-ons-http-interceptor-5d586bf6fc-hdlgd\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/keda-add-ons-http-interceptor-5d586bf6fc\nkeda\tkeda-add-ons-http-operator-9d4944f68-9c8j9\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/keda-add-ons-http-operator-9d4944f68\nkeda\tkeda-add-ons-http-scaler-5676f47f5f-mqxw9\tRunning\t1/1\t7\t-\tCompleted(0)\tReplicaSet/keda-add-ons-http-scaler-5676f47f5f\nkeda\tkeda-admission-85b5f686f5-4sncr\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/keda-admission-85b5f686f5\nkeda\tkeda-metrics-apiserver-774888449-8hnx9\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/keda-metrics-apiserver-774888449\nkeda\tkeda-operator-59f65cfb46-sgpjx\tRunning\t1/1\t6\t-\tUnknown(255)\tReplicaSet/keda-operator-59f65cfb46\nkube-system\tcloud-controller-manager-build-node-01\tRunning\t1/1\t10\t-\tError(2)\tNode/build-node-01\nkube-system\tetcd-build-node-01\tRunning\t1/1\t12\t-\tUnknown(255)\tNode/build-nod",
+   "result_chars": 3337,
+   "truncated": true,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "list_nodes",
+   "arguments": {},
+   "result": "nodes\nname\tready\tpressure\tunschedulable\nbuild-node-01\tTrue\t-\tFalse",
+   "result_chars": 66,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t6",
+   "tool": "list_argocd_apps",
+   "arguments": {},
+   "result": "argo cd applications\nnamespace\tname\tsync\thealth\tmessage\nargocd\talloy\tSynced\tHealthy\t\nargocd\targocd\tSynced\tHealthy\t\nargocd\tkeda\tSynced\tHealthy\t\nargocd\tkube-prometheus-stack\tSynced\tHealthy\t\nargocd\tkyverno\tSynced\tHealthy\t\nargocd\tlocal-agents\tSynced\tHealthy\t\nargocd\tlocal-airgap-llm\tSynced\tHealthy\t\nargocd\tlocal-path-storage\tSynced\tHealthy\t\nargocd\tloki\tSynced\tHealthy\t\nargocd\tpolicies\tSynced\tHealthy\t\nargocd\troot\tSynced\tHealthy\t\nargocd\tsample-app\tSynced\tHealthy\t\nargocd\tvelero\tSynced\tHealthy\t\nargocd\tzot\tSynced\tHealthy\t",
+   "result_chars": 515,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t7",
+   "tool": "list_pvcs",
+   "arguments": {},
+   "result": "persistent volume claims\nnamespace\tname\tphase\tstorage_class\tclass_exists\tcapacity\nmonitoring\tprometheus-kps-kube-prometheus-stack-prometheus-db-prometheus-kps-kube-prometheus-stack-prometheus-0\tBound\tlocal-path\tyes\t8Gi\nmonitoring\tstorage-loki-0\tBound\tlocal-path\tyes\t5Gi\nsample-app\tdata-db-0\tBound\tlocal-path\tyes\t1Gi\nzot\tzot-pvc-zot-0\tBound\tlocal-path\tyes\t10Gi",
+   "result_chars": 359,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t8",
+   "tool": "list_keda_objects",
+   "arguments": {},
+   "result": "keda objects\nnamespace\tkind\tname\ttarget\tmin\tmax\tready\tactive\tpaused\nkeda\tScaledObject\tkeda-add-ons-http-interceptor\tDeployment/keda-add-ons-http-interceptor\t1\t1\tTrue\tTrue\tFalse\nllm\tScaledObject\tllama-server\tDeployment/llama-server\t0\t1\tTrue\tTrue\tFalse",
+   "result_chars": 250,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849"
+ },
+ "timings": {
+  "started": "2026-11-24T23:57:39Z",
+  "finished": "2026-11-24T23:59:47Z",
+  "total_s": 127.7,
+  "model_s": 127.6,
+  "tools_s": 0.08,
+  "turns": 9
+ },
+ "error": null
+}

@@ -1,0 +1,169 @@
+{
+ "run_id": "r-20261124T233609Z-7452",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f07",
+   "object": "Pod/greedy-658b9c4b58-rlfx2",
+   "category": "unschedulable",
+   "summary": "Pod cannot schedule due to insufficient CPU on the only available node",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "0/1 nodes are available: 1 Insufficient cpu."
+    }
+   ]
+  },
+  {
+   "namespace": "agent-eval-f07",
+   "object": "Deployment/greedy",
+   "category": "unschedulable",
+   "summary": "Deployment cannot create pods due to insufficient CPU",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Available=False(MinimumReplicasUnavailable)"
+    }
+   ]
+  },
+  {
+   "namespace": "default",
+   "object": "ImageValidatingPolicy/verify-platform-images",
+   "category": "image-pull",
+   "summary": "Image validation policy blocks deployment due to failed image evaluation",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Deployment agent-eval-f06/unsigned: [evaluation] error (blocked); failed to evaluate policy: GET http://zot.zot.svc.cluster.local:5000/v2/library/alpine/manifests/sha256:000000000000000000000000000000"
+    }
+   ]
+  },
+  {
+   "namespace": "agents",
+   "object": "CronJob/status-reporter",
+   "category": "gitops-unhealthy",
+   "summary": "CronJob status-reporter is unhealthy due to unexpected job api-smoke-1",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Saw a job that the controller did not create or forgot: api-smoke-1"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "Found 4 faults: 1 unschedulable pod/deployment due to CPU shortage, 1 image-pull fault from policy violation, and 1 gitops-unhealthy cronjob.",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 54/55 healthy; workloads 77/79 healthy; warning events (object not healthy now) 1/4 healthy; pvcs 4/4 healthy; argo cd apps 14/14 healthy\n\npods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f07\tgreedy-658b9c4b58-rlfx2\tPending\t0/0\t0\t-\t-\tReplicaSet/greedy-658b9c4b58\n\nworkloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f07\tDeployment\tgreedy\t1\t0\tAvailable=False(MinimumReplicasUnavailable)\t-\nagent-eval-f07\tReplicaSet\tgreedy-658b9c4b58\t1\t0\t-\t-\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f07\tPod/greedy-658b9c4b58-rlfx2\tFailedScheduling\t1\t0m\t0/1 nodes are available: 1 Insufficient cpu. no new claims to deallocate, preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling.\ndefault\tImageValidatingPolicy/verify-platform-images\tPolicyViolation\t1\t0m\tDeployment agent-eval-f06/unsigned: [evaluation] error (blocked); failed to evaluate policy: GET http://zot.zot.svc.cluster.local:5000/v2/library/alpine/manifests/sha256:000000000000000000000000000000\nagents\tCronJob/status-reporter\tUnexpectedJob\t5\t6m\tSaw a job that the controller did not create or forgot: api-smoke-1",
+   "result_chars": 1227,
+   "truncated": false,
+   "duration_ms": 79,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agent-eval-f07"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f07\tgreedy-658b9c4b58-rlfx2\tPending\t0/0\t0\t-\t-\tReplicaSet/greedy-658b9c4b58",
+   "result_chars": 156,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_pods",
+   "arguments": {},
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f07\tgreedy-658b9c4b58-rlfx2\tPending\t0/0\t0\t-\t-\tReplicaSet/greedy-658b9c4b58\nagents\tapi-smoke-1-4svgw\tSucceeded\t0/1\t0\t-\t-\tJob/api-smoke-1\nagents\tstatus-reporter-584dbc6886-8bk6l\tRunning\t1/1\t0\t-\t-\tReplicaSet/status-reporter-584dbc6886\nagents\tstatus-reporter-smoke-1-nrn2z\tSucceeded\t0/1\t0\t-\t-\tJob/status-reporter-smoke-1\nargocd\targocd-application-controller-0\tRunning\t1/1\t5\t-\tUnknown(255)\tStatefulSet/argocd-application-controller\nargocd\targocd-applicationset-controller-76bd7bf48d-7qkpl\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-applicationset-controller-76bd7bf48d\nargocd\targocd-dex-server-6fb66cc6ff-mlj5k\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-dex-server-6fb66cc6ff\nargocd\targocd-notifications-controller-df77dddcb-gv6xw\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-notifications-controller-df77dddcb\nargocd\targocd-redis-798c57b5ff-8g4p2\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-redis-798c57b5ff\nargocd\targocd-repo-server-8dc7449bc-glg97\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-repo-server-8dc7449bc\nargocd\targocd-server-55dc66fbb9-hlzw8\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/argocd-server-55dc66fbb9\nkeda\tkeda-add-ons-http-interceptor-5d586bf6fc-hdlgd\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/keda-add-ons-http-interceptor-5d586bf6fc\nkeda\tkeda-add-ons-http-operator-9d4944f68-9c8j9\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/keda-add-ons-http-operator-9d4944f68\nkeda\tkeda-add-ons-http-scaler-5676f47f5f-mqxw9\tRunning\t1/1\t7\t-\tCompleted(0)\tReplicaSet/keda-add-ons-http-scaler-5676f47f5f\nkeda\tkeda-admission-85b5f686f5-4sncr\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/keda-admission-85b5f686f5\nkeda\tkeda-metrics-apiserver-774888449-8hnx9\tRunning\t1/1\t5\t-\tUnknown(255)\tReplicaSet/keda-metrics-apiserver-774888449\nkeda\tkeda-operator-59f65cfb46-sgpjx\tRunning\t1/1\t6\t-\tUnknown(255)\tReplicaSet/keda-operator-59f65cfb46\nkube-system\tcloud-controller-manager-build-node-01\tRunning\t1/1\t10\t-\tError(2)\tNode/bui",
+   "result_chars": 3423,
+   "truncated": true,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_events",
+   "arguments": {},
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagent-eval-f07\tPod/greedy-658b9c4b58-rlfx2\tFailedScheduling\t1\t0m\tNOT OK\t0/1 nodes are available: 1 Insufficient cpu. no new claims to deallocate, preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling.\ndefault\tImageValidatingPolicy/verify-platform-images\tPolicyViolation\t1\t0m\t?\tDeployment agent-eval-f06/unsigned: [evaluation] error (blocked); failed to evaluate policy: GET http://zot.zot.svc.cluster.local:5000/v2/library/alpine/manifests/sha256:000000000000000000000000000000\nagents\tCronJob/status-reporter\tUnexpectedJob\t5\t6m\t?\tSaw a job that the controller did not create or forgot: api-smoke-1\n(1 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 797,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "default"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner",
+   "result_chars": 70,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t6",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agents"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagents\tapi-smoke-1-4svgw\tSucceeded\t0/1\t0\t-\t-\tJob/api-smoke-1\nagents\tstatus-reporter-584dbc6886-8bk6l\tRunning\t1/1\t0\t-\t-\tReplicaSet/status-reporter-584dbc6886\nagents\tstatus-reporter-smoke-1-nrn2z\tSucceeded\t0/1\t0\t-\t-\tJob/status-reporter-smoke-1",
+   "result_chars": 312,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t7",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "default"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler",
+   "result_chars": 65,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t8",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agents"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagents\tDeployment\tstatus-reporter\t1\t1\t-\t-\nagents\tJob\tapi-smoke-1\t1\t1\t-\t-\nagents\tJob\tstatus-reporter-smoke-1\t1\t1\t-\t-\nagents\tReplicaSet\tstatus-reporter-584dbc6886\t1\t1\t-\t-",
+   "result_chars": 234,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849"
+ },
+ "timings": {
+  "started": "2026-11-24T23:36:09Z",
+  "finished": "2026-11-24T23:37:41Z",
+  "total_s": 92.1,
+  "model_s": 92.1,
+  "tools_s": 0.08,
+  "turns": 4
+ },
+ "error": null
+}

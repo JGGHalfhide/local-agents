@@ -239,7 +239,14 @@ Secrets/logs/exec/writes denied; labelled pod reaches the endpoint, unlabelled
 blocked; in-cluster report in 142 s with 1 false fault (llama-server
 scaled-to-zero despite the KEDA label; proposed fix: drop such faults in code).
 Note: `kubectl auth can-i get pods/log` means a pod named "log"; use
---subresource=log. Next: step 4, fault injection (approved cases).
+--subresource=log.
+Week 2 step 4 + operator interface done (11/24): API v1 + agentctl (ADR 0005,
+docs/interface.md), deployed (image e6ae522, signed); fault-injection eval
+through the API: faults 8/8, controls 5/5 (results/week2-status-eval/,
+first pass kept). f06/f08 are rejected by Kyverno at creation: visible only
+as PolicyViolation events. Week 2 over its 7-10 h budget; web view is a
+Week 5-6 stretch. Open: tag v0.2, tool-interface ADR, eval follow-ups
+(ROADMAP).
 Lab: build-node-01 running, airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state

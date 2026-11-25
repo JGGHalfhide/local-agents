@@ -1,0 +1,37 @@
+23:30:28 f01: inject exit 0     visible after 0s
+23:31:45 f01: HTTP 200 status=fault findings=[('agent-eval-f01', 'Deployment/podinfo', 'scaled-to-zero'), ('default', 'Pod/agent-admission-unsigned', 'admission-denied'), ('agents', 'CronJob/status-reporter', 'gitops-unhealthy')] 77.4s error=None
+23:31:51 f01: cleanup exit 0 gone
+23:31:56 f02: inject exit 0     visible after 5s
+23:32:59 f02: HTTP 200 status=fault findings=[('agent-eval-f02', 'Pod/puller-6979648498-jjj6l', 'image-pull'), ('agent-eval-f02', 'Deployment/puller', 'image-pull'), ('agents', 'CronJob/status-reporter', 'gitops-unhealthy'), ('default', 'ImageValidatingPolicy/verify-platform-images', 'admission-denied')] 63.1s error=None
+23:33:10 f02: cleanup exit 0 gone
+23:33:15 f04: inject exit 0     visible after 5s
+23:34:32 f04: HTTP 200 status=fault findings=[('agent-eval-f04', 'Pod/crashy-7dfc58bc6d-fp6k9', 'crash-loop'), ('default', 'Pod/agent-admission-unsigned', 'admission-denied'), ('agents', 'CronJob/status-reporter', 'gitops-unhealthy'), ('agent-eval-f04', 'Deployment/crashy', 'crash-loop')] 76.5s error=None
+23:34:42 f04: cleanup exit 0 gone
+23:34:48 f05: inject exit 0     visible after 5s
+23:35:53 f05: HTTP 200 status=fault findings=[('agent-eval-f05', 'Pod/hungry-5486775455-fgxkg', 'oom-killed'), ('default', 'Pod/agent-admission-unsigned', 'admission-denied'), ('agents', 'CronJob/status-reporter', 'gitops-unhealthy')] 64.9s error=None
+23:36:03 f05: cleanup exit 0 gone
+23:36:03 f06: inject exit 1 ==> f06: applying eval/status/cases/f06.yaml into agent-eval-f06 Error from server: error when creating "eval/status/cases/f06.yaml": admission webhook "ivpol.validate.kyverno.svc-fail" denied the request: Policy verify-platform-images error: failed to evaluate policy: GET http://zot.zot.svc.cluster.local:5000/v2/library/alpine/manifests/sha256:0000000000000000000000000000000000000000000000000000000000000001: MANIFEST_UNKNOWN: manifest unknown; map[description:This error is returned when the manifest, identified by name and tag is unknown to the repository. reference:sha256:0000000000000000000000000000000000000000000000000000000000000001]
+23:36:09 f06: cleanup exit 0 gone
+23:36:09 f07: inject exit 0     visible after 0s
+23:37:41 f07: HTTP 200 status=fault findings=[('agent-eval-f07', 'Pod/greedy-658b9c4b58-rlfx2', 'unschedulable'), ('agent-eval-f07', 'Deployment/greedy', 'unschedulable'), ('default', 'ImageValidatingPolicy/verify-platform-images', 'image-pull'), ('agents', 'CronJob/status-reporter', 'gitops-unhealthy')] 92.1s error=None
+23:37:47 f07: cleanup exit 0 gone
+23:37:47 f08: inject exit 1 ==> f08: applying eval/status/cases/f08.yaml into agent-eval-f08 Warning: would violate PodSecurity "restricted:latest": host namespaces (hostNetwork=true)
+Error from server: error when creating "eval/status/cases/f08.yaml": admission webhook "vpol.validate.kyverno.svc-fail" denied the request: Policy pod-security-restricted failed: hostNetwork, hostPID and hostIPC must not be set
+23:37:53 f08: cleanup exit 0 gone
+23:37:53 f10: inject exit 0     visible after 0s
+23:39:02 f10: HTTP 200 status=fault findings=[('agent-eval-f10', 'Pod/claimer', 'storage-unbound'), ('agent-eval-f10', 'PersistentVolumeClaim/data', 'storage-unbound'), ('default', 'ValidatingPolicy/pod-security-restricted', 'admission-denied'), ('default', 'ImageValidatingPolicy/verify-platform-images', 'admission-denied')] 68.7s error=None
+23:39:13 f10: cleanup exit 0 gone
+23:43:19 k1: inject exit 1 ==> waiting until the case is visible through the API (up to 240s) timed out: k1 not visible after 240s
+23:43:30 k1: cleanup exit 0 gone
+23:43:55 k2: inject exit 0     visible after 25s
+23:45:05 k2: HTTP 200 status=fault findings=[('default', 'DaemonSet/agent-eval-f08', 'admission-denied'), ('default', 'Deployment/agent-eval-f06', 'image-pull'), ('agents', 'CronJob/status-reporter', 'other')] 69.9s error=None
+23:45:48 k2: cleanup exit 0 gone
+23:45:53 k3: inject exit 0     visible after 5s
+23:47:15 k3: HTTP 200 status=fault findings=[('default', 'ValidatingPolicy/pod-security-restricted', 'admission-denied'), ('default', 'ImageValidatingPolicy/verify-platform-images', 'admission-denied'), ('agents', 'CronJob/status-reporter', 'other')] 82.1s error=None
+23:47:21 k3: cleanup exit 0 gone
+23:47:26 k4: inject exit 0     visible after 5s
+23:48:23 k4: HTTP 200 status=fault findings=[('default', 'DaemonSet/agent-eval-f08', 'admission-denied'), ('default', 'Deployment/agent-eval-f06', 'admission-denied'), ('agents', 'CronJob/status-reporter', 'other')] 56.1s error=None
+23:48:33 k4: cleanup exit 0 gone
+23:48:39 k5: inject exit 0     visible after 5s
+23:49:40 k5: HTTP 200 status=fault findings=[('default', 'DaemonSet/agent-eval-f08', 'admission-denied'), ('default', 'Deployment/agent-eval-f06', 'admission-denied'), ('agents', 'Job/api-smoke-1', 'gitops-unhealthy')] 61.4s error=None
+23:50:23 k5: cleanup exit 0 gone
