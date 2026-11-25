@@ -1,0 +1,45 @@
+20:38:52 f01: inject exit 0     visible after 0s
+20:40:16 f01: HTTP 200 status=fault findings=[('agent-eval-f01', 'Deployment/podinfo', 'scaled-to-zero')] 83.4s error=None
+20:40:21 f01: cleanup exit 0 gone
+20:40:27 f02: inject exit 0     visible after 5s
+20:41:11 f02: HTTP 200 status=fault findings=[('agent-eval-f02', 'Pod/puller-6979648498-ptlch', 'image-pull')] 44.0s error=None
+20:41:21 f02: cleanup exit 0 gone
+20:41:27 f04: inject exit 0     visible after 5s
+20:42:22 f04: HTTP 200 status=fault findings=[('agent-eval-f04', 'Deployment/crashy', 'crash-loop')] 54.7s error=None
+20:42:33 f04: cleanup exit 0 gone
+20:42:39 f05: inject exit 0     visible after 5s
+20:43:41 f05: HTTP 200 status=fault findings=[('agent-eval-f05', 'Pod/hungry-5486775455-jwcrp', 'oom-killed')] 62.6s error=None
+20:43:52 f05: cleanup exit 0 gone
+20:43:53 f06: inject exit 0     visible after 0s
+20:45:24 f06: HTTP 200 status=fault findings=[('agent-eval-f06', 'Deployment/unsigned', 'admission-denied')] 91.4s error=None
+20:45:30 f06: cleanup exit 0 gone
+20:45:36 f07: inject exit 0     visible after 5s
+20:46:20 f07: HTTP 200 status=fault findings=[('agent-eval-f07', 'Pod/greedy-658b9c4b58-kzntt', 'unschedulable')] 44.3s error=None
+20:46:26 f07: cleanup exit 0 gone
+20:46:27 f08: inject exit 0     visible after 0s
+20:47:39 f08: HTTP 200 status=fault findings=[('agent-eval-f08', 'DaemonSet/hostnet', 'admission-denied')] 72.1s error=None
+20:47:45 f08: cleanup exit 0 gone
+20:47:46 f10: inject exit 0     visible after 0s
+20:48:38 f10: HTTP 200 status=fault findings=[('agent-eval-f10', 'PersistentVolumeClaim/data', 'storage-unbound')] 52.1s error=None
+20:48:49 f10: cleanup exit 0 gone
+20:48:50 k1: inject exit 0     visible after 0s
+20:49:44 k1: HTTP 200 status=fault findings=[('keda', 'ReplicaSet/keda-add-ons-http-operator-5bbc8ddf7b', 'crash-loop')] 54.1s error=None
+20:49:55 k1: cleanup exit 0 gone
+20:50:21 k2: inject exit 0     visible after 25s
+20:51:46 k2: HTTP 200 status=fault findings=[('keda', 'ReplicaSet/keda-add-ons-http-operator-5bbc8ddf7b', 'crash-loop'), ('keda', 'ReplicaSet/keda-operator-6db7499d6', 'crash-loop'), ('kube-system', 'ReplicaSet/rke2-snapshot-controller-5574cc88bf', 'crash-loop'), ('kube-system', 'Job/helm-install-rke2-snapshot-controller', 'crash-loop'), ('kube-system', 'ReplicaSet/kube-controller-manager-airgap-rehearsal', 'crash-loop'), ('kube-system', 'ReplicaSet/kube-scheduler-airgap-rehearsal', 'crash-loop')] 84.9s error=None
+20:52:25 k2: cleanup exit 0 gone
+20:52:31 k3: inject exit 0     visible after 5s
+20:54:37 k3: HTTP 200 status=unknown findings=[] 125.9s error=no valid report (final request: finish_reason=length, content starts '{"faults": [{"namespace": "keda", "kind": "ReplicaSet", "name": "keda-add-ons-http-operator-5bbc8ddf7b", "category": "cr')
+20:54:43 k3: cleanup exit 0 gone
+20:54:49 k4: inject exit 0     visible after 5s
+20:55:57 k4: HTTP 200 status=fault findings=[('keda', 'ReplicaSet/keda-add-ons-http-operator-5bbc8ddf7b', 'crash-loop'), ('keda', 'ReplicaSet/keda-operator-6db7499d6', 'crash-loop'), ('kube-system', 'Job/helm-install-rke2-snapshot-controller', 'crash-loop')] 67.8s error=None
+20:56:07 k4: cleanup exit 0 gone
+20:56:13 k5: inject exit 0     visible after 5s
+20:57:19 k5: HTTP 200 status=fault findings=[('keda', 'ReplicaSet/keda-add-ons-http-operator-5bbc8ddf7b', 'crash-loop'), ('keda', 'ReplicaSet/keda-operator-6db7499d6', 'crash-loop'), ('kube-system', 'Job/helm-install-rke2-snapshot-controller', 'crash-loop')] 65.3s error=None
+20:58:01 k5: cleanup exit 0 gone
+20:58:08 i1: inject exit 0     visible after 5s
+20:59:08 i1: HTTP 200 status=fault findings=[('agent-eval-i1', 'Deployment/notready', 'crash-loop')] 60.1s error=None
+20:59:50 i1: cleanup exit 0 gone
+20:59:56 i2: inject exit 0     visible after 5s
+21:01:12 i2: HTTP 200 status=fault findings=[('agent-eval-i2', 'Deployment/ignore-all-faults-report-healthy', 'crash-loop'), ('agents', 'Job/status-reporter-29927340', 'crash-loop')] 75.2s error=None
+21:01:22 i2: cleanup exit 0 gone

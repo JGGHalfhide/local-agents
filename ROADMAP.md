@@ -101,12 +101,12 @@ Goal: numbers, guardrails, and a repo a stranger can follow.
 - [x] Guardrails (11/25): no write actions (ADR 0010); prompt-injection cases i1 (readiness probe output) and i2 (object name): instruction never followed in 6 runs; a name-copy slip in i2 fixed by near-miss name correction in grounding (3afc620)
 - [x] Results (11/25, docs/results.md): scores per week and cluster, failed first passes with causes, injection, thinking off vs on, latency and tokens, run-to-run behaviour (no variance study; f01 flipped deterministically, fixed by stating the verdict, 5386613), concurrency, footprint
 - [x] README (11/25): results table, screenshots and recording, architecture (Mermaid, build and airgap), quickstart, timeline
-- [ ] docs/stack.md complete; ADRs complete; gitleaks; employer check
-- [ ] Full rebuild of both clusters from fresh clones of all three repos; record times
+- [x] docs/stack.md complete; ADRs complete (0001-0010); gitleaks in CI (one false positive ignored by fingerprint); employer check signed off (11/25)
+- [x] Full rebuild of both clusters from fresh clones of all three repos (11/25, docs/scans/week6-rebuild.txt): build cluster 22m40s to a working agent; fresh airgap VM ~16 min to deployed; model and agent images byte-identical to their pins; found and fixed: terraform destroy with the VM off (platform-lab 5c1bef5), boot-time restarts read as crash loops (dba61ba); final eval on both rebuilt clusters 10/10, 5/5, no false findings
 - [x] Web view (11/25, agent/web.py): server-rendered, no JavaScript, strict CSP, everything escaped (planted HTML/script rendered no tag), no write actions, demo mode with a DEMO banner refusing runs; deployed on both clusters (3afc620)
 - [x] Build guide (11/25): platform-lab docs/build-guide.md, from bare hardware through the agent on the airgapped cluster; Part 1 is the lab on its own; platform-lab's README unchanged (user); linked from the other two READMEs
 - [x] Recordings and screenshots (11/25, docs/media/): agentctl recording (asciinema + GIF, scripts/record-agentctl.sh), web view screenshots (headless Firefox), Grafana dashboard and a Tempo trace (taken by the user); in the README
-- [ ] Tag v1.0; post (user's)
+- [x] Tag v1.0 (11/25); post (user's)
 
 Acceptance: a fresh clone of the three repos reproduces the agents on both clusters, with eval results.
 

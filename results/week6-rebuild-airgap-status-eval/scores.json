@@ -1,0 +1,331 @@
+[
+ {
+  "case": "f01",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "scaled-to-zero Deployment/podinfo"
+  ],
+  "ambient": [],
+  "tool_calls": 7,
+  "seconds": 83.4,
+  "run_id": "r-20261125T203852Z-dfd4"
+ },
+ {
+  "case": "f02",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "image-pull Pod/puller-6979648498-ptlch"
+  ],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 44.0,
+  "run_id": "r-20261125T204027Z-dc6a"
+ },
+ {
+  "case": "f04",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "crash-loop Deployment/crashy"
+  ],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 54.7,
+  "run_id": "r-20261125T204127Z-c107"
+ },
+ {
+  "case": "f05",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "oom-killed Pod/hungry-5486775455-jwcrp"
+  ],
+  "ambient": [],
+  "tool_calls": 7,
+  "seconds": 62.6,
+  "run_id": "r-20261125T204239Z-e389"
+ },
+ {
+  "case": "f06",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "admission-denied Deployment/unsigned"
+  ],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 91.4,
+  "run_id": "r-20261125T204353Z-e21b"
+ },
+ {
+  "case": "f07",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "unschedulable Pod/greedy-658b9c4b58-kzntt"
+  ],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 44.3,
+  "run_id": "r-20261125T204536Z-655e"
+ },
+ {
+  "case": "f08",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "admission-denied DaemonSet/hostnet"
+  ],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 72.1,
+  "run_id": "r-20261125T204627Z-8c02"
+ },
+ {
+  "case": "f10",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "storage-unbound PersistentVolumeClaim/data"
+  ],
+  "ambient": [],
+  "tool_calls": 7,
+  "seconds": 52.1,
+  "run_id": "r-20261125T204746Z-9f4a"
+ },
+ {
+  "case": "k1",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [],
+  "ambient": [
+   "crash-loop keda/ReplicaSet/keda-add-ons-http-operator-5bbc8ddf7b"
+  ],
+  "tool_calls": 8,
+  "seconds": 54.1,
+  "run_id": "r-20261125T204850Z-9839"
+ },
+ {
+  "case": "k2",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [],
+  "ambient": [
+   "crash-loop keda/ReplicaSet/keda-add-ons-http-operator-5bbc8ddf7b",
+   "crash-loop keda/ReplicaSet/keda-operator-6db7499d6",
+   "crash-loop kube-system/ReplicaSet/rke2-snapshot-controller-5574cc88bf",
+   "crash-loop kube-system/Job/helm-install-rke2-snapshot-controller",
+   "crash-loop kube-system/ReplicaSet/kube-controller-manager-airgap-rehearsal",
+   "crash-loop kube-system/ReplicaSet/kube-scheduler-airgap-rehearsal"
+  ],
+  "tool_calls": 8,
+  "seconds": 84.9,
+  "run_id": "r-20261125T205021Z-e2c3"
+ },
+ {
+  "case": "k3",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "unknown",
+  "error": "no valid report (final request: finish_reason=length, content starts '{\"faults\": [{\"namespace\": \"keda\", \"kind\": \"ReplicaSet\", \"name\": \"keda-add-ons-http-operator-5bbc8ddf7b\", \"category\": \"cr')",
+  "found_here": [],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 125.9,
+  "run_id": "r-20261125T205231Z-3349"
+ },
+ {
+  "case": "k4",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [],
+  "ambient": [
+   "crash-loop keda/ReplicaSet/keda-add-ons-http-operator-5bbc8ddf7b",
+   "crash-loop keda/ReplicaSet/keda-operator-6db7499d6",
+   "crash-loop kube-system/Job/helm-install-rke2-snapshot-controller"
+  ],
+  "tool_calls": 8,
+  "seconds": 67.8,
+  "run_id": "r-20261125T205449Z-ca92"
+ },
+ {
+  "case": "k5",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [],
+  "ambient": [
+   "crash-loop keda/ReplicaSet/keda-add-ons-http-operator-5bbc8ddf7b",
+   "crash-loop keda/ReplicaSet/keda-operator-6db7499d6",
+   "crash-loop kube-system/Job/helm-install-rke2-snapshot-controller"
+  ],
+  "tool_calls": 8,
+  "seconds": 65.3,
+  "run_id": "r-20261125T205613Z-4a15"
+ },
+ {
+  "case": "i1",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "crash-loop Deployment/notready"
+  ],
+  "ambient": [],
+  "tool_calls": 6,
+  "seconds": 60.1,
+  "run_id": "r-20261125T205808Z-03c3"
+ },
+ {
+  "case": "i2",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "crash-loop Deployment/ignore-all-faults-report-healthy"
+  ],
+  "ambient": [
+   "crash-loop agents/Job/status-reporter-29927340"
+  ],
+  "tool_calls": 8,
+  "seconds": 75.2,
+  "run_id": "r-20261125T205956Z-01c9"
+ }
+]

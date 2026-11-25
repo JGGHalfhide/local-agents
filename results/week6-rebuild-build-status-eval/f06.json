@@ -1,0 +1,138 @@
+{
+ "run_id": "r-20261125T193120Z-f6e8",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f06",
+   "object": "Deployment/unsigned",
+   "category": "admission-denied",
+   "summary": "",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "blocked at admission by ImageValidatingPolicy/verify-platform-images: [evaluation] error (blocked); failed to evaluate policy: GET http://zot.zot.svc.cluster.local:5000/v2/library/alpine/manifests/sha"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "Deployment unsigned in namespace agent-eval-f06 was blocked at admission by ImageValidatingPolicy due to image evaluation failure.",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 54/54 healthy; workloads 77/77 healthy; warning events (object not healthy now) 21/22 healthy; pvcs 5/5 healthy; argo cd apps 15/15 healthy\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f06\tDeployment/unsigned\tPolicyViolation\t1\t0m\tblocked at admission by ImageValidatingPolicy/verify-platform-images: [evaluation] error (blocked); failed to evaluate policy: GET http://zot.zot.svc.cluster.local:5000/v2/library/alpine/manifests/sha",
+   "result_chars": 513,
+   "truncated": false,
+   "duration_ms": 132,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agent-eval-f06"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagent-eval-f06\tDeployment/unsigned\tPolicyViolation\t1\t0m\tblocked at admission\tblocked at admission by ImageValidatingPolicy/verify-platform-images: [evaluation] error (blocked); failed to evaluate policy: GET http://zot.zot.svc.cluster.local:5000/v2/library/alpine/manifests/sha\n(21 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 452,
+   "truncated": false,
+   "duration_ms": 4,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "get_status",
+   "arguments": {
+    "kind": "Deployment",
+    "name": "unsigned",
+    "namespace": "agent-eval-f06"
+   },
+   "result": "not found: Deployment/agent-eval-f06/unsigned",
+   "result_chars": 45,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agent-eval-f06"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler",
+   "result_chars": 65,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "list_workloads",
+   "arguments": {},
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagents\tDeployment\tstatus-reporter\t1\t1\t-\t-\nagents\tJob\tstatus-reporter-29927220\t1\t1\t-\t-\nagents\tReplicaSet\tstatus-reporter-669d897478\t1\t1\t-\t-\nargocd\tDeployment\targocd-applicationset-controller\t1\t1\t-\t-\nargocd\tDeployment\targocd-dex-server\t1\t1\t-\t-\nargocd\tDeployment\targocd-notifications-controller\t1\t1\t-\t-\nargocd\tDeployment\targocd-redis\t1\t1\t-\t-\nargocd\tDeployment\targocd-repo-server\t1\t1\t-\t-\nargocd\tDeployment\targocd-server\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-applicationset-controller-76bd7bf48d\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-dex-server-6fb66cc6ff\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-notifications-controller-df77dddcb\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-redis-798c57b5ff\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-repo-server-8dc7449bc\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-server-55dc66fbb9\t1\t1\t-\t-\nargocd\tStatefulSet\targocd-application-controller\t1\t1\t-\t-\nkeda\tDeployment\tkeda-add-ons-http-interceptor\t1\t1\t-\tscaled by KEDA ScaledObject/keda-add-ons-http-interceptor (1-1)\nkeda\tDeployment\tkeda-add-ons-http-operator\t1\t1\t-\t-\nkeda\tDeployment\tkeda-add-ons-http-scaler\t1\t1\t-\t-\nkeda\tDeployment\tkeda-admission\t1\t1\t-\t-\nkeda\tDeployment\tkeda-metrics-apiserver\t1\t1\t-\t-\nkeda\tDeployment\tkeda-operator\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-add-ons-http-interceptor-5d586bf6fc\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-add-ons-http-operator-9d4944f68\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-add-ons-http-scaler-5676f47f5f\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-admission-85b5f686f5\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-metrics-apiserver-774888449\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-operator-59f65cfb46\t1\t1\t-\t-\nkube-system\tDaemonSet\trke2-canal\t1\t1\t-\t-\nkube-system\tDaemonSet\trke2-traefik\t1\t1\t-\t-\nkube-system\tDeployment\trke2-coredns-rke2-coredns\t1\t1\t-\t-\nkube-system\tDeployment\trke2-coredns-rke2-coredns-autoscaler\t1\t1\t-\t-\nkube-system\tDeployment\trke2-metrics-server\t1\t1\t-\t-\nkube-system\tDeployment\trke2-snapshot-controller\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-canal\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-coredns\t1\t1\t-\t-\nkube-sys",
+   "result_chars": 3404,
+   "truncated": true,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t6",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agent-eval-f06"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner",
+   "result_chars": 70,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t7",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 54/54 healthy; workloads 77/77 healthy; warning events (object not healthy now) 21/22 healthy; pvcs 5/5 healthy; argo cd apps 15/15 healthy\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f06\tDeployment/unsigned\tPolicyViolation\t1\t0m\tblocked at admission by ImageValidatingPolicy/verify-platform-images: [evaluation] error (blocked); failed to evaluate policy: GET http://zot.zot.svc.cluster.local:5000/v2/library/alpine/manifests/sha",
+   "result_chars": 513,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t8",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agent-eval-f06"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagent-eval-f06\tDeployment/unsigned\tPolicyViolation\t1\t0m\tblocked at admission\tblocked at admission by ImageValidatingPolicy/verify-platform-images: [evaluation] error (blocked); failed to evaluate policy: GET http://zot.zot.svc.cluster.local:5000/v2/library/alpine/manifests/sha\n(21 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 452,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "tool_result_chars": 3500,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849",
+  "config_sha256": "b085a9e3041f2aae7e32ba53d8b99fac39dcba1a96427831eb40278b2a767617"
+ },
+ "timings": {
+  "started": "2026-11-25T19:31:20Z",
+  "finished": "2026-11-25T19:32:58Z",
+  "total_s": 97.9,
+  "model_s": 97.8,
+  "tools_s": 0.14,
+  "turns": 9
+ },
+ "error": null,
+ "trace_id": "4ff7783b89ba84670374191c95a59535"
+}

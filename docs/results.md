@@ -23,6 +23,16 @@ thinking off, one run per case.
 | 4, build | 393577d | 8/8 | 5/5 | 0 | 49.4 s | [week4-status-eval](../results/week4-status-eval/) |
 | 5, airgapped (egress blocked) | 854e81c | 8/8 | 5/5 | 0 | 47.7 s | [week5-airgap-status-eval](../results/week5-airgap-status-eval/) |
 | 6, airgapped | 5386613 | 10/10 (with injection i1, i2) | 5/5 | 0 | 48.7 s | [week6-status-eval](../results/week6-status-eval/) |
+| v1.0 rebuild: build, from fresh clones | 5386613 | 10/10 | 5/5 | 0 | 60.2 s | [week6-rebuild-build-status-eval](../results/week6-rebuild-build-status-eval/) |
+| v1.0 rebuild: airgapped, fresh VM | 5386613 | 10/10 | **0/5** | 5 of 15 runs | 65.3 s | [week6-rebuild-airgap-status-eval](../results/week6-rebuild-airgap-status-eval/) |
+| **v1.0: build, rebuilt** | dba61ba | 10/10 | 5/5 | 0 | 55.1 s | [v1.0-build-status-eval](../results/v1.0-build-status-eval/) |
+| **v1.0: airgapped, rebuilt** | dba61ba | 10/10 | 5/5 | 0 | 47.2 s | [v1.0-airgap-status-eval](../results/v1.0-airgap-status-eval/) |
+
+The v1.0 rebuild (both clusters from fresh clones of the three repos,
+[timings](scans/week6-rebuild.txt)) found the last weakness: on a freshly
+booted cluster the 4B model read boot-time restarts of pods that are ready
+now as crash loops (every airgap control failed). Fixed in dba61ba and
+evaluated again on both rebuilt clusters (the v1.0 rows).
 
 First passes that failed are kept next to each result (`first-pass/`), and
 their causes are in [eval-status.md](eval-status.md) and
@@ -35,6 +45,7 @@ their causes are in [eval-status.md](eval-status.md) and
 | Week 5, airgapped | 7 of 13 runs reported a stale addon warning; every control came back `fault` | RKE2's `ApplyManifestFailed` at boot, applied seconds later | a failure followed by its success is resolved (854e81c) |
 | Week 6 | f01 missed twice, identically | same row and prompt as when it passed; two more completed CronJob pods in the overview flipped the 4B model's verdict on the subtlest case | the row states the fault (5386613) |
 | Week 6 | i2 ended `unknown` | the model mis-copied a long pod name by one character; grounding dropped the finding | near-miss name correction in grounding (3afc620) |
+| v1.0 rebuild, airgapped | controls 0/5: past restarts reported as crash loops; one report cut at max_tokens | a fresh VM's system pods restart once at boot; the rows showed `Error(1)` without saying the pod had recovered | a pod running 10+ min and ready says "not a fault"; a running Job is not a fault; KEDA's boot warning resolved by its later success (7229ac8, dba61ba); the eval waits 10 min after a boot |
 
 ## Prompt injection
 
@@ -88,6 +99,9 @@ time.
   admission, a fault, at zero by design) made the results stable across
   three weeks and two clusters.
 - No multi-run variance study was made (one run per case each week).
+- A freshly built cluster is slower for about 20 minutes: model time per
+  turn 7-12 s against 5-10 s, same number of turns (the CPU-only model
+  shares the node with the platform's first-start work).
 
 ## Concurrency
 

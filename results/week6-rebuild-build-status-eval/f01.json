@@ -1,0 +1,116 @@
+{
+ "run_id": "r-20261125T192448Z-a541",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f01",
+   "object": "Deployment/podinfo",
+   "category": "scaled-to-zero",
+   "summary": "Deployment podinfo in agent-eval-f01 is scaled to zero by hand, leaving its Service with no endpoints.",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "0 replicas, not autoscaled; Service/podinfo selects it and has no pods: a fault (scaled to zero by hand, not by KEDA)"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "One fault found: Deployment podinfo in agent-eval-f01 is scaled to zero by hand, causing its Service to have no endpoints.",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 54/54 healthy; workloads 77/78 healthy; warning events (object not healthy now) 29/29 healthy; pvcs 5/5 healthy; argo cd apps 15/15 healthy\n\nworkloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f01\tDeployment\tpodinfo\t0\t0\t-\t0 replicas, not autoscaled; Service/podinfo selects it and has no pods: a fault (scaled to zero by hand, not by KEDA)",
+   "result_chars": 398,
+   "truncated": false,
+   "duration_ms": 88,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_workloads",
+   "arguments": {},
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f01\tDeployment\tpodinfo\t0\t0\t-\t0 replicas, not autoscaled; Service/podinfo selects it and has no pods: a fault (scaled to zero by hand, not by KEDA)\nagents\tDeployment\tstatus-reporter\t1\t1\t-\t-\nagents\tJob\tstatus-reporter-29927220\t1\t1\t-\t-\nagents\tReplicaSet\tstatus-reporter-669d897478\t1\t1\t-\t-\nargocd\tDeployment\targocd-applicationset-controller\t1\t1\t-\t-\nargocd\tDeployment\targocd-dex-server\t1\t1\t-\t-\nargocd\tDeployment\targocd-notifications-controller\t1\t1\t-\t-\nargocd\tDeployment\targocd-redis\t1\t1\t-\t-\nargocd\tDeployment\targocd-repo-server\t1\t1\t-\t-\nargocd\tDeployment\targocd-server\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-applicationset-controller-76bd7bf48d\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-dex-server-6fb66cc6ff\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-notifications-controller-df77dddcb\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-redis-798c57b5ff\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-repo-server-8dc7449bc\t1\t1\t-\t-\nargocd\tReplicaSet\targocd-server-55dc66fbb9\t1\t1\t-\t-\nargocd\tStatefulSet\targocd-application-controller\t1\t1\t-\t-\nkeda\tDeployment\tkeda-add-ons-http-interceptor\t1\t1\t-\tscaled by KEDA ScaledObject/keda-add-ons-http-interceptor (1-1)\nkeda\tDeployment\tkeda-add-ons-http-operator\t1\t1\t-\t-\nkeda\tDeployment\tkeda-add-ons-http-scaler\t1\t1\t-\t-\nkeda\tDeployment\tkeda-admission\t1\t1\t-\t-\nkeda\tDeployment\tkeda-metrics-apiserver\t1\t1\t-\t-\nkeda\tDeployment\tkeda-operator\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-add-ons-http-interceptor-5d586bf6fc\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-add-ons-http-operator-9d4944f68\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-add-ons-http-scaler-5676f47f5f\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-admission-85b5f686f5\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-metrics-apiserver-774888449\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-operator-59f65cfb46\t1\t1\t-\t-\nkube-system\tDaemonSet\trke2-canal\t1\t1\t-\t-\nkube-system\tDaemonSet\trke2-traefik\t1\t1\t-\t-\nkube-system\tDeployment\trke2-coredns-rke2-coredns\t1\t1\t-\t-\nkube-system\tDeployment\trke2-coredns-rke2-coredns-autoscaler\t1\t1\t-\t-\nkube-system\tDeployment\trke2-metrics-server\t1\t1\t-\t-\nkube",
+   "result_chars": 3429,
+   "truncated": true,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_argocd_apps",
+   "arguments": {},
+   "result": "argo cd applications\nnamespace\tname\tsync\thealth\tmessage\nargocd\talloy\tSynced\tHealthy\t\nargocd\targocd\tSynced\tHealthy\t\nargocd\tkeda\tSynced\tHealthy\t\nargocd\tkube-prometheus-stack\tSynced\tHealthy\t\nargocd\tkyverno\tSynced\tHealthy\t\nargocd\tlocal-agents\tSynced\tHealthy\t\nargocd\tlocal-airgap-llm\tSynced\tHealthy\t\nargocd\tlocal-path-storage\tSynced\tHealthy\t\nargocd\tloki\tSynced\tHealthy\t\nargocd\tpolicies\tSynced\tHealthy\t\nargocd\troot\tSynced\tHealthy\t\nargocd\tsample-app\tSynced\tHealthy\t\nargocd\ttempo\tSynced\tHealthy\t\nargocd\tvelero\tSynced\tHealthy\t\nargocd\tzot\tSynced\tHealthy\t",
+   "result_chars": 544,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_nodes",
+   "arguments": {},
+   "result": "nodes\nname\tready\tpressure\tunschedulable\nbuild-node-01\tTrue\t-\tFalse",
+   "result_chars": 66,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "list_pvcs",
+   "arguments": {},
+   "result": "persistent volume claims\nnamespace\tname\tphase\tstorage_class\tclass_exists\tcapacity\nmonitoring\tprometheus-kps-kube-prometheus-stack-prometheus-db-prometheus-kps-kube-prometheus-stack-prometheus-0\tBound\tlocal-path\tyes\t8Gi\nmonitoring\tstorage-loki-0\tBound\tlocal-path\tyes\t5Gi\nmonitoring\tstorage-tempo-0\tBound\tlocal-path\tyes\t2Gi\nsample-app\tdata-db-0\tBound\tlocal-path\tyes\t1Gi\nzot\tzot-pvc-zot-0\tBound\tlocal-path\tyes\t10Gi",
+   "result_chars": 411,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t6",
+   "tool": "list_keda_objects",
+   "arguments": {},
+   "result": "keda objects\nnamespace\tkind\tname\ttarget\tmin\tmax\tready\tactive\tpaused\nkeda\tScaledObject\tkeda-add-ons-http-interceptor\tDeployment/keda-add-ons-http-interceptor\t1\t1\tTrue\tTrue\tFalse\nllm\tScaledObject\tllama-server\tDeployment/llama-server\t0\t1\tTrue\tTrue\tFalse",
+   "result_chars": 250,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t7",
+   "tool": "list_events",
+   "arguments": {},
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\n(29 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 174,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "tool_result_chars": 3500,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849",
+  "config_sha256": "b085a9e3041f2aae7e32ba53d8b99fac39dcba1a96427831eb40278b2a767617"
+ },
+ "timings": {
+  "started": "2026-11-25T19:24:48Z",
+  "finished": "2026-11-25T19:26:34Z",
+  "total_s": 106.3,
+  "model_s": 106.2,
+  "tools_s": 0.09,
+  "turns": 9
+ },
+ "error": null,
+ "trace_id": "b95977e095dc509c21c31917e5135b59"
+}

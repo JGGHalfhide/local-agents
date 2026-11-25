@@ -1,0 +1,104 @@
+{
+ "run_id": "r-20261125T212356Z-8c5f",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f05",
+   "object": "Pod/hungry-5486775455-bm6jc",
+   "category": "oom-killed",
+   "summary": "Pod is crash-looping due to OOMKilled - container exceeds memory limit",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Available=False(MinimumReplicasUnavailable)"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "1 fault: Pod hungry-5486775455-bm6jc in agent-eval-f05 is crash-looping due to OOMKilled",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 55/56 healthy; workloads 78/80 healthy; warning events (object not healthy now) 74/75 healthy; pvcs 5/5 healthy; argo cd apps 15/15 healthy\n\npods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f05\thungry-5486775455-bm6jc\tRunning\t0/1\t1\tCrashLoopBackOff\tOOMKilled(137)\tReplicaSet/hungry-5486775455\n\nworkloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f05\tDeployment\thungry\t1\t0\tAvailable=False(MinimumReplicasUnavailable)\t-\nagent-eval-f05\tReplicaSet\thungry-5486775455\t1\t0\t-\t-\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f05\tPod/hungry-5486775455-bm6jc\tBackOff\t2\t0m\tBack-off restarting failed container hungry in pod hungry-5486775455-bm6jc_agent-eval-f05(47ee9bb3-a3e0-407a-abd6-7077d982b587)",
+   "result_chars": 828,
+   "truncated": false,
+   "duration_ms": 89,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f05\thungry-5486775455-bm6jc\tRunning\t0/1\t1\tCrashLoopBackOff\tOOMKilled(137)\tReplicaSet/hungry-5486775455",
+   "result_chars": 184,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagent-eval-f05\tPod/hungry-5486775455-bm6jc\tBackOff\t2\t0m\tNOT OK\tBack-off restarting failed container hungry in pod hungry-5486775455-bm6jc_agent-eval-f05(47ee9bb3-a3e0-407a-abd6-7077d982b587)\n(74 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 365,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f05\tDeployment\thungry\t1\t0\tAvailable=False(MinimumReplicasUnavailable)\t-\nagent-eval-f05\tReplicaSet\thungry-5486775455\t1\t0\t-\t-",
+   "result_chars": 200,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "pod_metrics",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "pod metrics in agent-eval-f05\npod\tcontainer\tcpu\tmemory\tmemory_limit",
+   "result_chars": 67,
+   "truncated": false,
+   "duration_ms": 15,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "tool_result_chars": 3500,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849",
+  "config_sha256": "b085a9e3041f2aae7e32ba53d8b99fac39dcba1a96427831eb40278b2a767617"
+ },
+ "timings": {
+  "started": "2026-11-25T21:23:56Z",
+  "finished": "2026-11-25T21:24:44Z",
+  "total_s": 47.7,
+  "model_s": 47.6,
+  "tools_s": 0.11,
+  "turns": 5
+ },
+ "error": null,
+ "trace_id": "0bed04646ad44540fdd99b69a37d6509"
+}

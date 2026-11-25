@@ -1,0 +1,16 @@
+20:05:07 f01: inject exit 0     visible after 0s
+20:30:38 f01: inject exit 0     visible after 0s
+20:32:28 f01: HTTP 200 status=fault findings=[('agent-eval-f01', 'Deployment/podinfo', 'scaled-to-zero'), ('llm', 'ScaledObject/llama-server', 'other')] 110.2s error=None
+20:32:34 f01: cleanup exit 0 gone
+20:32:40 f02: inject exit 0     visible after 5s
+20:33:40 f02: HTTP 200 status=fault findings=[('agent-eval-f02', 'Pod/puller-6979648498-gj488', 'image-pull'), ('llm', 'ScaledObject/llama-server', 'other')] 59.8s error=None
+20:33:50 f02: cleanup exit 0 gone
+20:33:56 f04: inject exit 0     visible after 5s
+20:35:10 f04: HTTP 200 status=fault findings=[('agent-eval-f04', 'Pod/crashy-7dfc58bc6d-gp5xm', 'crash-loop'), ('llm', 'ScaledObject/llama-server', 'other')] 73.3s error=None
+20:35:20 f04: cleanup exit 0 gone
+20:35:26 f05: inject exit 0     visible after 5s
+20:36:38 f05: HTTP 200 status=fault findings=[('agent-eval-f05', 'Pod/hungry-5486775455-fl5fz', 'oom-killed'), ('agent-eval-f05', 'Deployment/hungry', 'crash-loop'), ('llm', 'ScaledObject/llama-server', 'other')] 72.1s error=None
+20:36:49 f05: cleanup exit 0 gone
+20:36:50 f06: inject exit 0     visible after 0s
+20:38:17 f06: HTTP 200 status=fault findings=[('agent-eval-f06', 'Deployment/unsigned', 'admission-denied')] 87.4s error=None
+20:38:23 f06: cleanup exit 0 gone

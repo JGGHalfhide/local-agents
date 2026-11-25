@@ -7,6 +7,22 @@ namespaces; a fault outside them needs the user's approval of that specific
 fault. Code: eval/status/ (cases.yaml, cases/*.yaml, inject.sh, cleanup.sh,
 score.py, run_eval.py); every run goes through the operator API (ADR 0005).
 
+## Results, v1.0 (11/25, results/v1.0-*-status-eval/)
+
+Both clusters rebuilt from fresh clones of the three repos
+([scans/week6-rebuild.txt](scans/week6-rebuild.txt)), image dba61ba, the
+15 cases (with injection i1, i2) on each: **build 10/10, 5/5 clean, no
+ambient findings, median 55.1 s; airgapped 10/10, 5/5 clean, no ambient
+findings, median 47.2 s**. The eval waits after every VM boot until no
+restarted container has run under 10 minutes.
+
+Before the fix (image 5386613, kept): the rebuilt build cluster passed
+(10/10, 5/5), the rebuilt airgap VM's controls 0/5 (boot-time restarts of
+pods ready now read as crash loops; one report cut at max_tokens). Fixed in
+7229ac8 and dba61ba (tools: earlier restarts of a pod running 10+ min and
+ready, a completed pod's earlier error, a running Job, and KEDA's boot-time
+deactivation failure are not faults).
+
 ## Thinking on, Week 4 (11/25, results/week4-thinking-status-eval/)
 
 The same 13 cases with `"thinking": true` (run_eval.py --thinking), same

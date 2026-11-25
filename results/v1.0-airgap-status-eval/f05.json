@@ -1,0 +1,102 @@
+{
+ "run_id": "r-20261125T215648Z-089f",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f05",
+   "object": "Deployment/hungry",
+   "category": "oom-killed",
+   "summary": "Deployment hungry has a pod crash-looping due to OOMKilled(137)",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "agent-eval-f05\thungry-5486775455-chdt6\tRunning\t0/1\t1\tCrashLoopBackOff\tOOMKilled(137)\tReplicaSet/hungry-5486775455"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "One fault: Deployment hungry in namespace agent-eval-f05 has a pod crash-looping due to OOMKilled(137)",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 47/48 healthy; workloads 64/66 healthy; warning events (object not healthy now) 64/65 healthy; pvcs 5/5 healthy; argo cd apps 0/0 healthy\n\npods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f05\thungry-5486775455-chdt6\tRunning\t0/1\t1\tCrashLoopBackOff\tOOMKilled(137)\tReplicaSet/hungry-5486775455\n\nworkloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f05\tDeployment\thungry\t1\t0\tAvailable=False(MinimumReplicasUnavailable)\t-\nagent-eval-f05\tReplicaSet\thungry-5486775455\t1\t0\t-\t-\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f05\tPod/hungry-5486775455-chdt6\tBackOff\t2\t0m\tBack-off restarting failed container hungry in pod hungry-5486775455-chdt6_agent-eval-f05(da72e406-921f-46a0-8058-05d08ed2696d)",
+   "result_chars": 826,
+   "truncated": false,
+   "duration_ms": 83,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f05\thungry-5486775455-chdt6\tRunning\t0/1\t1\tCrashLoopBackOff\tOOMKilled(137)\tReplicaSet/hungry-5486775455",
+   "result_chars": 184,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagent-eval-f05\tPod/hungry-5486775455-chdt6\tBackOff\t2\t0m\tNOT OK\tBack-off restarting failed container hungry in pod hungry-5486775455-chdt6_agent-eval-f05(da72e406-921f-46a0-8058-05d08ed2696d)\n(64 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 365,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f05\tDeployment\thungry\t1\t0\tAvailable=False(MinimumReplicasUnavailable)\t-\nagent-eval-f05\tReplicaSet\thungry-5486775455\t1\t0\t-\t-",
+   "result_chars": 200,
+   "truncated": false,
+   "duration_ms": 1,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "list_pods",
+   "arguments": {},
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f05\thungry-5486775455-chdt6\tRunning\t0/1\t1\tCrashLoopBackOff\tOOMKilled(137)\tReplicaSet/hungry-5486775455\nagents\tstatus-reporter-29927340-gb92f\tSucceeded\t0/1\t0\t-\t-\tJob/status-reporter-29927340\nagents\tstatus-reporter-67466f95d6-fqgb5\tRunning\t1/1\t0\t-\t-\tReplicaSet/status-reporter-67466f95d6\nkeda\tkeda-add-ons-http-interceptor-7bb75f56b5-zwhkr\tRunning\t1/1\t1\t-\tUnknown(255) earlier; running 10+ min, ready now: not a fault\tReplicaSet/keda-add-ons-http-interceptor-7bb75f56b5\nkeda\tkeda-add-ons-http-operator-5bbc8ddf7b-64rwm\tRunning\t1/1\t2\t-\tUnknown(255) earlier; running 10+ min, ready now: not a fault\tReplicaSet/keda-add-ons-http-operator-5bbc8ddf7b\nkeda\tkeda-add-ons-http-scaler-6cc79c548c-6hspv\tRunning\t1/1\t1\t-\tUnknown(255) earlier; running 10+ min, ready now: not a fault\tReplicaSet/keda-add-ons-http-scaler-6cc79c548c\nkeda\tkeda-admission-78db496f9f-stsv2\tRunning\t1/1\t1\t-\tUnknown(255) earlier; running 10+ min, ready now: not a fault\tReplicaSet/keda-admission-78db496f9f\nkeda\tkeda-metrics-apiserver-68cf466b57-5s898\tRunning\t1/1\t1\t-\tUnknown(255) earlier; running 10+ min, ready now: not a fault\tReplicaSet/keda-metrics-apiserver-68cf466b57\nkeda\tkeda-operator-6db7499d6-h7scr\tRunning\t1/1\t3\t-\tUnknown(255) earlier; running 10+ min, ready now: not a fault\tReplicaSet/keda-operator-6db7499d6\nkube-system\tcloud-controller-manager-airgap-rehearsal\tRunning\t1/1\t3\t-\tError(2) earlier; running 10+ min, ready now: not a fault\tNode/airgap-rehearsal\nkube-system\tetcd-airgap-rehearsal\tRunning\t1/1\t3\t-\tUnknown(255) earlier; running 10+ min, ready now: not a fault\tNode/airgap-rehearsal\nkube-system\thelm-install-rke2-canal-gg5wz\tSucceeded\t0/1\t0\t-\t-\tJob/helm-install-rke2-canal\nkube-system\thelm-install-rke2-coredns-rt55g\tSucceeded\t0/1\t0\t-\t-\tJob/helm-install-rke2-coredns\nkube-system\thelm-install-rke2-metrics-server-wbjtn\tSucceeded\t0/1\t0\t-\t-\tJob/helm-install-rke2-metrics-server\nkube-system\thelm-install-rke2-runtimeclasses-282s7\tSucceed",
+   "result_chars": 3413,
+   "truncated": true,
+   "duration_ms": 0,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "tool_result_chars": 3500,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849",
+  "config_sha256": "b085a9e3041f2aae7e32ba53d8b99fac39dcba1a96427831eb40278b2a767617"
+ },
+ "timings": {
+  "started": "2026-11-25T21:56:48Z",
+  "finished": "2026-11-25T21:57:59Z",
+  "total_s": 70.5,
+  "model_s": 70.4,
+  "tools_s": 0.09,
+  "turns": 5
+ },
+ "error": null,
+ "trace_id": "d4b0d382b32690fba393044f956b7933"
+}

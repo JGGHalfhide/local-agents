@@ -1,0 +1,130 @@
+{
+ "run_id": "r-20261125T215810Z-c71f",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f06",
+   "object": "Deployment/unsigned",
+   "category": "admission-denied",
+   "summary": "",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "blocked at admission by ImageValidatingPolicy/verify-platform-images: [evaluation] error (blocked); failed to evaluate policy: GET http://zarf-docker-registry.zarf.svc.cluster.local:5000/v2/library/al"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "One fault found: Deployment 'unsigned' in namespace 'agent-eval-f06' is blocked at admission by an ImageValidatingPolicy due to an evaluation error when trying to access the zarf-docker-registry.",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 47/47 healthy; workloads 64/64 healthy; warning events (object not healthy now) 63/64 healthy; pvcs 5/5 healthy; argo cd apps 0/0 healthy\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f06\tDeployment/unsigned\tPolicyViolation\t1\t0m\tblocked at admission by ImageValidatingPolicy/verify-platform-images: [evaluation] error (blocked); failed to evaluate policy: GET http://zarf-docker-registry.zarf.svc.cluster.local:5000/v2/library/al",
+   "result_chars": 511,
+   "truncated": false,
+   "duration_ms": 78,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_events",
+   "arguments": {},
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagent-eval-f06\tDeployment/unsigned\tPolicyViolation\t1\t0m\tblocked at admission\tblocked at admission by ImageValidatingPolicy/verify-platform-images: [evaluation] error (blocked); failed to evaluate policy: GET http://zarf-docker-registry.zarf.svc.cluster.local:5000/v2/library/al\n(63 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 452,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_argocd_apps",
+   "arguments": {},
+   "result": "argo cd applications\nnamespace\tname\tsync\thealth\tmessage",
+   "result_chars": 55,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_namespaces",
+   "arguments": {},
+   "result": "namespaces\nname\tphase\nagent-eval-f06\tActive\nagents\tActive\ndefault\tActive\nkeda\tActive\nkube-node-lease\tActive\nkube-public\tActive\nkube-system\tActive\nkyverno\tActive\nllm\tActive\nlocal-path-storage\tActive\nmonitoring\tActive\nmonitoring-node\tActive\nsample-app\tActive\nzarf\tActive",
+   "result_chars": 268,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agent-eval-f06"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner",
+   "result_chars": 70,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t6",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agent-eval-f06"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler",
+   "result_chars": 65,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t7",
+   "tool": "list_nodes",
+   "arguments": {},
+   "result": "nodes\nname\tready\tpressure\tunschedulable\nairgap-rehearsal\tTrue\t-\tFalse",
+   "result_chars": 69,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t8",
+   "tool": "list_pvcs",
+   "arguments": {},
+   "result": "persistent volume claims\nnamespace\tname\tphase\tstorage_class\tclass_exists\tcapacity\nmonitoring\tprometheus-kps-kube-prometheus-stack-prometheus-db-prometheus-kps-kube-prometheus-stack-prometheus-0\tBound\tlocal-path\tyes\t8Gi\nmonitoring\tstorage-loki-0\tBound\tlocal-path\tyes\t5Gi\nmonitoring\tstorage-tempo-0\tBound\tlocal-path\tyes\t2Gi\nsample-app\tdata-db-0\tBound\tlocal-path\tyes\t1Gi\nzarf\tzarf-docker-registry\tBound\tlocal-path\tyes\t20Gi",
+   "result_chars": 419,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "tool_result_chars": 3500,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849",
+  "config_sha256": "b085a9e3041f2aae7e32ba53d8b99fac39dcba1a96427831eb40278b2a767617"
+ },
+ "timings": {
+  "started": "2026-11-25T21:58:10Z",
+  "finished": "2026-11-25T21:58:47Z",
+  "total_s": 37.2,
+  "model_s": 37.2,
+  "tools_s": 0.08,
+  "turns": 9
+ },
+ "error": null,
+ "trace_id": "ba4b30971aa1b4a56685c07efaf240b4"
+}

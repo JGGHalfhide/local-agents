@@ -1,0 +1,170 @@
+{
+ "run_id": "r-20261125T203526Z-9df5",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f05",
+   "object": "Pod/hungry-5486775455-fl5fz",
+   "category": "oom-killed",
+   "summary": "",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Back-off restarting failed container hungry in pod hungry-5486775455-fl5fz_agent-eval-f05(36201085-7fed-4bf0-8166-44aa42f88f3a)"
+    }
+   ]
+  },
+  {
+   "namespace": "agent-eval-f05",
+   "object": "Deployment/hungry",
+   "category": "crash-loop",
+   "summary": "",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Available=False(MinimumReplicasUnavailable)"
+    }
+   ]
+  },
+  {
+   "namespace": "llm",
+   "object": "ScaledObject/llama-server",
+   "category": "other",
+   "summary": "",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Failed to deactivate apps/v1.Deployment llm/llama-server from -1 to 0: Get \"https://10.43.0.1:443/apis/apps/v1/namespaces/llm/deployments/llama-server/scale?timeout=32s\": context deadline exceeded"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "Found 3 faults: 1 pod OOM-killed and crash-looping in agent-eval-f05, 1 Deployment affected by the crash-loop, and 1 ScaledObject failing to deactivate due to API timeout.",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 46/47 healthy; workloads 63/65 healthy; warning events (object not healthy now) 44/46 healthy; pvcs 5/5 healthy; argo cd apps 0/0 healthy\n\npods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f05\thungry-5486775455-fl5fz\tRunning\t0/1\t1\tCrashLoopBackOff\tOOMKilled(137)\tReplicaSet/hungry-5486775455\n\nworkloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f05\tDeployment\thungry\t1\t0\tAvailable=False(MinimumReplicasUnavailable)\t-\nagent-eval-f05\tReplicaSet\thungry-5486775455\t1\t0\t-\t-\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f05\tPod/hungry-5486775455-fl5fz\tBackOff\t2\t0m\tBack-off restarting failed container hungry in pod hungry-5486775455-fl5fz_agent-eval-f05(36201085-7fed-4bf0-8166-44aa42f88f3a)\nllm\tScaledObject/llama-server\tKEDAScaleTargetDeactivationFailed\t1\t32m\tFailed to deactivate apps/v1.Deployment llm/llama-server from -1 to 0: Get \"https://10.43.0.1:443/apis/apps/v1/namespaces/llm/deployments/llama-server/scale?timeout=32s\": context deadline exceeded",
+   "result_chars": 1093,
+   "truncated": false,
+   "duration_ms": 86,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f05\thungry-5486775455-fl5fz\tRunning\t0/1\t1\tCrashLoopBackOff\tOOMKilled(137)\tReplicaSet/hungry-5486775455",
+   "result_chars": 184,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagent-eval-f05\tPod/hungry-5486775455-fl5fz\tBackOff\t2\t0m\tNOT OK\tBack-off restarting failed container hungry in pod hungry-5486775455-fl5fz_agent-eval-f05(36201085-7fed-4bf0-8166-44aa42f88f3a)\n(44 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 365,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "llm"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nllm\tScaledObject/llama-server\tKEDAScaleTargetDeactivationFailed\t1\t32m\t?\tFailed to deactivate apps/v1.Deployment llm/llama-server from -1 to 0: Get \"https://10.43.0.1:443/apis/apps/v1/namespaces/llm/deployments/llama-server/scale?timeout=32s\": context deadline exceeded\n(44 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 443,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "get_status",
+   "arguments": {
+    "kind": "Deployment",
+    "name": "hungry",
+    "namespace": "agent-eval-f05"
+   },
+   "result": "{\"namespace\": \"agent-eval-f05\", \"kind\": \"Deployment\", \"name\": \"hungry\", \"desired\": 1, \"ready\": 0, \"conditions\": \"Available=False(MinimumReplicasUnavailable)\", \"autoscaler\": \"-\", \"ok\": false}",
+   "result_chars": 190,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t6",
+   "tool": "get_status",
+   "arguments": {
+    "kind": "ScaledObject",
+    "name": "llama-server",
+    "namespace": "llm"
+   },
+   "result": "{\"namespace\": \"llm\", \"kind\": \"ScaledObject\", \"name\": \"llama-server\", \"target\": \"Deployment/llama-server\", \"min\": 0, \"max\": 1, \"ready\": \"True\", \"active\": \"True\", \"paused\": \"False\"}",
+   "result_chars": 179,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t7",
+   "tool": "get_status",
+   "arguments": {
+    "kind": "Deployment",
+    "name": "llama-server",
+    "namespace": "llm"
+   },
+   "result": "{\"namespace\": \"llm\", \"kind\": \"Deployment\", \"name\": \"llama-server\", \"desired\": 1, \"ready\": 1, \"conditions\": \"-\", \"autoscaler\": \"scaled by KEDA ScaledObject/llama-server (0-1)\", \"ok\": true}",
+   "result_chars": 187,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t8",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "llm"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nllm\tDeployment\tllama-server\t1\t1\t-\tscaled by KEDA ScaledObject/llama-server (0-1)\nllm\tReplicaSet\tllama-server-6f47bffd4\t1\t1\t-\t-",
+   "result_chars": 192,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "tool_result_chars": 3500,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849",
+  "config_sha256": "b085a9e3041f2aae7e32ba53d8b99fac39dcba1a96427831eb40278b2a767617"
+ },
+ "timings": {
+  "started": "2026-11-25T20:35:26Z",
+  "finished": "2026-11-25T20:36:38Z",
+  "total_s": 72.1,
+  "model_s": 72.0,
+  "tools_s": 0.09,
+  "turns": 6
+ },
+ "error": null,
+ "trace_id": "5f138500e12ec6eefe34c8f1f42a1541"
+}

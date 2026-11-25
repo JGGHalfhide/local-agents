@@ -338,7 +338,22 @@ scripts/record-agentctl.sh; web view PNGs via headless Firefox with its own
 profile, since the user's Firefox is open). Open: Grafana and Tempo
 screenshots (need the Grafana login), the from-zero build guide, the full
 rebuild of both clusters from fresh clones (user: last, before v1.0), v1.0.
-Lab: airgap-rehearsal running (egress blocked; image 5386613), build-node-01 off (a libvirt domain named
+v1.0 (11/25): full rebuild from fresh clones (docs/scans/week6-rebuild.txt):
+make down (after platform-lab 5c1bef5: destroy failed with the VM off),
+fresh clones, build cluster 22m40s to a working agent; model and agent
+images byte-identical to their pins; fresh airgap VM, zarf init, 9
+packages Succeeded, 0 pull errors, egress blocked, unsigned image rejected.
+The rebuilt airgap VM's controls failed 0/5 (boot-time restarts read as
+crash loops) -> fixed before v1.0 (user's choice: 7229ac8, dba61ba; image
+dba61ba sha256:3d131df5, deployed 2cc1602, agents 0.6.2). Final eval on
+both rebuilt clusters: 10/10, 5/5 clean, no ambient findings
+(results/v1.0-*-status-eval/). Stale events from the publish window, the
+unsigned test and KEDA's boot warning deleted with the user's OK. After
+every VM boot the eval waits until no restarted container has run < 10 min.
+The rebuilt clusters' Terraform state, kubeconfigs and packages were made in
+~/projects/freshclone-1125/ and copied back to the working repos.
+Tagged v1.0 (11/25; employer check signed off).
+Lab: airgap-rehearsal running (egress blocked; image dba61ba), build-node-01 off (both rebuilt 11/25) (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state
 and kubeconfigs.

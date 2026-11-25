@@ -19,8 +19,9 @@ three repos together show the whole chain end to end, from bare hardware to
 an agent on an airgapped cluster
 ([ADR 0006](docs/adr/0006-scope-one-agent.md)).
 
-**Status:** Week 6 (11/25). Running on the build cluster and on the
-airgapped cluster; v1.0 after the full rebuild from fresh clones.
+**Status:** v1.0 (11/25). Both clusters rebuilt from fresh clones of the
+three repos and evaluated; running on the build cluster and on the
+airgapped cluster.
 
 ## Results
 
@@ -32,6 +33,7 @@ thinking off ([full results](docs/results.md)):
 | Build (Week 4) | 8/8 | 5/5 | 0 | 49 s |
 | Airgapped, egress blocked (Week 5) | 8/8 | 5/5 | 0 | 48 s |
 | Airgapped, with prompt injection (Week 6) | 10/10 | 5/5 | 0 | 49 s |
+| **v1.0, both clusters rebuilt from fresh clones** | 10/10 each | 5/5 each | 0 | 55 s / 47 s |
 
 - **Prompt injection:** instructions planted in a readiness probe's output
   and in an object's name were never followed (6 runs).
@@ -150,7 +152,7 @@ thinking, write actions).
 | 3 | v0.3 | Eval follow-ups; no false findings |
 | 4 | v0.4 | Tracing (OpenTelemetry, Tempo), prompts as GitOps files with an eval gate in CI, dashboard, thinking tested |
 | 5 | v0.5 | The airgapped cluster: Zarf package, signatures via the Zarf registry, eval matching the build cluster |
-| 6 | | No write actions, prompt-injection cases, web view, results, recordings |
+| 6 | v1.0 | No write actions, prompt-injection cases, web view, results, recordings, build guide; both clusters rebuilt from fresh clones and evaluated |
 
 ## License
 

@@ -1,0 +1,122 @@
+{
+ "run_id": "r-20261125T193304Z-2791",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f07",
+   "object": "Pod/greedy-658b9c4b58-gvtr5",
+   "category": "unschedulable",
+   "summary": "Pod is in Pending phase due to insufficient CPU resources on the cluster",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "0/1 nodes are available: 1 Insufficient cpu. no new claims to deallocate, preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling."
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "One fault found: Pod greedy-658b9c4b58-gvtr5 in namespace agent-eval-f07 is unschedulable due to insufficient CPU.",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 54/55 healthy; workloads 77/79 healthy; warning events (object not healthy now) 16/17 healthy; pvcs 5/5 healthy; argo cd apps 15/15 healthy\n\npods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f07\tgreedy-658b9c4b58-gvtr5\tPending\t0/0\t0\t-\t-\tReplicaSet/greedy-658b9c4b58\n\nworkloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f07\tDeployment\tgreedy\t1\t0\tAvailable=False(MinimumReplicasUnavailable)\t-\nagent-eval-f07\tReplicaSet\tgreedy-658b9c4b58\t1\t0\t-\t-\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f07\tPod/greedy-658b9c4b58-gvtr5\tFailedScheduling\t1\t0m\t0/1 nodes are available: 1 Insufficient cpu. no new claims to deallocate, preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling.",
+   "result_chars": 836,
+   "truncated": false,
+   "duration_ms": 90,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_nodes",
+   "arguments": {},
+   "result": "nodes\nname\tready\tpressure\tunschedulable\nbuild-node-01\tTrue\t-\tFalse",
+   "result_chars": 66,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agent-eval-f07"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f07\tgreedy-658b9c4b58-gvtr5\tPending\t0/0\t0\t-\t-\tReplicaSet/greedy-658b9c4b58",
+   "result_chars": 156,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agent-eval-f07"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagent-eval-f07\tPod/greedy-658b9c4b58-gvtr5\tFailedScheduling\t1\t0m\tNOT OK\t0/1 nodes are available: 1 Insufficient cpu. no new claims to deallocate, preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling.\n(16 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 401,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agent-eval-f07"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f07\tDeployment\tgreedy\t1\t0\tAvailable=False(MinimumReplicasUnavailable)\t-\nagent-eval-f07\tReplicaSet\tgreedy-658b9c4b58\t1\t0\t-\t-",
+   "result_chars": 200,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t6",
+   "tool": "list_argocd_apps",
+   "arguments": {},
+   "result": "argo cd applications\nnamespace\tname\tsync\thealth\tmessage\nargocd\talloy\tSynced\tHealthy\t\nargocd\targocd\tSynced\tHealthy\t\nargocd\tkeda\tSynced\tHealthy\t\nargocd\tkube-prometheus-stack\tSynced\tHealthy\t\nargocd\tkyverno\tSynced\tHealthy\t\nargocd\tlocal-agents\tSynced\tHealthy\t\nargocd\tlocal-airgap-llm\tSynced\tHealthy\t\nargocd\tlocal-path-storage\tSynced\tHealthy\t\nargocd\tloki\tSynced\tHealthy\t\nargocd\tpolicies\tSynced\tHealthy\t\nargocd\troot\tSynced\tHealthy\t\nargocd\tsample-app\tSynced\tHealthy\t\nargocd\ttempo\tSynced\tHealthy\t\nargocd\tvelero\tSynced\tHealthy\t\nargocd\tzot\tSynced\tHealthy\t",
+   "result_chars": 544,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t7",
+   "tool": "list_pvcs",
+   "arguments": {},
+   "result": "persistent volume claims\nnamespace\tname\tphase\tstorage_class\tclass_exists\tcapacity\nmonitoring\tprometheus-kps-kube-prometheus-stack-prometheus-db-prometheus-kps-kube-prometheus-stack-prometheus-0\tBound\tlocal-path\tyes\t8Gi\nmonitoring\tstorage-loki-0\tBound\tlocal-path\tyes\t5Gi\nmonitoring\tstorage-tempo-0\tBound\tlocal-path\tyes\t2Gi\nsample-app\tdata-db-0\tBound\tlocal-path\tyes\t1Gi\nzot\tzot-pvc-zot-0\tBound\tlocal-path\tyes\t10Gi",
+   "result_chars": 411,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "tool_result_chars": 3500,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849",
+  "config_sha256": "b085a9e3041f2aae7e32ba53d8b99fac39dcba1a96427831eb40278b2a767617"
+ },
+ "timings": {
+  "started": "2026-11-25T19:33:04Z",
+  "finished": "2026-11-25T19:34:09Z",
+  "total_s": 64.9,
+  "model_s": 64.8,
+  "tools_s": 0.09,
+  "turns": 9
+ },
+ "error": null,
+ "trace_id": "925b5cdc008cfb000d6b007c03a29fa9"
+}
