@@ -132,7 +132,8 @@ class Cluster:
                         orphaned = [svc["metadata"]["name"] for svc in self.src.items("services")
                                     if svc["metadata"]["namespace"] == ns and (svc.get("spec") or {}).get("selector")
                                     and all(tmpl.get(a) == b for a, b in svc["spec"]["selector"].items())]
-                        note = (f"0 replicas, not autoscaled; Service/{','.join(orphaned)} selects it and has no pods"
+                        note = (f"0 replicas, not autoscaled; Service/{','.join(orphaned)} selects it and has no pods: "
+                                f"a fault (scaled to zero by hand, not by KEDA)"
                                 if orphaned else "0 replicas, not autoscaled; no Service selects it")
                     conds = _bad_conditions(s.get("conditions"))
                     complete = kind == "Job" and any(c["type"] == "Complete" and c["status"] == "True" for c in s.get("conditions") or [])

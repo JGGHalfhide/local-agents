@@ -1,0 +1,146 @@
+{
+ "run_id": "r-20261125T170305Z-6d88",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f04",
+   "object": "Deployment/crashy",
+   "category": "crash-loop",
+   "summary": "Deployment crashy is in CrashLoopBackOff with Error(127) and no ready pods.",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Available=False(MinimumReplicasUnavailable)"
+    },
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Back-off restarting failed container crashy in pod crashy-7dfc58bc6d-rgkbj_agent-eval-f04(c574ba1c-6cb3-4db8-94ea-fd40abe441fd)"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "One fault found: Deployment crashy in namespace agent-eval-f04 is crash-looping with Error(127).",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 48/49 healthy; workloads 65/67 healthy; warning events (object not healthy now) 37/38 healthy; pvcs 5/5 healthy; argo cd apps 0/0 healthy\n\npods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f04\tcrashy-7dfc58bc6d-rgkbj\tRunning\t0/1\t1\tCrashLoopBackOff\tError(127)\tReplicaSet/crashy-7dfc58bc6d\n\nworkloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f04\tDeployment\tcrashy\t1\t0\tAvailable=False(MinimumReplicasUnavailable)\t-\nagent-eval-f04\tReplicaSet\tcrashy-7dfc58bc6d\t1\t0\t-\t-\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f04\tPod/crashy-7dfc58bc6d-rgkbj\tBackOff\t2\t0m\tBack-off restarting failed container crashy in pod crashy-7dfc58bc6d-rgkbj_agent-eval-f04(c574ba1c-6cb3-4db8-94ea-fd40abe441fd)",
+   "result_chars": 822,
+   "truncated": false,
+   "duration_ms": 83,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agent-eval-f04"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f04\tcrashy-7dfc58bc6d-rgkbj\tRunning\t0/1\t1\tCrashLoopBackOff\tError(127)\tReplicaSet/crashy-7dfc58bc6d",
+   "result_chars": 180,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agent-eval-f04"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagent-eval-f04\tPod/crashy-7dfc58bc6d-rgkbj\tBackOff\t2\t0m\tNOT OK\tBack-off restarting failed container crashy in pod crashy-7dfc58bc6d-rgkbj_agent-eval-f04(c574ba1c-6cb3-4db8-94ea-fd40abe441fd)\n(37 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 365,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "get_status",
+   "arguments": {
+    "kind": "Pod",
+    "name": "crashy-7dfc58bc6d-rgkbj",
+    "namespace": "agent-eval-f04"
+   },
+   "result": "{\"namespace\": \"agent-eval-f04\", \"name\": \"crashy-7dfc58bc6d-rgkbj\", \"phase\": \"Running\", \"ready\": \"0/1\", \"restarts\": 1, \"waiting\": \"CrashLoopBackOff\", \"last_terminated\": \"Error(127)\", \"ok\": false, \"owner\": \"ReplicaSet/crashy-7dfc58bc6d\"}",
+   "result_chars": 235,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "get_status",
+   "arguments": {
+    "kind": "Deployment",
+    "name": "crashy",
+    "namespace": "agent-eval-f04"
+   },
+   "result": "{\"namespace\": \"agent-eval-f04\", \"kind\": \"Deployment\", \"name\": \"crashy\", \"desired\": 1, \"ready\": 0, \"conditions\": \"Available=False(MinimumReplicasUnavailable)\", \"autoscaler\": \"-\", \"ok\": false}",
+   "result_chars": 190,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t6",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agent-eval-f04"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f04\tDeployment\tcrashy\t1\t0\tAvailable=False(MinimumReplicasUnavailable)\t-\nagent-eval-f04\tReplicaSet\tcrashy-7dfc58bc6d\t1\t0\t-\t-",
+   "result_chars": 200,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t7",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agent-eval-f04"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagent-eval-f04\tPod/crashy-7dfc58bc6d-rgkbj\tBackOff\t2\t0m\tNOT OK\tBack-off restarting failed container crashy in pod crashy-7dfc58bc6d-rgkbj_agent-eval-f04(c574ba1c-6cb3-4db8-94ea-fd40abe441fd)\n(37 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 365,
+   "truncated": false,
+   "duration_ms": 1,
+   "error": false
+  },
+  {
+   "id": "t8",
+   "tool": "list_events",
+   "arguments": {},
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagent-eval-f04\tPod/crashy-7dfc58bc6d-rgkbj\tBackOff\t2\t0m\tNOT OK\tBack-off restarting failed container crashy in pod crashy-7dfc58bc6d-rgkbj_agent-eval-f04(c574ba1c-6cb3-4db8-94ea-fd40abe441fd)\n(37 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 365,
+   "truncated": false,
+   "duration_ms": 1,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "tool_result_chars": 3500,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849",
+  "config_sha256": "b085a9e3041f2aae7e32ba53d8b99fac39dcba1a96427831eb40278b2a767617"
+ },
+ "timings": {
+  "started": "2026-11-25T17:03:05Z",
+  "finished": "2026-11-25T17:04:02Z",
+  "total_s": 57.5,
+  "model_s": 57.4,
+  "tools_s": 0.09,
+  "turns": 8
+ },
+ "error": null,
+ "trace_id": "790751497f0b40e19ef7cd619171ae78"
+}

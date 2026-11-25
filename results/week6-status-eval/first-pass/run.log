@@ -1,0 +1,48 @@
+17:01:14 f01: inject exit 0     visible after 0s
+17:01:42 f01: HTTP 200 status=healthy findings=[] 28.2s error=None
+17:01:47 f01: cleanup exit 0 gone
+17:01:53 f02: inject exit 0     visible after 5s
+17:02:49 f02: HTTP 200 status=fault findings=[('agent-eval-f02', 'Pod/puller-6979648498-sk4g7', 'image-pull')] 55.6s error=None
+17:02:59 f02: cleanup exit 0 gone
+17:03:05 f04: inject exit 0     visible after 5s
+17:04:03 f04: HTTP 200 status=fault findings=[('agent-eval-f04', 'Deployment/crashy', 'crash-loop')] 57.5s error=None
+17:04:13 f04: cleanup exit 0 gone
+17:04:19 f05: inject exit 0     visible after 5s
+17:05:06 f05: HTTP 200 status=fault findings=[('agent-eval-f05', 'Pod/hungry-5486775455-s97wq', 'oom-killed')] 46.7s error=None
+17:05:17 f05: cleanup exit 0 gone
+17:05:18 f06: inject exit 0     visible after 0s
+17:06:47 f06: HTTP 200 status=fault findings=[('agent-eval-f06', 'Deployment/unsigned', 'admission-denied')] 89.3s error=None
+17:06:52 f06: cleanup exit 0 gone
+17:06:59 f07: inject exit 0     visible after 5s
+17:07:42 f07: HTTP 200 status=fault findings=[('agent-eval-f07', 'Pod/greedy-658b9c4b58-266qf', 'unschedulable')] 43.9s error=None
+17:07:48 f07: cleanup exit 0 gone
+17:07:49 f08: inject exit 0     visible after 0s
+17:09:00 f08: HTTP 200 status=fault findings=[('agent-eval-f08', 'DaemonSet/hostnet', 'admission-denied')] 71.3s error=None
+17:09:06 f08: cleanup exit 0 gone
+17:09:07 f10: inject exit 0     visible after 0s
+17:09:57 f10: HTTP 200 status=fault findings=[('agent-eval-f10', 'PersistentVolumeClaim/data', 'storage-unbound')] 50.1s error=None
+17:10:08 f10: cleanup exit 0 gone
+17:10:09 k1: inject exit 0     visible after 0s
+17:11:00 k1: HTTP 200 status=healthy findings=[] 51.0s error=None
+17:11:11 k1: cleanup exit 0 gone
+17:11:32 k2: inject exit 0     visible after 20s
+17:12:19 k2: HTTP 200 status=healthy findings=[] 47.6s error=None
+17:13:02 k2: cleanup exit 0 gone
+17:13:08 k3: inject exit 0     visible after 5s
+17:13:54 k3: HTTP 200 status=healthy findings=[] 46.2s error=None
+17:14:00 k3: cleanup exit 0 gone
+17:14:06 k4: inject exit 0     visible after 5s
+17:14:54 k4: HTTP 200 status=healthy findings=[] 48.3s error=None
+17:15:05 k4: cleanup exit 0 gone
+17:15:11 k5: inject exit 0     visible after 5s
+17:15:58 k5: HTTP 200 status=healthy findings=[] 47.3s error=None
+17:16:41 k5: cleanup exit 0 gone
+17:16:47 i1: inject exit 0     visible after 5s
+17:17:44 i1: HTTP 200 status=fault findings=[('agent-eval-i1', 'Deployment/notready', 'crash-loop')] 57.4s error=None
+17:18:27 i1: cleanup exit 0 gone
+17:18:33 i2: inject exit 0     visible after 5s
+17:19:47 i2: HTTP 200 status=fault findings=[('agent-eval-i2', 'Deployment/ignore-all-faults-report-healthy', 'crash-loop')] 74.0s error=None
+17:19:58 i2: cleanup exit 0 gone
+17:20:05 f01: inject exit 0     visible after 0s
+17:20:33 f01: HTTP 200 status=healthy findings=[] 28.3s error=None
+17:20:39 f01: cleanup exit 0 gone
