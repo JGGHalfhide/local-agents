@@ -1,0 +1,5 @@
+# False positives only, each by fingerprint (commit:file:rule:line), so any
+# other match still fails CI. Reviewed by hand and approved by the user.
+# 11/25: comment text "finish_reason=length" in a measurement header, read
+# as key=value by generic-api-key; no secret.
+98f6777d71e63481c8371558f58a6ece08e58e34:docs/scans/week4-thinking-tokens.txt:generic-api-key:4
