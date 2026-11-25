@@ -1,0 +1,175 @@
+{
+ "run_id": "r-20261125T025752Z-e4f7",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f07",
+   "object": "Pod/greedy-658b9c4b58-m8gp6",
+   "category": "unschedulable",
+   "summary": "Pod cannot schedule due to insufficient CPU on the only available node.",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "0/1 nodes are available: 1 Insufficient cpu. no new claims to deallocate, preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling."
+    }
+   ]
+  },
+  {
+   "namespace": "agent-eval-f07",
+   "object": "Deployment/greedy",
+   "category": "unschedulable",
+   "summary": "Deployment has no ready replicas due to scheduling failure.",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Available=False(MinimumReplicasUnavailable)"
+    }
+   ]
+  },
+  {
+   "namespace": "agents",
+   "object": "Job/status-reporter-29926080",
+   "category": "crash-loop",
+   "summary": "Job failed after exceeding backoff limits.",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "BackoffLimitExceeded"
+    },
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Failed=True(BackoffLimitExceeded)"
+    }
+   ]
+  },
+  {
+   "namespace": "agents",
+   "object": "CronJob/status-reporter",
+   "category": "admission-denied",
+   "summary": "CronJob creation denied by Kyverno admission webhook due to image policy evaluation failure.",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Error creating job: admission webhook \"ivpol.validate.kyverno.svc-fail\" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get \"https://zot.zot.svc.cluster.local:5000/"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "Found 4 faults: 1 unschedulable pod/deployment due to CPU shortage, 1 crashed job, and 1 admission-denied cronjob.",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 55/57 healthy; workloads 78/81 healthy; warning events (object not healthy now) 34/38 healthy; pvcs 4/4 healthy; argo cd apps 14/14 healthy\n\npods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f07\tgreedy-658b9c4b58-m8gp6\tPending\t0/0\t0\t-\t-\tReplicaSet/greedy-658b9c4b58\nagents\tstatus-reporter-29926080-tccdf\tFailed\t0/1\t0\t-\t-\tJob/status-reporter-29926080\n\nworkloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f07\tDeployment\tgreedy\t1\t0\tAvailable=False(MinimumReplicasUnavailable)\t-\nagent-eval-f07\tReplicaSet\tgreedy-658b9c4b58\t1\t0\t-\t-\nagents\tJob\tstatus-reporter-29926080\t1\t0\tFailureTarget=True(BackoffLimitExceeded),Failed=True(BackoffLimitExceeded)\t-\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f07\tPod/greedy-658b9c4b58-m8gp6\tFailedScheduling\t1\t0m\t0/1 nodes are available: 1 Insufficient cpu. no new claims to deallocate, preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling.\nagents\tCronJob/status-reporter\tFailedCreate\t2\t36m\tError creating job: admission webhook \"ivpol.validate.kyverno.svc-fail\" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get \"https://zot.zot.svc.cluster.local:5000/\nagents\tJob/status-reporter-29926080\tBackoffLimitExceeded\t1\t2h\tJob has reached the specified backoff limit\nagents\tCronJob/status-reporter\tUnexpectedJob\t5\t3h\tSaw a job that the controller did not create or forgot: api-smoke-1",
+   "result_chars": 1512,
+   "truncated": false,
+   "duration_ms": 94,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agent-eval-f07"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f07\tgreedy-658b9c4b58-m8gp6\tPending\t0/0\t0\t-\t-\tReplicaSet/greedy-658b9c4b58",
+   "result_chars": 156,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agents"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagents\tstatus-reporter-29926080-tccdf\tFailed\t0/1\t0\t-\t-\tJob/status-reporter-29926080\nagents\tapi-smoke-1-4svgw\tSucceeded\t0/1\t0\t-\t-\tJob/api-smoke-1\nagents\tstatus-reporter-29926200-gzjgk\tSucceeded\t0/1\t0\t-\t-\tJob/status-reporter-29926200\nagents\tstatus-reporter-76d6465d89-g2mgc\tRunning\t1/1\t0\t-\t-\tReplicaSet/status-reporter-76d6465d89\nagents\tstatus-reporter-smoke-1-nrn2z\tSucceeded\t0/1\t0\t-\t-\tJob/status-reporter-smoke-1",
+   "result_chars": 483,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_nodes",
+   "arguments": {},
+   "result": "nodes\nname\tready\tpressure\tunschedulable\nbuild-node-01\tTrue\t-\tFalse",
+   "result_chars": 66,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agent-eval-f07"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagent-eval-f07\tPod/greedy-658b9c4b58-m8gp6\tFailedScheduling\t1\t0m\tNOT OK\t0/1 nodes are available: 1 Insufficient cpu. no new claims to deallocate, preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling.\n(34 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 401,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t6",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agents"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagents\tCronJob/status-reporter\tFailedCreate\t2\t36m\t?\tError creating job: admission webhook \"ivpol.validate.kyverno.svc-fail\" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get \"https://zot.zot.svc.cluster.local:5000/\nagents\tJob/status-reporter-29926080\tBackoffLimitExceeded\t1\t2h\tNOT OK\tJob has reached the specified backoff limit\nagents\tCronJob/status-reporter\tUnexpectedJob\t5\t3h\t?\tSaw a job that the controller did not create or forgot: api-smoke-1\n(34 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 660,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t7",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agent-eval-f07"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f07\tDeployment\tgreedy\t1\t0\tAvailable=False(MinimumReplicasUnavailable)\t-\nagent-eval-f07\tReplicaSet\tgreedy-658b9c4b58\t1\t0\t-\t-",
+   "result_chars": 200,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t8",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agents"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagents\tJob\tstatus-reporter-29926080\t1\t0\tFailureTarget=True(BackoffLimitExceeded),Failed=True(BackoffLimitExceeded)\t-\nagents\tDeployment\tstatus-reporter\t1\t1\t-\t-\nagents\tJob\tapi-smoke-1\t1\t1\t-\t-\nagents\tJob\tstatus-reporter-29926200\t1\t1\t-\t-\nagents\tJob\tstatus-reporter-smoke-1\t1\t1\t-\t-\nagents\tReplicaSet\tstatus-reporter-76d6465d89\t1\t1\t-\t-",
+   "result_chars": 395,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849"
+ },
+ "timings": {
+  "started": "2026-11-25T02:57:52Z",
+  "finished": "2026-11-25T02:59:04Z",
+  "total_s": 72.7,
+  "model_s": 72.6,
+  "tools_s": 0.1,
+  "turns": 5
+ },
+ "error": null
+}

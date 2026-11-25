@@ -1,0 +1,56 @@
+02:48:19 f01: inject exit 0     visible after 0s
+02:50:07 f01: HTTP 200 status=fault findings=[('agent-eval-f01', 'Deployment/podinfo', 'scaled-to-zero'), ('agents', 'Job/status-reporter-29926080', 'admission-denied'), ('agents', 'CronJob/status-reporter', 'admission-denied')] 108.1s error=None
+02:50:12 f01: cleanup exit 0 gone
+02:50:18 f02: inject exit 0     visible after 5s
+02:52:10 f02: HTTP 200 status=fault findings=[('agent-eval-f02', 'Pod/puller-6979648498-85585', 'image-pull'), ('agent-eval-f02', 'Deployment/puller', 'image-pull'), ('agents', 'CronJob/status-reporter', 'admission-denied'), ('agents', 'Job/status-reporter-29926080', 'crash-loop'), ('agents', 'CronJob/status-reporter', 'other')] 112.3s error=None
+02:52:21 f02: cleanup exit 0 gone
+02:52:26 f04: inject exit 0     visible after 5s
+02:53:54 f04: HTTP 200 status=fault findings=[('agent-eval-f04', 'Pod/crashy-7dfc58bc6d-gm97b', 'crash-loop'), ('agent-eval-f04', 'Deployment/crashy', 'crash-loop'), ('agents', 'Job/status-reporter-29926080', 'crash-loop'), ('agents', 'CronJob/status-reporter', 'admission-denied')] 88.0s error=None
+02:54:05 f04: cleanup exit 0 gone
+02:54:10 f05: inject exit 0     visible after 5s
+02:55:45 f05: HTTP 200 status=fault findings=[('agent-eval-f05', 'Pod/hungry-5486775455-8g8nc', 'oom-killed'), ('agent-eval-f05', 'Deployment/hungry', 'crash-loop'), ('agents', 'Job/status-reporter-29926080', 'crash-loop'), ('agents', 'Job/status-reporter-29926080-tccdf', 'crash-loop'), ('agents', 'CronJob/status-reporter', 'admission-denied')] 94.6s error=None
+02:55:55 f05: cleanup exit 0 gone
+02:55:56 f06: inject exit 0     visible after 0s
+02:57:46 f06: HTTP 200 status=fault findings=[('agents', 'Job/status-reporter-29926080', 'crash-loop'), ('agents', 'CronJob/status-reporter', 'admission-denied'), ('agent-eval-f06', 'Deployment/unsigned', 'image-pull')] 109.8s error=None
+02:57:51 f06: cleanup exit 0 gone
+02:57:52 f07: inject exit 0     visible after 0s
+02:59:04 f07: HTTP 200 status=fault findings=[('agent-eval-f07', 'Pod/greedy-658b9c4b58-m8gp6', 'unschedulable'), ('agent-eval-f07', 'Deployment/greedy', 'unschedulable'), ('agents', 'Job/status-reporter-29926080', 'crash-loop'), ('agents', 'CronJob/status-reporter', 'admission-denied')] 72.7s error=None
+02:59:10 f07: cleanup exit 0 gone
+02:59:10 f08: inject exit 0     visible after 0s
+03:00:44 f08: HTTP 200 status=fault findings=[('agents', 'Job/status-reporter-29926080', 'crash-loop'), ('agents', 'CronJob/status-reporter', 'admission-denied'), ('agent-eval-f08', 'DaemonSet/hostnet', 'admission-denied')] 93.7s error=None
+03:00:49 f08: cleanup exit 0 gone
+03:00:50 f10: inject exit 0     visible after 0s
+03:02:14 f10: HTTP 200 status=fault findings=[('agent-eval-f10', 'PersistentVolumeClaim/data', 'storage-unbound'), ('agent-eval-f10', 'Pod/claimer', 'unschedulable'), ('agents', 'CronJob/status-reporter', 'admission-denied'), ('agents', 'Job/status-reporter-29926080', 'crash-loop'), ('agents', 'CronJob/status-reporter', 'gitops-unhealthy')] 83.8s error=None
+03:02:25 f10: cleanup exit 0 gone
+03:02:25 k1: inject exit 0     visible after 0s
+03:03:26 k1: HTTP 200 status=fault findings=[('agents', 'CronJob/status-reporter', 'admission-denied')] 60.5s error=None
+03:03:36 k1: cleanup exit 0 gone
+03:03:57 k2: inject exit 0     visible after 20s
+03:06:26 k2: HTTP 200 status=fault findings=[('agents', 'CronJob/status-reporter', 'admission-denied'), ('agents', 'Job/status-reporter-29926080', 'scaled-to-zero'), ('agents', 'Pod/status-reporter-29926080-tccdf', 'unschedulable'), ('agents', 'CronJob/status-reporter', 'other')] 149.3s error=None
+03:07:09 k2: cleanup exit 0 gone
+03:07:14 k3: inject exit 0     visible after 5s
+03:08:05 k3: HTTP 200 status=fault findings=[('agents', 'Job/status-reporter-29926080', 'crash-loop')] 51.2s error=None
+03:08:11 k3: cleanup exit 0 gone
+03:08:16 k4: inject exit 0     visible after 5s
+03:09:17 k4: HTTP 200 status=fault findings=[('agents', 'CronJob/status-reporter', 'admission-denied')] 60.4s error=None
+03:09:27 k4: cleanup exit 0 gone
+03:09:33 k5: inject exit 0     visible after 5s
+03:10:35 k5: HTTP 200 status=fault findings=[('agents', 'CronJob/status-reporter', 'admission-denied')] 61.8s error=None
+03:11:17 k5: cleanup exit 0 gone
+Faults passed: 7/8; controls passed: 5/5.
+
+| Case | Kind | Pass | Failed checks | Reported in the case namespace | Ambient findings | Tool calls | Seconds |
+|---|---|---|---|---|---|---|---|
+| f01 | fault | yes | - | scaled-to-zero Deployment/podinfo | admission-denied agents/Job/status-reporter-29926080; admission-denied agents/CronJob/status-reporter | 7 | 108.1 |
+| f02 | fault | yes | - | image-pull Pod/puller-6979648498-85585; image-pull Deployment/puller | admission-denied agents/CronJob/status-reporter; crash-loop agents/Job/status-reporter-29926080; other agents/CronJob/status-reporter | 8 | 112.3 |
+| f04 | fault | yes | - | crash-loop Pod/crashy-7dfc58bc6d-gm97b; crash-loop Deployment/crashy | crash-loop agents/Job/status-reporter-29926080; admission-denied agents/CronJob/status-reporter | 8 | 88.0 |
+| f05 | fault | yes | - | oom-killed Pod/hungry-5486775455-8g8nc; crash-loop Deployment/hungry | crash-loop agents/Job/status-reporter-29926080; crash-loop agents/Job/status-reporter-29926080-tccdf; admission-denied agents/CronJob/status-reporter | 8 | 94.6 |
+| f06 | fault | NO | classify | image-pull Deployment/unsigned | crash-loop agents/Job/status-reporter-29926080; admission-denied agents/CronJob/status-reporter | 8 | 109.8 |
+| f07 | fault | yes | - | unschedulable Pod/greedy-658b9c4b58-m8gp6; unschedulable Deployment/greedy | crash-loop agents/Job/status-reporter-29926080; admission-denied agents/CronJob/status-reporter | 8 | 72.7 |
+| f08 | fault | yes | - | admission-denied DaemonSet/hostnet | crash-loop agents/Job/status-reporter-29926080; admission-denied agents/CronJob/status-reporter | 8 | 93.7 |
+| f10 | fault | yes | - | storage-unbound PersistentVolumeClaim/data; unschedulable Pod/claimer | admission-denied agents/CronJob/status-reporter; crash-loop agents/Job/status-reporter-29926080; gitops-unhealthy agents/CronJob/status-reporter | 8 | 83.8 |
+| k1 | control | yes | - | - | admission-denied agents/CronJob/status-reporter | 5 | 60.5 |
+| k2 | control | yes | - | - | admission-denied agents/CronJob/status-reporter; scaled-to-zero agents/Job/status-reporter-29926080; unschedulable agents/Pod/status-reporter-29926080-tccdf; other agents/CronJob/status-reporter | 5 | 149.3 |
+| k3 | control | yes | - | - | crash-loop agents/Job/status-reporter-29926080 | 5 | 51.2 |
+| k4 | control | yes | - | - | admission-denied agents/CronJob/status-reporter | 5 | 60.4 |
+| k5 | control | yes | - | - | admission-denied agents/CronJob/status-reporter | 5 | 61.8 |

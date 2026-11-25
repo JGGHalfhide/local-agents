@@ -61,12 +61,12 @@ Acceptance: the status reporter runs in-cluster with read-only tools, passing th
 Goal: the eval's follow-ups closed and the open Week 2 decisions made.
 (Was agent 2, triage with retrieval: dropped, ADR 0006.)
 
-- [ ] Eval follow-ups from Week 2: the CronJob treats 429 (busy) as a skipped run; list_workloads hides benign conditions (JobResumed=False); Kyverno PolicyViolation findings located at the blocked object
+- [x] Eval follow-ups from Week 2 (11/24, images c4f5677 and f906bd3): the CronJob treats 429 (busy) as a skipped run (agentctl exit 3; seen live); benign conditions hidden (Suspended=False etc.); Kyverno PolicyViolation findings located at the blocked object and marked "blocked at admission"
 - [x] Tool interface: tools stay in-process functions (ADR 0007, done in Week 2)
 - [x] Rebuild check and tag v0.2 (done at the end of Week 2)
 - [ ] Tag v0.3
 
-Acceptance: follow-ups closed; the eval still passes (8/8, 5/5).
+Acceptance: follow-ups closed; the eval still passes (8/8, 5/5). (11/24: 8/8, 5/5 with f06/f08 scored strictly, no ambient findings, median 48.9 s: docs/eval-status.md.)
 
 ## Week 4: Tracing, GitOps config, observability
 

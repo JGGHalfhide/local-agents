@@ -1,0 +1,139 @@
+{
+ "run_id": "r-20261125T033301Z-7e56",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f05",
+   "object": "Pod/hungry-5486775455-gjhzh",
+   "category": "oom-killed",
+   "summary": "Pod is crash-looping due to OOM kill (exit code 137)",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "agent-eval-f05\thungry-5486775455-gjhzh\tRunning\t0/1\t1\tCrashLoopBackOff\tOOMKilled(137)\tReplicaSet/hungry-5486775455"
+    }
+   ]
+  },
+  {
+   "namespace": "agent-eval-f05",
+   "object": "Deployment/hungry",
+   "category": "oom-killed",
+   "summary": "Deployment has 0 ready replicas due to pod OOM kills",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "agent-eval-f05\thungry-5486775455-gjhzh\tRunning\t0/1\t1\tCrashLoopBackOff\tOOMKilled(137)\tReplicaSet/hungry-5486775455"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "1 fault: OOM-killed crash-loop in agent-eval-f05 namespace affecting Deployment hungry and Pod hungry-5486775455-gjhzh",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 55/56 healthy; workloads 78/80 healthy; warning events (object not healthy now) 5/6 healthy; pvcs 4/4 healthy; argo cd apps 14/14 healthy\n\npods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f05\thungry-5486775455-gjhzh\tRunning\t0/1\t1\tCrashLoopBackOff\tOOMKilled(137)\tReplicaSet/hungry-5486775455\n\nworkloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f05\tDeployment\thungry\t1\t0\tAvailable=False(MinimumReplicasUnavailable)\t-\nagent-eval-f05\tReplicaSet\thungry-5486775455\t1\t0\t-\t-\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f05\tPod/hungry-5486775455-gjhzh\tBackOff\t2\t0m\tBack-off restarting failed container hungry in pod hungry-5486775455-gjhzh_agent-eval-f05(d85cd4a3-5b12-436e-97a5-22484ab4e5ba)",
+   "result_chars": 826,
+   "truncated": false,
+   "duration_ms": 75,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f05\thungry-5486775455-gjhzh\tRunning\t0/1\t1\tCrashLoopBackOff\tOOMKilled(137)\tReplicaSet/hungry-5486775455",
+   "result_chars": 184,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagent-eval-f05\tPod/hungry-5486775455-gjhzh\tBackOff\t2\t0m\tNOT OK\tBack-off restarting failed container hungry in pod hungry-5486775455-gjhzh_agent-eval-f05(d85cd4a3-5b12-436e-97a5-22484ab4e5ba)\n(5 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 364,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "get_status",
+   "arguments": {
+    "kind": "Pod",
+    "name": "hungry-5486775455-gjhzh",
+    "namespace": "agent-eval-f05"
+   },
+   "result": "{\"namespace\": \"agent-eval-f05\", \"name\": \"hungry-5486775455-gjhzh\", \"phase\": \"Running\", \"ready\": \"0/1\", \"restarts\": 1, \"waiting\": \"CrashLoopBackOff\", \"last_terminated\": \"OOMKilled(137)\", \"ok\": false, \"owner\": \"ReplicaSet/hungry-5486775455\"}",
+   "result_chars": 239,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "get_status",
+   "arguments": {
+    "kind": "Deployment",
+    "name": "hungry",
+    "namespace": "agent-eval-f05"
+   },
+   "result": "{\"namespace\": \"agent-eval-f05\", \"kind\": \"Deployment\", \"name\": \"hungry\", \"desired\": 1, \"ready\": 0, \"conditions\": \"Available=False(MinimumReplicasUnavailable)\", \"autoscaler\": \"-\", \"ok\": false}",
+   "result_chars": 190,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t6",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f05\tDeployment\thungry\t1\t0\tAvailable=False(MinimumReplicasUnavailable)\t-\nagent-eval-f05\tReplicaSet\thungry-5486775455\t1\t0\t-\t-",
+   "result_chars": 200,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t7",
+   "tool": "list_pods",
+   "arguments": {},
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f05\thungry-5486775455-gjhzh\tRunning\t0/1\t1\tCrashLoopBackOff\tOOMKilled(137)\tReplicaSet/hungry-5486775455\nagents\tapi-smoke-1-4svgw\tSucceeded\t0/1\t0\t-\t-\tJob/api-smoke-1\nagents\tstatus-reporter-29926200-gzjgk\tSucceeded\t0/1\t0\t-\t-\tJob/status-reporter-29926200\nagents\tstatus-reporter-29926260-h92b5\tSucceeded\t0/1\t0\t-\t-\tJob/status-reporter-29926260\nagents\tstatus-reporter-55bb47cb54-dftn4\tRunning\t1/1\t0\t-\t-\tReplicaSet/status-reporter-55bb47cb54\nargocd\targocd-application-controller-0\tRunning\t1/1\t6\t-\tUnknown(255)\tStatefulSet/argocd-application-controller\nargocd\targocd-applicationset-controller-76bd7bf48d-7qkpl\tRunning\t1/1\t6\t-\tUnknown(255)\tReplicaSet/argocd-applicationset-controller-76bd7bf48d\nargocd\targocd-dex-server-6fb66cc6ff-mlj5k\tRunning\t1/1\t6\t-\tUnknown(255)\tReplicaSet/argocd-dex-server-6fb66cc6ff\nargocd\targocd-notifications-controller-df77dddcb-gv6xw\tRunning\t1/1\t6\t-\tUnknown(255)\tReplicaSet/argocd-notifications-controller-df77dddcb\nargocd\targocd-redis-798c57b5ff-8g4p2\tRunning\t1/1\t6\t-\tUnknown(255)\tReplicaSet/argocd-redis-798c57b5ff\nargocd\targocd-repo-server-8dc7449bc-glg97\tRunning\t1/1\t6\t-\tUnknown(255)\tReplicaSet/argocd-repo-server-8dc7449bc\nargocd\targocd-server-55dc66fbb9-hlzw8\tRunning\t1/1\t6\t-\tUnknown(255)\tReplicaSet/argocd-server-55dc66fbb9\nkeda\tkeda-add-ons-http-interceptor-5d586bf6fc-hdlgd\tRunning\t1/1\t6\t-\tUnknown(255)\tReplicaSet/keda-add-ons-http-interceptor-5d586bf6fc\nkeda\tkeda-add-ons-http-operator-9d4944f68-9c8j9\tRunning\t1/1\t6\t-\tUnknown(255)\tReplicaSet/keda-add-ons-http-operator-9d4944f68\nkeda\tkeda-add-ons-http-scaler-5676f47f5f-mqxw9\tRunning\t1/1\t8\t-\tUnknown(255)\tReplicaSet/keda-add-ons-http-scaler-5676f47f5f\nkeda\tkeda-admission-85b5f686f5-4sncr\tRunning\t1/1\t6\t-\tUnknown(255)\tReplicaSet/keda-admission-85b5f686f5\nkeda\tkeda-metrics-apiserver-774888449-8hnx9\tRunning\t1/1\t7\t-\tCompleted(0)\tReplicaSet/keda-metrics-apiserver-774888449\nkeda\tkeda-operator-59f65cfb46-sgpjx\tRunning\t1/1\t7\t-\tUnknown(255)\tRepl",
+   "result_chars": 3358,
+   "truncated": true,
+   "duration_ms": 0,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849"
+ },
+ "timings": {
+  "started": "2026-11-25T03:33:01Z",
+  "finished": "2026-11-25T03:34:19Z",
+  "total_s": 77.9,
+  "model_s": 77.8,
+  "tools_s": 0.08,
+  "turns": 7
+ },
+ "error": null
+}

@@ -1,0 +1,163 @@
+{
+ "run_id": "r-20261125T025910Z-29fb",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agents",
+   "object": "Job/status-reporter-29926080",
+   "category": "crash-loop",
+   "summary": "Job reached backoff limit after failing to schedule",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "FailureTarget=True(BackoffLimitExceeded),Failed=True(BackoffLimitExceeded)"
+    }
+   ]
+  },
+  {
+   "namespace": "agents",
+   "object": "CronJob/status-reporter",
+   "category": "admission-denied",
+   "summary": "CronJob creation blocked by admission webhook due to image registry connectivity failure",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Error creating job: admission webhook \"ivpol.validate.kyverno.svc-fail\" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get \"https://zot.zot.svc.cluster.local:5000/"
+    }
+   ]
+  },
+  {
+   "namespace": "agent-eval-f08",
+   "object": "DaemonSet/hostnet",
+   "category": "admission-denied",
+   "summary": "DaemonSet blocked at admission due to policy violation",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "ValidatingPolicy/pod-security-restricted: fail (blocked); hostNetwork, hostPID and hostIPC must not be set"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "Found 3 faults: 1 Job at backoff limit, 1 CronJob blocked by admission webhook, 1 DaemonSet blocked by security policy",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 55/56 healthy; workloads 78/79 healthy; warning events (object not healthy now) 33/37 healthy; pvcs 4/4 healthy; argo cd apps 14/14 healthy\n\npods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagents\tstatus-reporter-29926080-tccdf\tFailed\t0/1\t0\t-\t-\tJob/status-reporter-29926080\n\nworkloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagents\tJob\tstatus-reporter-29926080\t1\t0\tFailureTarget=True(BackoffLimitExceeded),Failed=True(BackoffLimitExceeded)\t-\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f08\tDaemonSet/hostnet\tPolicyViolation\t1\t0m\tValidatingPolicy/pod-security-restricted: fail (blocked); hostNetwork, hostPID and hostIPC must not be set\nagents\tCronJob/status-reporter\tFailedCreate\t2\t38m\tError creating job: admission webhook \"ivpol.validate.kyverno.svc-fail\" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get \"https://zot.zot.svc.cluster.local:5000/\nagents\tJob/status-reporter-29926080\tBackoffLimitExceeded\t1\t2h\tJob has reached the specified backoff limit\nagents\tCronJob/status-reporter\tUnexpectedJob\t5\t3h\tSaw a job that the controller did not create or forgot: api-smoke-1",
+   "result_chars": 1232,
+   "truncated": false,
+   "duration_ms": 102,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agents"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagents\tstatus-reporter-29926080-tccdf\tFailed\t0/1\t0\t-\t-\tJob/status-reporter-29926080\nagents\tapi-smoke-1-4svgw\tSucceeded\t0/1\t0\t-\t-\tJob/api-smoke-1\nagents\tstatus-reporter-29926200-gzjgk\tSucceeded\t0/1\t0\t-\t-\tJob/status-reporter-29926200\nagents\tstatus-reporter-76d6465d89-g2mgc\tRunning\t1/1\t0\t-\t-\tReplicaSet/status-reporter-76d6465d89\nagents\tstatus-reporter-smoke-1-nrn2z\tSucceeded\t0/1\t0\t-\t-\tJob/status-reporter-smoke-1",
+   "result_chars": 483,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agents"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagents\tCronJob/status-reporter\tFailedCreate\t2\t38m\t?\tError creating job: admission webhook \"ivpol.validate.kyverno.svc-fail\" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get \"https://zot.zot.svc.cluster.local:5000/\nagents\tJob/status-reporter-29926080\tBackoffLimitExceeded\t1\t2h\tNOT OK\tJob has reached the specified backoff limit\nagents\tCronJob/status-reporter\tUnexpectedJob\t5\t3h\t?\tSaw a job that the controller did not create or forgot: api-smoke-1\n(33 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 660,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "get_status",
+   "arguments": {
+    "kind": "CronJob",
+    "name": "status-reporter",
+    "namespace": "agents"
+   },
+   "result": "{\"schedule\": \"0 * * * *\", \"suspend\": false, \"active_jobs\": 0, \"last_schedule\": \"2026-11-25T02:00:00Z\", \"last_success\": \"2026-11-25T02:24:30Z\"}",
+   "result_chars": 142,
+   "truncated": false,
+   "duration_ms": 4,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "get_status",
+   "arguments": {
+    "kind": "Job",
+    "name": "status-reporter-29926080",
+    "namespace": "agents"
+   },
+   "result": "{\"namespace\": \"agents\", \"kind\": \"Job\", \"name\": \"status-reporter-29926080\", \"desired\": 1, \"ready\": 0, \"conditions\": \"FailureTarget=True(BackoffLimitExceeded),Failed=True(BackoffLimitExceeded)\", \"autoscaler\": \"-\", \"ok\": false}",
+   "result_chars": 224,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t6",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agents"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagents\tJob\tstatus-reporter-29926080\t1\t0\tFailureTarget=True(BackoffLimitExceeded),Failed=True(BackoffLimitExceeded)\t-\nagents\tDeployment\tstatus-reporter\t1\t1\t-\t-\nagents\tJob\tapi-smoke-1\t1\t1\t-\t-\nagents\tJob\tstatus-reporter-29926200\t1\t1\t-\t-\nagents\tJob\tstatus-reporter-smoke-1\t1\t1\t-\t-\nagents\tReplicaSet\tstatus-reporter-76d6465d89\t1\t1\t-\t-",
+   "result_chars": 395,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t7",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 55/56 healthy; workloads 78/79 healthy; warning events (object not healthy now) 33/37 healthy; pvcs 4/4 healthy; argo cd apps 14/14 healthy\n\npods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagents\tstatus-reporter-29926080-tccdf\tFailed\t0/1\t0\t-\t-\tJob/status-reporter-29926080\n\nworkloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagents\tJob\tstatus-reporter-29926080\t1\t0\tFailureTarget=True(BackoffLimitExceeded),Failed=True(BackoffLimitExceeded)\t-\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f08\tDaemonSet/hostnet\tPolicyViolation\t1\t0m\tValidatingPolicy/pod-security-restricted: fail (blocked); hostNetwork, hostPID and hostIPC must not be set\nagents\tCronJob/status-reporter\tFailedCreate\t2\t38m\tError creating job: admission webhook \"ivpol.validate.kyverno.svc-fail\" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get \"https://zot.zot.svc.cluster.local:5000/\nagents\tJob/status-reporter-29926080\tBackoffLimitExceeded\t1\t2h\tJob has reached the specified backoff limit\nagents\tCronJob/status-reporter\tUnexpectedJob\t5\t3h\tSaw a job that the controller did not create or forgot: api-smoke-1",
+   "result_chars": 1232,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t8",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agent-eval-f08"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagent-eval-f08\tDaemonSet/hostnet\tPolicyViolation\t1\t0m\tblocked at admission\tValidatingPolicy/pod-security-restricted: fail (blocked); hostNetwork, hostPID and hostIPC must not be set\n(33 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 356,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849"
+ },
+ "timings": {
+  "started": "2026-11-25T02:59:10Z",
+  "finished": "2026-11-25T03:00:44Z",
+  "total_s": 93.7,
+  "model_s": 93.6,
+  "tools_s": 0.11,
+  "turns": 7
+ },
+ "error": null
+}

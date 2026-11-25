@@ -16,10 +16,14 @@ an operator API and `agentctl` ([ADR 0005](docs/adr/0005-operator-interface.md))
 under its own read-only identity; image built with crane and signed
 ([ADR 0004](docs/adr/0004-agent-image-built-with-crane.md)). Fault-injection
 eval: **8/8 faults found and classified, 5/5 healthy controls clean**
-([eval-status.md](docs/eval-status.md#results-1124-resultsweek2-status-eval)).
+([eval-status.md](docs/eval-status.md#results-week-2-1124-resultsweek2-status-eval)).
 Tools stay in-process functions, no tool servers
-([ADR 0007](docs/adr/0007-tools-in-process.md)). Next: Week 3, the eval's
-follow-ups (ROADMAP.md).
+([ADR 0007](docs/adr/0007-tools-in-process.md)).
+
+Week 3 (11/24): the eval's follow-ups closed; rerun **8/8 faults, 5/5
+controls with no false findings in any run** (admission denials now located
+at the blocked object), median 49 s per report
+([eval-status.md](docs/eval-status.md#results-week-3-1124-resultsweek3-status-eval)).
 
 Week 1 (v0.1, 11/24): VMs sized (12 vCPU / 20 GiB,
 [resource plan](docs/resource-plan.md)), endpoint access decided

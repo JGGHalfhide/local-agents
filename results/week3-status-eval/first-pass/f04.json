@@ -1,0 +1,193 @@
+{
+ "run_id": "r-20261125T025226Z-de89",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f04",
+   "object": "Pod/crashy-7dfc58bc6d-gm97b",
+   "category": "crash-loop",
+   "summary": "",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Back-off restarting failed container crashy in pod crashy-7dfc58bc6d-gm97b_agent-eval-f04"
+    }
+   ]
+  },
+  {
+   "namespace": "agent-eval-f04",
+   "object": "Deployment/crashy",
+   "category": "crash-loop",
+   "summary": "",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "agent-eval-f04\tcrashy-7dfc58bc6d-gm97b\tRunning\t0/1\t1\tCrashLoopBackOff\tError(127)\tReplicaSet/crashy-7dfc58bc6d"
+    }
+   ]
+  },
+  {
+   "namespace": "agents",
+   "object": "Job/status-reporter-29926080",
+   "category": "crash-loop",
+   "summary": "",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Job has reached the specified backoff limit"
+    }
+   ]
+  },
+  {
+   "namespace": "agents",
+   "object": "CronJob/status-reporter",
+   "category": "admission-denied",
+   "summary": "",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Error creating job: admission webhook \"ivpol.validate.kyverno.svc-fail\" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get \"https://zot.zot.svc.cluster.local:5000/"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "Found 4 faults: 1 pod crash-looping with Error(127), 1 deployment affected by crash-loop, 1 job failed due to backoff limit exceeded, and 1 cronjob rejected by admission webhook.",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 55/57 healthy; workloads 78/81 healthy; warning events (object not healthy now) 34/38 healthy; pvcs 4/4 healthy; argo cd apps 14/14 healthy\n\npods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f04\tcrashy-7dfc58bc6d-gm97b\tRunning\t0/1\t1\tCrashLoopBackOff\tError(127)\tReplicaSet/crashy-7dfc58bc6d\nagents\tstatus-reporter-29926080-tccdf\tFailed\t0/1\t0\t-\t-\tJob/status-reporter-29926080\n\nworkloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f04\tDeployment\tcrashy\t1\t0\tAvailable=False(MinimumReplicasUnavailable)\t-\nagent-eval-f04\tReplicaSet\tcrashy-7dfc58bc6d\t1\t0\t-\t-\nagents\tJob\tstatus-reporter-29926080\t1\t0\tFailureTarget=True(BackoffLimitExceeded),Failed=True(BackoffLimitExceeded)\t-\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f04\tPod/crashy-7dfc58bc6d-gm97b\tBackOff\t2\t0m\tBack-off restarting failed container crashy in pod crashy-7dfc58bc6d-gm97b_agent-eval-f04(3994206a-ca9e-4f15-9e61-f13414fc3750)\nagents\tCronJob/status-reporter\tFailedCreate\t2\t31m\tError creating job: admission webhook \"ivpol.validate.kyverno.svc-fail\" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get \"https://zot.zot.svc.cluster.local:5000/\nagents\tJob/status-reporter-29926080\tBackoffLimitExceeded\t1\t2h\tJob has reached the specified backoff limit\nagents\tCronJob/status-reporter\tUnexpectedJob\t5\t3h\tSaw a job that the controller did not create or forgot: api-smoke-1",
+   "result_chars": 1500,
+   "truncated": false,
+   "duration_ms": 83,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agent-eval-f04"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f04\tcrashy-7dfc58bc6d-gm97b\tRunning\t0/1\t1\tCrashLoopBackOff\tError(127)\tReplicaSet/crashy-7dfc58bc6d",
+   "result_chars": 180,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agents"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagents\tstatus-reporter-29926080-tccdf\tFailed\t0/1\t0\t-\t-\tJob/status-reporter-29926080\nagents\tapi-smoke-1-4svgw\tSucceeded\t0/1\t0\t-\t-\tJob/api-smoke-1\nagents\tstatus-reporter-29926200-gzjgk\tSucceeded\t0/1\t0\t-\t-\tJob/status-reporter-29926200\nagents\tstatus-reporter-76d6465d89-g2mgc\tRunning\t1/1\t0\t-\t-\tReplicaSet/status-reporter-76d6465d89\nagents\tstatus-reporter-smoke-1-nrn2z\tSucceeded\t0/1\t0\t-\t-\tJob/status-reporter-smoke-1",
+   "result_chars": 483,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agent-eval-f04"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagent-eval-f04\tPod/crashy-7dfc58bc6d-gm97b\tBackOff\t2\t0m\tNOT OK\tBack-off restarting failed container crashy in pod crashy-7dfc58bc6d-gm97b_agent-eval-f04(3994206a-ca9e-4f15-9e61-f13414fc3750)\n(34 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 365,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agents"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagents\tCronJob/status-reporter\tFailedCreate\t2\t31m\t?\tError creating job: admission webhook \"ivpol.validate.kyverno.svc-fail\" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get \"https://zot.zot.svc.cluster.local:5000/\nagents\tJob/status-reporter-29926080\tBackoffLimitExceeded\t1\t2h\tNOT OK\tJob has reached the specified backoff limit\nagents\tCronJob/status-reporter\tUnexpectedJob\t5\t3h\t?\tSaw a job that the controller did not create or forgot: api-smoke-1\n(34 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 660,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t6",
+   "tool": "get_status",
+   "arguments": {
+    "kind": "Pod",
+    "name": "crashy-7dfc58bc6d-gm97b",
+    "namespace": "agent-eval-f04"
+   },
+   "result": "{\"namespace\": \"agent-eval-f04\", \"name\": \"crashy-7dfc58bc6d-gm97b\", \"phase\": \"Running\", \"ready\": \"0/1\", \"restarts\": 1, \"waiting\": \"CrashLoopBackOff\", \"last_terminated\": \"Error(127)\", \"ok\": false, \"owner\": \"ReplicaSet/crashy-7dfc58bc6d\"}",
+   "result_chars": 235,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t7",
+   "tool": "get_status",
+   "arguments": {
+    "kind": "Pod",
+    "name": "status-reporter-29926080-tccdf",
+    "namespace": "agents"
+   },
+   "result": "{\"namespace\": \"agents\", \"name\": \"status-reporter-29926080-tccdf\", \"phase\": \"Failed\", \"ready\": \"0/1\", \"restarts\": 0, \"waiting\": \"-\", \"last_terminated\": \"-\", \"ok\": false, \"owner\": \"Job/status-reporter-29926080\"}",
+   "result_chars": 209,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t8",
+   "tool": "get_status",
+   "arguments": {
+    "kind": "Job",
+    "name": "status-reporter-29926080",
+    "namespace": "agents"
+   },
+   "result": "{\"namespace\": \"agents\", \"kind\": \"Job\", \"name\": \"status-reporter-29926080\", \"desired\": 1, \"ready\": 0, \"conditions\": \"FailureTarget=True(BackoffLimitExceeded),Failed=True(BackoffLimitExceeded)\", \"autoscaler\": \"-\", \"ok\": false}",
+   "result_chars": 224,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t9",
+   "tool": "get_status",
+   "arguments": {
+    "kind": "CronJob",
+    "name": "status-reporter",
+    "namespace": "agents"
+   },
+   "result": "error: tool-call limit reached; give your final answer now",
+   "result_chars": 58,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": true
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849"
+ },
+ "timings": {
+  "started": "2026-11-25T02:52:26Z",
+  "finished": "2026-11-25T02:53:54Z",
+  "total_s": 88.0,
+  "model_s": 87.9,
+  "tools_s": 0.08,
+  "turns": 5
+ },
+ "error": null
+}

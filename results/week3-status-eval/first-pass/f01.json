@@ -1,0 +1,145 @@
+{
+ "run_id": "r-20261125T024819Z-5aad",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f01",
+   "object": "Deployment/podinfo",
+   "category": "scaled-to-zero",
+   "summary": "Deployment has 0 desired and 0 ready replicas with no autoscaler",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "0 replicas, not autoscaled; Service/podinfo selects it and has no pods"
+    }
+   ]
+  },
+  {
+   "namespace": "agents",
+   "object": "Job/status-reporter-29926080",
+   "category": "admission-denied",
+   "summary": "Job failed due to admission webhook denial from Kyverno policy",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Error creating job: admission webhook \"ivpol.validate.kyverno.svc-fail\" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get \"https://zot.zot.svc.cluster.local:5000/"
+    }
+   ]
+  },
+  {
+   "namespace": "agents",
+   "object": "CronJob/status-reporter",
+   "category": "admission-denied",
+   "summary": "CronJob failed to create due to admission webhook denial from Kyverno policy",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Error creating job: admission webhook \"ivpol.validate.kyverno.svc-fail\" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get \"https://zot.zot.svc.cluster.local:5000/"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "3 faults: 1 scaled-to-zero deployment in agent-eval-f01, and 2 admission-denied jobs/CronJobs in agents namespace due to Kyverno policy validation failures",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 55/56 healthy; workloads 78/80 healthy; warning events (object not healthy now) 34/37 healthy; pvcs 4/4 healthy; argo cd apps 14/14 healthy\n\npods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagents\tstatus-reporter-29926080-tccdf\tFailed\t0/1\t0\t-\t-\tJob/status-reporter-29926080\n\nworkloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f01\tDeployment\tpodinfo\t0\t0\t-\t0 replicas, not autoscaled; Service/podinfo selects it and has no pods\nagents\tJob\tstatus-reporter-29926080\t1\t0\tFailureTarget=True(BackoffLimitExceeded),Failed=True(BackoffLimitExceeded)\t-\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagents\tCronJob/status-reporter\tFailedCreate\t2\t27m\tError creating job: admission webhook \"ivpol.validate.kyverno.svc-fail\" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get \"https://zot.zot.svc.cluster.local:5000/\nagents\tJob/status-reporter-29926080\tBackoffLimitExceeded\t1\t2h\tJob has reached the specified backoff limit\nagents\tCronJob/status-reporter\tUnexpectedJob\t5\t3h\tSaw a job that the controller did not create or forgot: api-smoke-1",
+   "result_chars": 1182,
+   "truncated": false,
+   "duration_ms": 103,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agents"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagents\tstatus-reporter-29926080-tccdf\tFailed\t0/1\t0\t-\t-\tJob/status-reporter-29926080\nagents\tapi-smoke-1-4svgw\tSucceeded\t0/1\t0\t-\t-\tJob/api-smoke-1\nagents\tstatus-reporter-29926200-gzjgk\tSucceeded\t0/1\t0\t-\t-\tJob/status-reporter-29926200\nagents\tstatus-reporter-76d6465d89-g2mgc\tRunning\t1/1\t0\t-\t-\tReplicaSet/status-reporter-76d6465d89\nagents\tstatus-reporter-smoke-1-nrn2z\tSucceeded\t0/1\t0\t-\t-\tJob/status-reporter-smoke-1",
+   "result_chars": 483,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agent-eval-f01"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f01\tDeployment\tpodinfo\t0\t0\t-\t0 replicas, not autoscaled; Service/podinfo selects it and has no pods",
+   "result_chars": 176,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agents"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagents\tCronJob/status-reporter\tFailedCreate\t2\t27m\t?\tError creating job: admission webhook \"ivpol.validate.kyverno.svc-fail\" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get \"https://zot.zot.svc.cluster.local:5000/\nagents\tJob/status-reporter-29926080\tBackoffLimitExceeded\t1\t2h\tNOT OK\tJob has reached the specified backoff limit\nagents\tCronJob/status-reporter\tUnexpectedJob\t5\t3h\t?\tSaw a job that the controller did not create or forgot: api-smoke-1\n(34 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 660,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "list_argocd_apps",
+   "arguments": {},
+   "result": "argo cd applications\nnamespace\tname\tsync\thealth\tmessage\nargocd\talloy\tSynced\tHealthy\t\nargocd\targocd\tSynced\tHealthy\t\nargocd\tkeda\tSynced\tHealthy\t\nargocd\tkube-prometheus-stack\tSynced\tHealthy\t\nargocd\tkyverno\tSynced\tHealthy\t\nargocd\tlocal-agents\tSynced\tHealthy\t\nargocd\tlocal-airgap-llm\tSynced\tHealthy\t\nargocd\tlocal-path-storage\tSynced\tHealthy\t\nargocd\tloki\tSynced\tHealthy\t\nargocd\tpolicies\tSynced\tHealthy\t\nargocd\troot\tSynced\tHealthy\t\nargocd\tsample-app\tSynced\tHealthy\t\nargocd\tvelero\tSynced\tHealthy\t\nargocd\tzot\tSynced\tHealthy\t",
+   "result_chars": 515,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t6",
+   "tool": "list_pvcs",
+   "arguments": {
+    "namespace": "agents"
+   },
+   "result": "persistent volume claims\nnamespace\tname\tphase\tstorage_class\tclass_exists\tcapacity",
+   "result_chars": 81,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t7",
+   "tool": "list_pvcs",
+   "arguments": {},
+   "result": "persistent volume claims\nnamespace\tname\tphase\tstorage_class\tclass_exists\tcapacity\nmonitoring\tprometheus-kps-kube-prometheus-stack-prometheus-db-prometheus-kps-kube-prometheus-stack-prometheus-0\tBound\tlocal-path\tyes\t8Gi\nmonitoring\tstorage-loki-0\tBound\tlocal-path\tyes\t5Gi\nsample-app\tdata-db-0\tBound\tlocal-path\tyes\t1Gi\nzot\tzot-pvc-zot-0\tBound\tlocal-path\tyes\t10Gi",
+   "result_chars": 359,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849"
+ },
+ "timings": {
+  "started": "2026-11-25T02:48:19Z",
+  "finished": "2026-11-25T02:50:07Z",
+  "total_s": 108.1,
+  "model_s": 108.0,
+  "tools_s": 0.1,
+  "turns": 6
+ },
+ "error": null
+}

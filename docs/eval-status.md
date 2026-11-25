@@ -7,7 +7,42 @@ namespaces; a fault outside them needs the user's approval of that specific
 fault. Code: eval/status/ (cases.yaml, cases/*.yaml, inject.sh, cleanup.sh,
 score.py, run_eval.py); every run goes through the operator API (ADR 0005).
 
-## Results (11/24, results/week2-status-eval/)
+## Results, Week 3 (11/24, results/week3-status-eval/)
+
+Faults 8/8 found, located and classified; controls 5/5 reported healthy
+with no findings at all; **no ambient findings in any of the 13 runs**
+(Week 2: 1-5 per run). f06 and f08 now scored strictly (the finding must
+name the blocked object in the case namespace; Week 2 accepted the case
+namespace anywhere in the finding). Every run grounded, 6-8 tool calls,
+39.6-84.4 s, median 48.9 s (Week 2: 56-128 s). Agent image f906bd3. One
+greedy run per case.
+
+Changes since Week 2 (the Week 2 follow-ups):
+- The hourly CronJob treats 429 as a skipped run (agentctl exit 3), not a
+  failed Job; a failed Job from Week 2's 429 was every later run's ambient
+  finding. Seen live: the 03:00 run during the eval completed in 3 s.
+- Conditions where False is healthy (Suspended, Failed, FailureTarget,
+  ReplicaFailure) are reported only when True (a completed Job's
+  `Suspended=False(JobResumed)` was printed as bad).
+- Kyverno PolicyViolation events are located at the object named in the
+  message (Kyverno files them under the policy in `default`), marked
+  "blocked at admission by <policy>"; hidden once that namespace is gone.
+
+Passes on the way, kept:
+- first-pass/ (image c4f5677): faults 7/8, controls 5/5. f06 located but
+  classified `image-pull`: with the policy no longer the event's object,
+  the message "failed to evaluate policy: GET .../manifests/sha256:..."
+  read as a pull error. Fix: the row says "blocked at admission by
+  <policy>" (f906bd3).
+- rerun-f906bd3/ (f06, f08 only): f08 passed, f06 not reported at all. The
+  leftover failed Job from Week 2 (a 429) was still in `agents`; the model
+  spent its calls on it and merged the two into one story about the agent's
+  own namespace. The Job was deleted (the user's OK; its only log line, the
+  429, is quoted above) and the full set rerun: the result above.
+- Lesson: one unrelated real fault in the cluster can pull a 4B model off
+  the injected one; the eval assumes an otherwise healthy cluster.
+
+## Results, Week 2 (11/24, results/week2-status-eval/)
 
 Faults 8/8 found, located and classified; controls 5/5 with nothing
 reported in their namespace; every run grounded, 7-8 valid tool calls,

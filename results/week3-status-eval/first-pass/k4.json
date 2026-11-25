@@ -1,0 +1,99 @@
+{
+ "run_id": "r-20261125T030816Z-4ccd",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agents",
+   "object": "CronJob/status-reporter",
+   "category": "admission-denied",
+   "summary": "CronJob admission webhook denied job creation due to platform image verification failure",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Error creating job: admission webhook \"ivpol.validate.kyverno.svc-fail\" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get \"https://zot.zot.svc.cluster.local:5000/"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "One fault found: CronJob status-reporter in namespace agents is blocked by Kyverno admission webhook.",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 56/57 healthy; workloads 80/81 healthy; warning events (object not healthy now) 34/37 healthy; pvcs 4/4 healthy; argo cd apps 14/14 healthy\n\npods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagents\tstatus-reporter-29926080-tccdf\tFailed\t0/1\t0\t-\t-\tJob/status-reporter-29926080\n\nworkloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagents\tJob\tstatus-reporter-29926080\t1\t0\tFailureTarget=True(BackoffLimitExceeded),Failed=True(BackoffLimitExceeded)\t-\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagents\tCronJob/status-reporter\tFailedCreate\t2\t47m\tError creating job: admission webhook \"ivpol.validate.kyverno.svc-fail\" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get \"https://zot.zot.svc.cluster.local:5000/\nagents\tJob/status-reporter-29926080\tBackoffLimitExceeded\t1\t3h\tJob has reached the specified backoff limit\nagents\tCronJob/status-reporter\tUnexpectedJob\t5\t3h\tSaw a job that the controller did not create or forgot: api-smoke-1",
+   "result_chars": 1071,
+   "truncated": false,
+   "duration_ms": 91,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agents"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagents\tCronJob/status-reporter\tFailedCreate\t2\t47m\t?\tError creating job: admission webhook \"ivpol.validate.kyverno.svc-fail\" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get \"https://zot.zot.svc.cluster.local:5000/\nagents\tJob/status-reporter-29926080\tBackoffLimitExceeded\t1\t3h\tNOT OK\tJob has reached the specified backoff limit\nagents\tCronJob/status-reporter\tUnexpectedJob\t5\t3h\t?\tSaw a job that the controller did not create or forgot: api-smoke-1\n(34 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 660,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agents"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagents\tstatus-reporter-29926080-tccdf\tFailed\t0/1\t0\t-\t-\tJob/status-reporter-29926080\nagents\tapi-smoke-1-4svgw\tSucceeded\t0/1\t0\t-\t-\tJob/api-smoke-1\nagents\tstatus-reporter-29926200-gzjgk\tSucceeded\t0/1\t0\t-\t-\tJob/status-reporter-29926200\nagents\tstatus-reporter-29926260-h92b5\tSucceeded\t0/1\t0\t-\t-\tJob/status-reporter-29926260\nagents\tstatus-reporter-76d6465d89-g2mgc\tRunning\t1/1\t0\t-\t-\tReplicaSet/status-reporter-76d6465d89",
+   "result_chars": 485,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agents"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagents\tJob\tstatus-reporter-29926080\t1\t0\tFailureTarget=True(BackoffLimitExceeded),Failed=True(BackoffLimitExceeded)\t-\nagents\tDeployment\tstatus-reporter\t1\t1\t-\t-\nagents\tJob\tapi-smoke-1\t1\t1\t-\t-\nagents\tJob\tstatus-reporter-29926200\t1\t1\t-\t-\nagents\tJob\tstatus-reporter-29926260\t1\t1\t-\t-\nagents\tReplicaSet\tstatus-reporter-76d6465d89\t1\t1\t-\t-",
+   "result_chars": 396,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "list_argocd_apps",
+   "arguments": {},
+   "result": "argo cd applications\nnamespace\tname\tsync\thealth\tmessage\nargocd\talloy\tSynced\tHealthy\t\nargocd\targocd\tSynced\tHealthy\t\nargocd\tkeda\tSynced\tHealthy\t\nargocd\tkube-prometheus-stack\tSynced\tHealthy\t\nargocd\tkyverno\tSynced\tHealthy\t\nargocd\tlocal-agents\tSynced\tHealthy\t\nargocd\tlocal-airgap-llm\tSynced\tHealthy\t\nargocd\tlocal-path-storage\tSynced\tHealthy\t\nargocd\tloki\tSynced\tHealthy\t\nargocd\tpolicies\tSynced\tHealthy\t\nargocd\troot\tSynced\tHealthy\t\nargocd\tsample-app\tSynced\tHealthy\t\nargocd\tvelero\tSynced\tHealthy\t\nargocd\tzot\tSynced\tHealthy\t",
+   "result_chars": 515,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849"
+ },
+ "timings": {
+  "started": "2026-11-25T03:08:16Z",
+  "finished": "2026-11-25T03:09:17Z",
+  "total_s": 60.4,
+  "model_s": 60.3,
+  "tools_s": 0.09,
+  "turns": 5
+ },
+ "error": null
+}

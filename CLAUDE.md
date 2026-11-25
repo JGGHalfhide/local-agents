@@ -253,7 +253,16 @@ Week 2 close (11/24): tool interface decided (ADR 0007: tools stay
 in-process functions, no MCP); docs/stack.md pipeline, data flow and
 diagram written, Mermaid diagram in the README; eval follow-ups moved to
 Week 3. Tagged v0.2 (11/24; employer check signed off; image rebuilt
-byte-identical to the deployed digest). Next: Week 3 follow-ups.
+byte-identical to the deployed digest).
+Week 3 (11/24): follow-ups closed (images c4f5677, f906bd3; deployed
+3cafb55): agentctl exit 3 = busy, the CronJob counts it as skipped;
+negative-polarity conditions shown only when True; PolicyViolation events
+located at the blocked object ("blocked at admission by <policy>").
+Eval rerun: 8/8, 5/5, f06/f08 scored strictly, no ambient findings,
+median 48.9 s (results/week3-status-eval/; first pass 7/8 and an f06
+rerun kept). A leftover failed Job (Week 2's 429) pulled the model off f06;
+deleted with the user's OK. The eval assumes an otherwise healthy cluster.
+Open: tag v0.3 (rebuild check, employer check).
 Lab: build-node-01 running, airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state
