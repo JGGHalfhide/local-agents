@@ -92,8 +92,8 @@ platform-lab (Phase 1, v1.0 11/18) and local-airgap-LLM (Phase 2, v1.1
   namespaces, nodes, PVCs, Argo CD Applications, KEDA objects; no Secrets,
   no pods/exec, no pods/log in v1.
 - One agent only (ADR 0006, 11/24): no triage agent, no retrieval. The
-  project is an MVP / proof of concept of the whole lab: airgapped cluster,
-  local LLM, one agent. Eval set v0 stays as the Week 1 baseline record.
+  project shows the whole lab end to end: airgapped cluster, local LLM,
+  one agent. Eval set v0 stays as the Week 1 baseline record.
 - Tools (ADR 0007, 11/24): in-process functions in the agent image; no
   tool servers or MCP unless a second consumer or a write action needs one.
 - Agent runtime (ADR 0002, 11/24): a plain tool loop on the openai SDK.
@@ -221,7 +221,7 @@ ADR 0002 (11/24): agent runtime = plain tool loop on the openai SDK (spike of
 langgraph 3/4, smolagents 2/4, pydantic-ai 0/4). Endpoint quirks every loop
 must handle are in the ADR. Report quality was weak for all (false faults
 from boot-time warnings and KEDA scale-to-zero): Week 2 tool design.
-MVP scope (user, 11/24): proof of concept; smallest test that decides.
+Scope (user, 11/24): smallest test that decides.
 Week 1 tagged v0.1 (11/24; employer check signed off by the user).
 Week 2 step 1 done (11/24, ADR 0004): agent image built with crane
 (`make agent-image`, reproducible, locked wheels), published through
@@ -281,7 +281,18 @@ cases with the current config_sha256 (eval/status/check_config.py, in
 `make eval-check`). Image 393577d, deployed 7e81b03. Eval: 8/8, 5/5, no
 ambient findings, median 49.4 s (results/week4-status-eval/). Traces: the
 final structured request is 35-45 s of every run.
-Next in Week 4: dashboard as code, thinking opt-in test, tag v0.4.
+Week 4 step 3 done (11/25): dashboard as code in platform-lab (1b20d42,
+gitops/monitoring/dashboards/local-agents.json; 9 panels, TraceQL metrics
+from Tempo; sits in platform-lab because Grafana's sidecar reads only the
+monitoring namespace).
+Week 4 step 4 done (11/25, ADR 0009): thinking on, same 13 cases: 8/8,
+5/5, no ambient findings, median 149.8 s vs 49.4 s off: thinking stays off
+for the status reporter (results/week4-thinking-status-eval/).
+Snag 11/25: Tempo OOMKilled twice (512 MiB limit) while ~20 traces were read
+in a row; idle 46 MiB, memory steps up per read. Probable cause: no
+GOMEMLIMIT; proposed fix in platform-lab (limit 1 GiB, GOMEMLIMIT ~80%).
+All 26 eval traces survived.
+Next in Week 4: Tempo memory fix, tag v0.4 (rebuild check, employer check).
 Lab: build-node-01 running (started 11/25), airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state

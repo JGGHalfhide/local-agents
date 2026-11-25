@@ -7,8 +7,8 @@ Kyverno, prompts and tool configs versioned through GitOps, every model and
 tool call traced, delivered through the same signed supply chain, and
 deployed to the airgapped cluster. Agent 1: a read-only platform status
 reporter (ADR 0003), scored automatically by fault injection in disposable
-namespaces (docs/eval-status.md). No second agent (ADR 0006): the project is a proof of concept of the
-whole lab: airgapped cluster, local LLM, one agent. Measured: detection, location and classification of
+namespaces (docs/eval-status.md). No second agent (ADR 0006): the project shows the
+whole lab end to end: airgapped cluster, local LLM, one agent. Measured: detection, location and classification of
 injected faults, grounding and tool-call validity, latency and tokens per
 run, thinking off vs on.
 
@@ -49,7 +49,7 @@ tools under the platform's policies, reachable through a structured API and
 - [x] Operator API v1 (11/24, agent/server.py; deployed b6ce0e2, image e6ae522). Original item: Operator API v1 (ADR 0005, docs/interface.md): `python -m agent serve` (stdlib http.server), Deployment + Service in `agents`; POST /v1/status, GET /v1/runs, GET /v1/runs/{id}, GET /healthz; run object with findings, evidence by tool-call id, tool calls, model settings, timings; 300 s run deadline, one run at a time (429), last 50 runs in an emptyDir; ingress only from agentctl pods, operators via port-forward (RBAC)
 - [x] agentctl (11/24, agent/agentctl.py; the CronJob runs it). Original item: agentctl (ADR 0005): one stdlib-only Python file; status [-n], runs, trace, health; --json, --thinking, --timeout, --endpoint; exit 0 healthy, 1 fault, 2 error/unknown; the CronJob runs `agentctl status` against the Service
 - [x] Deterministic rule and tools (11/24: KEDA rule in agent/loop.py; overview, list_pvcs, list_argocd_apps, pod_metrics; get_status reads CronJobs). Original item: Deterministic rule from the step 3 smoke test: drop `scaled-to-zero` findings on workloads the tools mark as KEDA-managed; PVC and Argo CD Application tools (for f10)
-- [x] Fault-injection eval run (11/24, results/week2-status-eval/): faults 8/8, controls 5/5 through the operator API; one greedy run per case (MVP); first pass 6/6 and 3/4 kept. Original item: Fault-injection eval run (approved faults and controls only, in `agent-eval-*` namespaces), every run through POST /v1/status (the operators' path): automatic scores; greedy repeated to check determinism, any sampled configuration run 3 times
+- [x] Fault-injection eval run (11/24, results/week2-status-eval/): faults 8/8, controls 5/5 through the operator API; one greedy run per case; first pass 6/6 and 3/4 kept. Original item: Fault-injection eval run (approved faults and controls only, in `agent-eval-*` namespaces), every run through POST /v1/status (the operators' path): automatic scores; greedy repeated to check determinism, any sampled configuration run 3 times
 - [x] Smoke test (11/24): in-cluster report (Job from the CronJob, 142 s, 1 false fault), labelled pod reaches the endpoint, unlabelled pod blocked, unsigned image rejected (docs/scans/week2-identity-smoke.txt, week2-agent-image-admission.txt). Original item: Smoke test: a status report in-cluster with tool calls; unlabelled pod blocked; no egress; unsigned image rejected; the agent's ServiceAccount denied Secrets, pods/exec and pods/log
 - [x] Follow-ups from the eval (11/24): recorded, moved to Week 3
 - [x] Tag v0.2 (11/24; rebuild check: fresh clone lint + eval-check, image at e6ae522 rebuilt byte-identical to the deployed digest)
@@ -75,8 +75,8 @@ Goal: every model and tool call visible; prompts change by commit.
 - [x] Trace every model call and tool call (11/25, ADR 0008): OpenTelemetry SDK in the agent, Grafana Tempo 3.1.1 in platform-lab (62262d6); one run = 1 trace, 18 spans, tokens and latency per call (docs/scans/week4-tracing.txt)
 - [x] What traces may contain (11/25, ADR 0008): metadata only; no prompt, output, tool argument values or tool text (checked on the stored trace); content stays in the run object
 - [x] Prompts and tool configs as versioned files synced by Argo CD (11/25, deploy/agents/prompts/, agent/profile.py; image 393577d, deployed 7e81b03); a prompt change is a commit, and CI requires eval results with the same config_sha256 (eval/status/check_config.py). Eval 8/8, 5/5, no ambient findings, median 49.4 s (results/week4-status-eval/)
-- [ ] Dashboard as code: runs, tool calls, latency, tokens, failures, thinking on/off
-- [ ] Thinking: per-request opt-in tested on the status reporter, only after agent 1 works with thinking off (off stays the default)
+- [x] Dashboard as code (11/25, platform-lab 1b20d42, gitops/monitoring/dashboards/local-agents.json): 9 panels from the Tempo traces (TraceQL metrics): runs by status, failures, run duration, thinking on/off, model-call latency, tokens, tool calls, finish reasons, recent runs
+- [x] Thinking (11/25, ADR 0009): opt-in tested on the 13 cases: 8/8, 5/5, same as off, median 149.8 s vs 49.4 s; off stays the default for the status reporter (results/week4-thinking-status-eval/)
 - [ ] Tag v0.4
 
 Acceptance: a status-reporter run is fully traced; fault-injection results with thinking off vs opted in.
@@ -104,6 +104,8 @@ Goal: numbers, guardrails, and a repo a stranger can follow.
 - [ ] docs/stack.md complete; ADRs complete; gitleaks; employer check
 - [ ] Full rebuild of both clusters from fresh clones of all three repos; record times
 - [ ] Stretch (Week 5-6, if time): read-only web view (ADR 0005, docs/interface.md): served by the agent's server from the same run JSON; server-rendered, no JavaScript, vendored CSS; everything HTML-escaped, strict CSP, no write actions; demo mode with a DEMO banner for screenshots
+- [ ] Final step (user, 11/25): one all-encompassing build guide for the three repos together (platform-lab, local-airgap-LLM, local-agents), for someone starting from absolute zero, not just cloning these repos: host hardware and OS, host setup (libvirt/KVM, tools with pinned versions and checksums), VMs, OS hardening, RKE2, Argo CD, registry, PKI and signing keys, Kyverno policies, monitoring and tracing, KEDA, the model (source, license, SHA-256, OCI packaging), the inference endpoint, the agent, the eval, Zarf packages and the airgap flow; the full tech stack, architecture and network diagrams, and the data flow end to end; every step reproducible and verified with its expected output; where it lives decided then (likely its own doc linked from all three READMEs)
+- [ ] Final reminder (user, 11/25): terminal recordings (asciinema or similar) of `agentctl` (health, status, runs, trace) and of the web UI, plus screenshots (web UI, Grafana dashboard, a trace in Tempo), linked from the READMEs and the build guide; the web UI is the Week 5-6 stretch above, so it must exist first (demo mode, DEMO banner)
 - [ ] Tag v1.0; post (user's)
 
 Acceptance: a fresh clone of the three repos reproduces the agents on both clusters, with eval results.
@@ -112,7 +114,7 @@ Acceptance: a fresh clone of the three repos reproduces the agents on both clust
 
 - ~~Endpoint access: NetworkPolicy only, or an API key from Vault (Week 1)? Changes go in local-airgap-LLM.~~ Answered 11/23: NetworkPolicy only (ADR 0001).
 - ~~VM size: how much more than 16 GiB per VM do agents, embeddings, a vector store and tracing need, still running one VM at a time (Week 1)?~~ Answered 11/23: 12 vCPU / 20 GiB, one at a time (docs/resource-plan.md); estimates replaced by measurements in Weeks 2-4. Disk on build-node-01 (69%) is the next limit.
-- When should an agent opt in to thinking (per step type), with which sampling settings (Qwen recommends sampling, not greedy, in thinking mode), and should reasoning be kept across turns (`--reasoning-preserve`, context growth)? Off by default; opt-in tested on the status reporter only after it works (Week 4).
+- ~~When should an agent opt in to thinking?~~ Answered for the status reporter 11/25: not by default (ADR 0009: same scores, 3x the time). Sampling settings and `--reasoning-preserve` untested; revisit only with a harder eval.
 - Pod logs for the status reporter: how to add them safely (size caps, redaction, which namespaces) after v1 (Week 2 proposal).
 - One model or two: is Qwen3.5 4B enough, or does a larger model for hard steps earn its memory? The client is backend-neutral, so the same fault-injection eval can later run against a hosted model for comparison (not planned yet). (Week 1 baseline, Week 4)
 - ~~Agent runtime: plain loop vs a framework; tools in-process vs tool servers (MCP) (Weeks 1-2).~~ Answered 11/24: a plain loop (ADR 0002), tools in-process (ADR 0007).

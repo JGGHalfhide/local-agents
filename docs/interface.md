@@ -227,8 +227,8 @@ rules:
 | Question | Recommendation |
 |---|---|
 | Run history size | 50 runs in a 64 MiB emptyDir. A run is ~20-40 KB (8 tool results truncated to 2,000 characters, the report, settings); 50 runs ≈ 2 MB. Raise only if the eval needs more in one go (it writes its own results to results/ anyway). |
-| Persist runs across restarts | No (emptyDir). The eval's results are committed under results/; Loki keeps the CronJob's logs. A PVC adds backup and airgap work for no MVP need. |
-| Auth beyond NetworkPolicy | None for the MVP: one user, access by port-forward gated by RBAC. Revisit (new ADR) with a second user or any exposure beyond port-forward (Ingress), as ADR 0001 says for the endpoint. |
+| Persist runs across restarts | No (emptyDir). The eval's results are committed under results/; Loki keeps the CronJob's logs. A PVC adds backup and airgap work for no current need. |
+| Auth beyond NetworkPolicy | None in v1: one user, access by port-forward gated by RBAC. Revisit (new ADR) with a second user or any exposure beyond port-forward (Ingress), as ADR 0001 says for the endpoint. |
 | Trace backend (Week 4) | Keep the run JSON's `tool_calls` as the trace for now; Week 4's ADR picks an OpenTelemetry backend. Recommendation for that ADR: one that runs airgapped and already fits the platform (Grafana Tempo, alongside Loki and Grafana), decided by measurement there. |
 | Queue instead of 429 | 429. A queue of synchronous 5-minute requests ties up connections and clients' timeouts; the scorer retries once after `Retry-After`; agentctl exits 3 (busy) and the CronJob counts that as a skipped run. |
 | Thinking flag | In the contract now, default off, untested until Week 4. |

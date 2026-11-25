@@ -2,7 +2,7 @@
 """Fault-injection eval of the status reporter, through the operator API
 (ADR 0005: the scorer uses the operators' path).
 
-  KUBECONFIG=... eval/status/run_eval.py <results-dir> [--cases f04,k3,...]
+  KUBECONFIG=... eval/status/run_eval.py <results-dir> [--cases f04,k3,...] [--thinking]
 
 For each case, one at a time: eval/status/inject.sh <id> (waits until the
 case is visible) -> POST /v1/status (whole cluster) through
@@ -27,9 +27,9 @@ CASES = ["f01", "f02", "f04", "f05", "f06", "f07", "f08", "f10", "k1", "k2", "k3
 PORT = 18200
 
 
-def status(timeout=330):
+def status(timeout=330, thinking=False):
     req = urllib.request.Request(f"http://127.0.0.1:{PORT}/v1/status", method="POST",
-                                 data=json.dumps({"namespace": None, "thinking": False}).encode(),
+                                 data=json.dumps({"namespace": None, "thinking": thinking}).encode(),
                                  headers={"Content-Type": "application/json"})
     for attempt in range(2):
         try:
@@ -50,6 +50,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("out")
     ap.add_argument("--cases", default=",".join(CASES))
+    ap.add_argument("--thinking", action="store_true", help="opt in to thinking per request (ADR 0006 in local-airgap-LLM)")
     a = ap.parse_args()
     out = pathlib.Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -74,7 +75,7 @@ def main():
                     f"{(' ' + inj.stderr.strip()) if inj.returncode else ''}")
                 if inj.returncode != 0:
                     continue
-                code, run = status()
+                code, run = status(thinking=a.thinking)
                 (out / f"{cid}.json").write_text(json.dumps(run, indent=1) + "\n")
                 say(f"{cid}: HTTP {code} status={run.get('status')} findings="
                     f"{[(f['namespace'], f['object'], f['category']) for f in run.get('findings') or []]} "

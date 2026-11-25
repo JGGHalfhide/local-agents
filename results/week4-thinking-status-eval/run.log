@@ -1,0 +1,39 @@
+13:43:43 f01: inject exit 0     visible after 0s
+13:46:45 f01: HTTP 200 status=fault findings=[('agent-eval-f01', 'Deployment/podinfo', 'scaled-to-zero')] 182.3s error=None
+13:46:51 f01: cleanup exit 0 gone
+13:46:56 f02: inject exit 0     visible after 5s
+13:49:10 f02: HTTP 200 status=fault findings=[('agent-eval-f02', 'Pod/puller-6979648498-vk2ct', 'image-pull'), ('agent-eval-f02', 'Deployment/puller', 'image-pull')] 134.1s error=None
+13:49:21 f02: cleanup exit 0 gone
+13:49:26 f04: inject exit 0     visible after 5s
+13:52:10 f04: HTTP 200 status=fault findings=[('agent-eval-f04', 'Pod/crashy-7dfc58bc6d-8kfhn', 'crash-loop')] 163.7s error=None
+13:52:20 f04: cleanup exit 0 gone
+13:52:26 f05: inject exit 0     visible after 5s
+13:55:16 f05: HTTP 200 status=fault findings=[('agent-eval-f05', 'ReplicaSet/hungry-5486775455', 'oom-killed')] 170.1s error=None
+13:55:26 f05: cleanup exit 0 gone
+13:55:27 f06: inject exit 0     visible after 0s
+13:57:43 f06: HTTP 200 status=fault findings=[('agent-eval-f06', 'Deployment/unsigned', 'admission-denied')] 136.5s error=None
+13:57:49 f06: cleanup exit 0 gone
+13:57:49 f07: inject exit 0     visible after 0s
+14:00:17 f07: HTTP 200 status=fault findings=[('agent-eval-f07', 'Pod/greedy-658b9c4b58-cxg58', 'unschedulable')] 148.3s error=None
+14:00:23 f07: cleanup exit 0 gone
+14:00:23 f08: inject exit 0     visible after 0s
+14:03:14 f08: HTTP 200 status=fault findings=[('agent-eval-f08', 'DaemonSet/hostnet', 'admission-denied')] 171.2s error=None
+14:03:20 f08: cleanup exit 0 gone
+14:03:21 f10: inject exit 0     visible after 0s
+14:06:30 f10: HTTP 200 status=fault findings=[('agent-eval-f10', 'Pod/claimer', 'unschedulable'), ('agent-eval-f10', 'PersistentVolumeClaim/data', 'storage-unbound')] 189.6s error=None
+14:06:41 f10: cleanup exit 0 gone
+14:06:41 k1: inject exit 0     visible after 0s
+14:09:04 k1: HTTP 200 status=healthy findings=[] 142.8s error=None
+14:09:15 k1: cleanup exit 0 gone
+14:09:41 k2: inject exit 0     visible after 25s
+14:12:10 k2: HTTP 200 status=healthy findings=[] 149.8s error=None
+14:12:49 k2: cleanup exit 0 gone
+14:12:54 k3: inject exit 0     visible after 5s
+14:15:25 k3: HTTP 200 status=healthy findings=[] 150.8s error=None
+14:15:31 k3: cleanup exit 0 gone
+14:15:36 k4: inject exit 0     visible after 5s
+14:17:56 k4: HTTP 200 status=healthy findings=[] 139.8s error=None
+14:18:07 k4: cleanup exit 0 gone
+14:18:12 k5: inject exit 0     visible after 5s
+14:20:24 k5: HTTP 200 status=healthy findings=[] 132.1s error=None
+14:21:07 k5: cleanup exit 0 gone

@@ -1,0 +1,154 @@
+{
+ "run_id": "r-20261125T135226Z-abb9",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f05",
+   "object": "ReplicaSet/hungry-5486775455",
+   "category": "oom-killed",
+   "summary": "ReplicaSet hungry-5486775455 has 0 ready pods out of 1 desired, pods crash with OOMKilled(137)",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "namespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f05\tReplicaSet\thungry-5486775455\t1\t0\t-\t-"
+    },
+    {
+     "tool_call_id": "t3",
+     "excerpt": "namespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f05\thungry-5486775455-kvfw7\tRunning\t1/1\t2\t-\tOOMKilled(137)\tReplicaSet/hungry-5486775455"
+    },
+    {
+     "tool_call_id": "t1",
+     "excerpt": "namespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f05\tReplicaSet\thungry-5486775455\t1\t0\t-\t-"
+    },
+    {
+     "tool_call_id": "t4",
+     "excerpt": "namespace\tobject\treason\tcount\tage\tnow\tmessage\n(5 warning events about objects that are healthy now or gone were hidden)"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "1 fault found: ReplicaSet hungry-5486775455 in namespace agent-eval-f05 is crash-looping due to OOMKilled",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 57/57 healthy; workloads 80/81 healthy; warning events (object not healthy now) 5/5 healthy; pvcs 5/5 healthy; argo cd apps 15/15 healthy\n\nworkloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f05\tReplicaSet\thungry-5486775455\t1\t0\t-\t-",
+   "result_chars": 290,
+   "truncated": false,
+   "duration_ms": 100,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f05\tReplicaSet\thungry-5486775455\t1\t0\t-\t-\nagent-eval-f05\tDeployment\thungry\t1\t1\t-\t-",
+   "result_chars": 158,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f05\thungry-5486775455-kvfw7\tRunning\t1/1\t2\t-\tOOMKilled(137)\tReplicaSet/hungry-5486775455",
+   "result_chars": 169,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\n(5 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 173,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "get_status",
+   "arguments": {
+    "kind": "Pod",
+    "name": "hungry-5486775455-kvfw7",
+    "namespace": "agent-eval-f05"
+   },
+   "result": "{\"namespace\": \"agent-eval-f05\", \"name\": \"hungry-5486775455-kvfw7\", \"phase\": \"Running\", \"ready\": \"1/1\", \"restarts\": 2, \"waiting\": \"-\", \"last_terminated\": \"OOMKilled(137)\", \"ok\": true, \"owner\": \"ReplicaSet/hungry-5486775455\"}",
+   "result_chars": 223,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t6",
+   "tool": "list_events",
+   "arguments": {},
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\n(5 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 173,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t7",
+   "tool": "pod_metrics",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "pod metrics in agent-eval-f05\npod\tcontainer\tcpu\tmemory\tmemory_limit",
+   "result_chars": 67,
+   "truncated": false,
+   "duration_ms": 6,
+   "error": false
+  },
+  {
+   "id": "t8",
+   "tool": "get_status",
+   "arguments": {
+    "kind": "ReplicaSet",
+    "name": "hungry-5486775455",
+    "namespace": "agent-eval-f05"
+   },
+   "result": "{\"namespace\": \"agent-eval-f05\", \"kind\": \"ReplicaSet\", \"name\": \"hungry-5486775455\", \"desired\": 1, \"ready\": 0, \"conditions\": \"-\", \"autoscaler\": \"-\", \"ok\": false}",
+   "result_chars": 159,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": true,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "tool_result_chars": 3500,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849",
+  "config_sha256": "b085a9e3041f2aae7e32ba53d8b99fac39dcba1a96427831eb40278b2a767617"
+ },
+ "timings": {
+  "started": "2026-11-25T13:52:26Z",
+  "finished": "2026-11-25T13:55:16Z",
+  "total_s": 170.1,
+  "model_s": 170.0,
+  "tools_s": 0.11,
+  "turns": 7
+ },
+ "error": null,
+ "trace_id": "32cb2194893306ec3cd9c2e0454886f5"
+}

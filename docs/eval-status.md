@@ -7,6 +7,16 @@ namespaces; a fault outside them needs the user's approval of that specific
 fault. Code: eval/status/ (cases.yaml, cases/*.yaml, inject.sh, cleanup.sh,
 score.py, run_eval.py); every run goes through the operator API (ADR 0005).
 
+## Thinking on, Week 4 (11/25, results/week4-thinking-status-eval/)
+
+The same 13 cases with `"thinking": true` (run_eval.py --thinking), same
+image and config: faults 8/8, controls 5/5, no ambient findings, no errors,
+nothing ungrounded; 7-8 tool calls; 132.1-189.6 s, median 149.8 s (3.0x
+thinking off). Two reports differ without changing a score: f05 named the
+ReplicaSet of the OOM-killed pod, f10 added the pod waiting on the unbound
+claim. Decision: thinking stays off for the status reporter
+([ADR 0009](adr/0009-status-reporter-thinking-off.md)).
+
 ## Results, Week 4 (11/25, results/week4-status-eval/)
 
 Faults 8/8, controls 5/5 reported healthy with no findings, **no ambient
@@ -70,7 +80,7 @@ Passes on the way, kept:
 
 Faults 8/8 found, located and classified; controls 5/5 with nothing
 reported in their namespace; every run grounded, 7-8 valid tool calls,
-56-128 s. One greedy run per case (MVP scope; no variance study).
+56-128 s. One greedy run per case (no variance study).
 
 - First pass (results/week2-status-eval/first-pass/): faults 6/6, controls
   3/4. f06 and f08 could not be injected as specified (below); k1's

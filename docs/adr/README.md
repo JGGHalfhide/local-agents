@@ -14,9 +14,10 @@ decided.
 | [0003](0003-first-agent-status-reporter.md) | First agent: read-only platform status reporter, scored by fault injection; triage becomes agent 2 (Week 1) |
 | [0004](0004-agent-image-built-with-crane.md) | Agent image built with crane on the host, published through platform-lab's supply chain from a local OCI layout (Week 2) |
 | [0005](0005-operator-interface.md) | Operator interface: HTTP API v1, agentctl, read-only web view (planned; Week 2, web view stretch) |
-| [0006](0006-scope-mvp-no-triage-agent.md) | Scope: one agent (the status reporter), no triage agent or retrieval (Week 2) |
+| [0006](0006-scope-one-agent.md) | Scope: one agent (the status reporter), no triage agent or retrieval (Week 2) |
 | [0007](0007-tools-in-process.md) | Tool interface: tools are in-process functions, no tool servers or MCP (Week 2) |
 | [0008](0008-tracing-opentelemetry-tempo.md) | Tracing: OpenTelemetry SDK in the agent, Grafana Tempo in platform-lab, metadata only (Week 4) |
+| [0009](0009-status-reporter-thinking-off.md) | The status reporter keeps thinking off; per-request opt-in stays available (Week 4) |
 
 Expected in the next weeks (ROADMAP.md): write actions and approval
 (Week 6).
