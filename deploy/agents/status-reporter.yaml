@@ -44,8 +44,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: status-reporter
-          # local-agents/agent:e6ae522 (make agent-image at e6ae522)
-          image: 127.0.0.1:30500/local-agents/agent@sha256:7c29634333a1eb0c3cd8c459fc0ac4dfd1e5b22b7e31bd78f1d257cb9babf1ba
+          # local-agents/agent:c4f5677 (make agent-image at c4f5677)
+          image: 127.0.0.1:30500/local-agents/agent@sha256:a2d79ebc9db831bad4c3eeda9a38b58b59a6c11b2cbac313fca904c3a9d751ce
           args: [serve, --port, "8080"]
           env:
             - name: AGENT_CONFIG
@@ -145,8 +145,8 @@ spec:
               type: RuntimeDefault
           containers:
             - name: agentctl
-              # local-agents/agent:e6ae522, same digest as the Deployment
-              image: 127.0.0.1:30500/local-agents/agent@sha256:7c29634333a1eb0c3cd8c459fc0ac4dfd1e5b22b7e31bd78f1d257cb9babf1ba
+              # local-agents/agent:c4f5677, same digest as the Deployment
+              image: 127.0.0.1:30500/local-agents/agent@sha256:a2d79ebc9db831bad4c3eeda9a38b58b59a6c11b2cbac313fca904c3a9d751ce
               command: [/bin/sh, -c]
               args:
                 - python3 /opt/agent/app/agent/agentctl.py status; rc=$?; [ "$rc" -le 1 ] || [ "$rc" -eq 3 ]
