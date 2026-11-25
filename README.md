@@ -105,8 +105,9 @@ How a run moves through it, and every component with its version and why:
 ## Quickstart
 
 Needs platform-lab v1.0+ (build cluster up, `make image` working) and
-local-airgap-LLM v1.1+ (the endpoint deployed). A from-zero guide for all
-three repos is planned for v1.0 (ROADMAP.md).
+local-airgap-LLM v1.1+ (the endpoint deployed). From an empty machine,
+all three repos in order:
+[build guide](https://github.com/JGGHalfhide/platform-lab/blob/main/docs/build-guide.md).
 
 ```bash
 make agent-image                       # reproducible image with crane (ADR 0004)
