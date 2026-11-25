@@ -1,0 +1,1 @@
+Report the current status of namespace {namespace}: list every fault there. Pass namespace={namespace} to the tools that take one.

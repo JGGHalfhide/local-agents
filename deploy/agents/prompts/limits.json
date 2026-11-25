@@ -1,0 +1,5 @@
+{
+ "max_tool_calls": 8,
+ "max_tokens": 1024,
+ "tool_result_chars": 3500
+}

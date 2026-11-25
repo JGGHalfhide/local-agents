@@ -20,7 +20,6 @@ Then, on the model's report:
   KEDA manages is moved to "ungrounded".
 """
 import datetime as dt
-import hashlib
 import json
 import re
 import secrets
@@ -30,38 +29,14 @@ from openai import OpenAI
 
 from opentelemetry.trace import Status, StatusCode
 
-from agent import tools, tracing
+from agent import profile, tools, tracing
 
 CATEGORIES = ["scaled-to-zero", "image-pull", "crash-loop", "oom-killed", "admission-denied", "unschedulable",
               "storage-unbound", "gitops-unhealthy", "node-not-ready", "other"]
-MAX_TOOL_CALLS = 8
-MAX_TURNS = MAX_TOOL_CALLS + 2
-MAX_TOKENS = 1024
 DEADLINE_S = 300
 RESULT_KEEP = 2000
-
-SYSTEM_PROMPT = f"""You are a read-only Kubernetes platform status reporter.
-Use the tools to look at the cluster, then report every fault you find.
-A fault is something broken now: a workload that should run but cannot, pods
-crash-looping, OOM-killed, failing to pull, rejected at admission,
-unschedulable, an unbound volume, a node not Ready, a Service whose workload
-was scaled to zero by hand, an Argo CD application not Synced or not Healthy.
-Not faults: a workload KEDA scales to zero (the tools say so), a completed
-Job, restarts in the past of a pod that is ready now. list_events already
-hides warnings about objects that are healthy now.
-Start with the overview tool; use the other tools only to look closer at
-something it shows. Rules: always call tools before reporting; at most {MAX_TOOL_CALLS} tool calls; only name
-namespaces and objects that appear in tool output; quote evidence exactly as
-the tools printed it. Each fault gets one category from:
-{", ".join(CATEGORIES)}.
-Your final answer is a JSON object only:
-{{"faults": [{{"namespace": "...", "kind": "...", "name": "...", "category": "...",
-"summary": "one sentence", "evidence": ["exact text from a tool result"]}}], "summary": "..."}}
-An empty "faults" list means no fault."""
-USER_PROMPT = "Report the current status of the cluster: list every fault."
-FINAL_ASK = "Give the final report as JSON only."
-LOOK_FIRST = "Call the tools first (start with overview); do not report before."
-PROMPT_SHA256 = hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest()
+# Prompts and limits (max_tool_calls, max_tokens, tool_result_chars) come
+# from files synced by Argo CD: agent/profile.py, deploy/agents/prompts/.
 
 REPORT_SCHEMA = {
     "type": "object",
@@ -157,12 +132,14 @@ def new_run_id():
 def run(cfg, cluster, namespace=None, thinking=False, run_id=None, log=None):
     """One status run, traced (agent/tracing.py). Returns the API's run object (docs/interface.md)."""
     run_id = run_id or new_run_id()
+    p = profile.load(categories=CATEGORIES)
+    tools.MAX_RESULT_CHARS = p["limits"]["tool_result_chars"]
     with tracing.tracer().start_as_current_span(f"invoke_agent {tracing.SERVICE}") as span:
         span.set_attributes({"gen_ai.operation.name": "invoke_agent", "gen_ai.agent.name": tracing.SERVICE,
                              "gen_ai.request.model": cfg["model"], "agent.run_id": run_id,
                              "agent.thinking": bool(thinking), "agent.namespace": namespace or "",
-                             "agent.prompt_sha256": PROMPT_SHA256})
-        out = _run(cfg, cluster, namespace, thinking, run_id, log)
+                             "agent.prompt_sha256": p["prompt_sha256"], "agent.config_sha256": p["config_sha256"]})
+        out = _run(cfg, cluster, namespace, thinking, run_id, log, p)
         out["trace_id"] = tracing.trace_id(span)
         span.set_attributes({"agent.status": out["status"], "agent.findings": len(out["findings"]),
                              "agent.ungrounded": len(out["ungrounded"]), "agent.tool_calls": len(out["tool_calls"]),
@@ -173,17 +150,16 @@ def run(cfg, cluster, namespace=None, thinking=False, run_id=None, log=None):
     return out
 
 
-def _run(cfg, cluster, namespace, thinking, run_id, log):
+def _run(cfg, cluster, namespace, thinking, run_id, log, p):
+    max_tool_calls, max_tokens = p["limits"]["max_tool_calls"], p["limits"]["max_tokens"]
+    max_turns = max_tool_calls + 2
     started, t0 = _now(), time.monotonic()
     client = OpenAI(base_url=cfg["base_url"], api_key=cfg["api_key"], max_retries=0)
-    opts = {"model": cfg["model"], "temperature": 0, "max_tokens": MAX_TOKENS}
+    opts = {"model": cfg["model"], "temperature": 0, "max_tokens": max_tokens}
     if thinking:
         opts["extra_body"] = {"chat_template_kwargs": {"enable_thinking": True}}
-    user = USER_PROMPT
-    if namespace:
-        user = (f"Report the current status of namespace {namespace}: list every fault there. "
-                f"Pass namespace={namespace} to the tools that take one.")
-    msgs = [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": user}]
+    user = p["user_namespace"].replace("{namespace}", namespace) if namespace else p["user"]
+    msgs = [{"role": "system", "content": p["system"]}, {"role": "user", "content": user}]
     calls, turns, nudged, content, error = [], 0, False, "", None
     model_s = tools_s = 0.0
 
@@ -197,7 +173,7 @@ def _run(cfg, cluster, namespace, thinking, run_id, log):
         t = time.monotonic()
         with tracing.tracer().start_as_current_span(f"chat {cfg['model']}") as span:
             span.set_attributes({"gen_ai.operation.name": "chat", "gen_ai.request.model": cfg["model"],
-                                 "gen_ai.request.temperature": 0, "gen_ai.request.max_tokens": MAX_TOKENS,
+                                 "gen_ai.request.temperature": 0, "gen_ai.request.max_tokens": max_tokens,
                                  "agent.thinking": bool(thinking), "agent.messages": len(msgs),
                                  "agent.request": "final" if "response_format" in kw else "tools"})
             try:
@@ -217,8 +193,8 @@ def _run(cfg, cluster, namespace, thinking, run_id, log):
 
     report = None
     try:
-        for _ in range(MAX_TURNS):
-            if len([x for x in calls if not x["error"]]) >= MAX_TOOL_CALLS:
+        for _ in range(max_turns):
+            if len([x for x in calls if not x["error"]]) >= max_tool_calls:
                 content = ""          # cap reached: no more tools, straight to the final request
                 break
             turns += 1
@@ -227,7 +203,7 @@ def _run(cfg, cluster, namespace, thinking, run_id, log):
             if not m.tool_calls:
                 if not calls and not nudged:
                     nudged = True
-                    msgs += [{"role": "assistant", "content": content}, {"role": "user", "content": LOOK_FIRST}]
+                    msgs += [{"role": "assistant", "content": content}, {"role": "user", "content": p["look_first"]}]
                     continue
                 break
             d = m.model_dump(exclude_none=True)
@@ -239,7 +215,7 @@ def _run(cfg, cluster, namespace, thinking, run_id, log):
                 args = parse_args(c.function.arguments)
                 if args is not None and namespace and c.function.name in NS_TOOLS and not args.get("namespace"):
                     args["namespace"] = namespace
-                if len([x for x in calls if not x["error"]]) >= MAX_TOOL_CALLS:
+                if len([x for x in calls if not x["error"]]) >= max_tool_calls:
                     out, err = "error: tool-call limit reached; give your final answer now", True
                 elif args is None:
                     out, err = "error: arguments are not JSON", True
@@ -268,7 +244,7 @@ def _run(cfg, cluster, namespace, thinking, run_id, log):
         if report is None and calls:
             if content:
                 msgs.append({"role": "assistant", "content": content})
-            msgs.append({"role": "user", "content": FINAL_ASK})
+            msgs.append({"role": "user", "content": p["final_ask"]})
             r = chat(response_format={"type": "json_schema", "json_schema": {"name": "report", "schema": REPORT_SCHEMA}})
             turns += 1
             report = parse_report(r.choices[0].message.content)
@@ -299,9 +275,10 @@ def _run(cfg, cluster, namespace, thinking, run_id, log):
         "tool_calls": [{"id": c["id"], "tool": c["tool"], "arguments": c["arguments"], "result": c["full"][:RESULT_KEEP],
                         "result_chars": len(c["full"]), "truncated": len(c["full"]) > RESULT_KEEP,
                         "duration_ms": c["duration_ms"], "error": c["error"]} for c in calls],
-        "model": {"name": cfg["model"], "base_url": cfg["base_url"], "temperature": 0, "max_tokens": MAX_TOKENS,
-                  "thinking": bool(thinking), "max_tool_calls": MAX_TOOL_CALLS, "max_turns": MAX_TURNS,
-                  "prompt_sha256": PROMPT_SHA256},
+        "model": {"name": cfg["model"], "base_url": cfg["base_url"], "temperature": 0, "max_tokens": max_tokens,
+                  "thinking": bool(thinking), "max_tool_calls": max_tool_calls, "max_turns": max_turns,
+                  "tool_result_chars": p["limits"]["tool_result_chars"],
+                  "prompt_sha256": p["prompt_sha256"], "config_sha256": p["config_sha256"]},
         "timings": {"started": started, "finished": _now(), "total_s": round(time.monotonic() - t0, 1),
                     "model_s": round(model_s, 1), "tools_s": round(tools_s, 2), "turns": turns},
         "error": error,

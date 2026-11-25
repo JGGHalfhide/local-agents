@@ -12,6 +12,7 @@ lint:
 # Validate the evaluation cases (schema, patterns, leak check); docs/eval.md.
 eval-check:
 	python3 eval/check.py
+	python3 eval/status/check_config.py
 
 # Lock the agent image's Python dependencies with hashes (agent/requirements.lock).
 agent-lock:

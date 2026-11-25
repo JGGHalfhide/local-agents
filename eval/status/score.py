@@ -27,7 +27,9 @@ import sys
 import yaml
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-MAX_TOOL_CALLS = 8
+# The limit the run used (recorded in its model settings) or, for older
+# results, the deployed one (deploy/agents/prompts/limits.json).
+MAX_TOOL_CALLS = json.loads((ROOT / "deploy/agents/prompts/limits.json").read_text())["max_tool_calls"]
 
 
 def score_case(cid, case, run):
@@ -55,7 +57,8 @@ def score_case(cid, case, run):
         checks["no_fault_here"] = not here
     checks["no_false_positive"] = not other_eval
     checks["grounding"] = not ungrounded
-    checks["tool_validity"] = not invalid and len(executed) <= MAX_TOOL_CALLS
+    limit = (run.get("model") or {}).get("max_tool_calls") or MAX_TOOL_CALLS
+    checks["tool_validity"] = not invalid and len(executed) <= limit
     return {"case": cid, "kind": case["kind"], "pass": all(checks.values()), "checks": checks,
             "status": run.get("status"), "error": run.get("error"),
             "found_here": [f"{f['category']} {f['object']}" for f in here],
