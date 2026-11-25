@@ -2,7 +2,7 @@
 
 The full technical specification of local-agents: every tool and
 component, its version, what it does here and why it was chosen; then the
-pipeline from an incident to a triage answer, how data moves at run time,
+pipeline from the cluster's state to a status report, how data moves at run time,
 and a diagram. Decisions are recorded in [adr/](adr/). Same structure as
 local-airgap-LLM's and platform-lab's docs/stack.md.
 
@@ -36,7 +36,7 @@ Keep this page current every week.
 | Endpoint access | NetworkPolicy (Canal), no API key | Agent namespaces and agent pods labelled `inference.local-airgap-llm/client: "true"` (both required by the interceptor's policy); tools unlabelled | [ADR 0001](adr/0001-endpoint-access-networkpolicy-only.md) |
 | Operator interface | 11/24: HTTP API v1 (stdlib `http.server` in the agent image), `agentctl` (stdlib CLI); web view a Week 5-6 stretch | Starts a status run and returns structured, grounded findings with the tool-call trace; one path for operators, the CronJob and the eval | [ADR 0005](adr/0005-operator-interface.md), [interface.md](interface.md) |
 | Identity and policy | deploy/agents/ (11/24): namespace `agents` (restricted Pod Security, client label), ServiceAccount `status-reporter`, ClusterRole get/list/watch only, NetworkPolicies (default deny; DNS, KEDA interceptor :8080, API server :6443 on the lab network), hourly CronJob; synced by Argo CD (platform-lab Application `local-agents`) | The status reporter reads the cluster and calls the endpoint, nothing else | Least privilege as specified in ADR 0003 and ADR 0001; checked with `kubectl auth can-i` and probe pods ([scan](scans/week2-identity-smoke.txt)) |
-| Retrieval: embedding model, vector store, index | *planned, Week 3* | | |
+| Retrieval: embedding model, vector store, index | dropped (ADR 0006) | | |
 | Tracing | *planned, Week 4* | | |
 | Evaluation set and scoring | v0: 22 cases (`eval/cases/`), `eval/check.py`, `eval/run_baseline.py`, `eval/review_sheet.py` | Real incidents from Phases 1-2 with known cause and fix; automatic first pass by patterns, then human review; leak check in CI | Decide by measurement; no judge model fits the lab ([eval.md](eval.md)) |
 | Status reporter eval | eval/status/ (11/24): 13 cases in `agent-eval-*` namespaces, `inject.sh` / `cleanup.sh` (build cluster only, labelled namespaces only), `score.py`, `run_eval.py` through the operator API | Injects a fault or control, asks the status reporter, scores detect / locate / classify / grounding / tool validity | Automatic, repeatable scoring with no hand review (ADR 0003); 8/8 faults, 5/5 controls ([eval-status.md](eval-status.md)) |
@@ -45,12 +45,12 @@ Keep this page current every week.
 ## Pipeline
 
 *To be written as it is built: evaluation set → agent image and config →
-GitOps deploy → tools and retrieval → traced triage run → eval results →
+GitOps deploy → tools → traced status run → eval results →
 airgap packages.*
 
 ## Data flow
 
-*To be written: a triage request, tool calls, retrieval, model calls,
+*To be written: a status request, tool calls, model calls,
 traces; what leaves which namespace (nothing leaves the cluster).*
 
 ## Diagram

@@ -7,12 +7,10 @@ Kyverno, prompts and tool configs versioned through GitOps, every model and
 tool call traced, delivered through the same signed supply chain, and
 deployed to the airgapped cluster. Agent 1: a read-only platform status
 reporter (ADR 0003), scored automatically by fault injection in disposable
-namespaces (docs/eval-status.md). Agent 2 (stretch): incident triage with
-known-issue retrieval, measured on the evaluation set of real incidents
-(docs/eval.md). Measured: detection, location and classification of
+namespaces (docs/eval-status.md). No second agent (ADR 0006): the project is a proof of concept of the
+whole lab: airgapped cluster, local LLM, one agent. Measured: detection, location and classification of
 injected faults, grounding and tool-call validity, latency and tokens per
-run, run-to-run variance; for agent 2, answer quality with and without
-retrieval and thinking.
+run, thinking off vs on.
 
 Six weeks at about 7-10 hours per week. Each week ends with a rebuild check
 and a tag, like the other two repos.
@@ -58,18 +56,17 @@ tools under the platform's policies, reachable through a structured API and
 
 Acceptance: the status reporter runs in-cluster with read-only tools, passing the platform's policies as written or with documented scoped exceptions, with automatic fault-injection scores.
 
-## Week 3: Agent 2 (triage, stretch): known-issue retrieval
+## Week 3: Status reporter follow-ups
 
-Goal: the triage agent finds the matching known issue or runbook section.
+Goal: the eval's follow-ups closed and the open Week 2 decisions made.
+(Was agent 2, triage with retrieval: dropped, ADR 0006.)
 
-- [ ] Embedding model chosen by measurement (openly licensed; served on CPU, e.g. llama.cpp's embedding mode; memory and speed); as a signed OCI image with provenance, following local-airgap-LLM's `make model`; ADR
-- [ ] Vector store (e.g. pgvector on the platform's PostgreSQL vs a dedicated store): footprint, backups, airgap packaging; ADR
-- [ ] Reproducible index build: known issues and docs from platform-lab and local-airgap-LLM pinned to commits, chunking recorded, rebuilt by a make target; 6-8 incidents of the evaluation set held out of the index (chosen and recorded before the first build)
-- [ ] Retrieval eval: for each case, is the right document in the top k; held-out incidents reported separately
-- [ ] Context budget: retrieved chunks + tool output + prompt within the 32k shared context and a sane prompt-processing time (~110 tok/s)
+- [ ] Eval follow-ups from Week 2: the CronJob treats 429 (busy) as a skipped run; list_workloads hides benign conditions (JobResumed=False); Kyverno PolicyViolation findings located at the blocked object
+- [ ] Tool interface: tools stay in-process functions (no tool servers such as MCP); short ADR
+- [ ] Rebuild check and tag v0.2 if not done at the end of Week 2
 - [ ] Tag v0.3
 
-Acceptance: retrieval measured on the eval set; the index rebuilds from pinned sources.
+Acceptance: follow-ups closed; the eval still passes (8/8, 5/5).
 
 ## Week 4: Tracing, GitOps config, observability
 
@@ -80,7 +77,6 @@ Goal: every model and tool call visible; prompts change by commit.
 - [ ] Prompts and tool configs as versioned files synced by Argo CD; a prompt change is a commit, and the eval reruns on it
 - [ ] Dashboard as code: runs, tool calls, latency, tokens, failures, thinking on/off
 - [ ] Thinking: per-request opt-in tested on the status reporter, only after agent 1 works with thinking off (off stays the default)
-- [ ] Agent 2 (if built): eval run with retrieval; compare with the Week 1 baseline
 - [ ] Tag v0.4
 
 Acceptance: a status-reporter run is fully traced; fault-injection results with thinking off vs opted in.
@@ -89,21 +85,21 @@ Acceptance: a status-reporter run is fully traced; fault-injection results with 
 
 Goal: the same agents on the disconnected VM.
 
-- [ ] Zarf packages: agent, tools, embedding model (and its signatures), vector store and index, tracing, manifests, dashboard
+- [ ] Zarf packages: agent image, manifests, tracing, dashboard
 - [ ] Packages built and signed on the build host; deployed with egress blocked via platform-lab's flow (after the cluster has settled post-boot)
 - [ ] Signatures verified via the Zarf registry; unsigned image rejected; 0 pull errors
 - [ ] Eval run on the airgapped cluster; results match the build cluster
 - [ ] docs/airgap-runbook.md
 - [ ] Tag v0.5
 
-Acceptance: status reports (and triage answers, if built) on the airgapped VM with egress blocked, everything verified, no pull errors.
+Acceptance: status reports on the airgapped VM with egress blocked, everything verified, no pull errors.
 
 ## Week 6: Safety, results, publish
 
 Goal: numbers, guardrails, and a repo a stranger can follow.
 
 - [ ] Guardrails: tools read-only by default; any write action (e.g. restart a deployment) behind explicit approval or not offered (decide, ADR); prompt-injection test cases (instructions planted in logs and docs)
-- [ ] Results: fault-injection scores, latency and tokens per run, variance, thinking off vs on; triage with/without retrieval if built; concurrency with the endpoint's 4 slots
+- [ ] Results: fault-injection scores, latency and tokens per run, variance, thinking off vs on; concurrency with the endpoint's 4 slots
 - [ ] README: architecture (Mermaid), results table, quickstart (depends on platform-lab v1.0+ and local-airgap-LLM v1.1+)
 - [ ] docs/stack.md complete; ADRs complete; gitleaks; employer check
 - [ ] Full rebuild of both clusters from fresh clones of all three repos; record times

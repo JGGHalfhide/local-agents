@@ -4,14 +4,12 @@ AI agents running inside the
 [platform-lab](https://github.com/JGGHalfhide/platform-lab) Kubernetes
 platform, calling the CPU-only, airgapped LLM endpoint from
 [local-airgap-LLM](https://github.com/JGGHalfhide/local-airgap-LLM): per-agent
-identity, read-only tools behind NetworkPolicy and Kyverno, retrieval over
-the platform's runbooks, every model and tool call traced, delivered through
+identity, read-only tools behind NetworkPolicy and Kyverno, every model and tool call traced, delivered through
 the same signed supply chain and deployed to an airgapped cluster with no
 internet. First agent: a read-only platform status reporter, scored
 automatically by fault injection
-([ADR 0003](docs/adr/0003-first-agent-status-reporter.md)); second
-(stretch): incident triage, measured on an evaluation set of real
-incidents.
+([ADR 0003](docs/adr/0003-first-agent-status-reporter.md)). One agent by design: the lab is a proof of concept
+(airgapped cluster, local LLM, one agent; [ADR 0006](docs/adr/0006-scope-mvp-no-triage-agent.md)).
 
 **Status:** Week 2 (11/24): the status reporter runs in the cluster behind
 an operator API and `agentctl` ([ADR 0005](docs/adr/0005-operator-interface.md)),
@@ -40,7 +38,7 @@ local-airgap-LLM (its ADR 0007). See [ROADMAP.md](ROADMAP.md).
 - **local-airgap-LLM** provides the model endpoint: Qwen3.5 4B on
   llama.cpp, OpenAI-compatible, scale to zero, the model as a signed image.
 - **This repo** provides the agents: agent workloads and their identity,
-  tools, retrieval, prompts and tool configs, tracing, the evaluation set and
+  tools, prompts and tool configs, tracing, the evaluation set and
   results, and the Zarf packages for the airgapped cluster.
 
 ## Decisions

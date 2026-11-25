@@ -3,11 +3,10 @@
 Status: v0 (Week 1, 11/23). 22 cases; scoring method accepted by the
 user (11/23).
 
-This set measures agent 2, incident triage (stretch; ADR 0003), on real
-incidents from platform-lab (Phase 1) and local-airgap-LLM (Phase 2) whose
-causes and fixes are known: the model alone (Week 1 baseline), then with
-known-issue retrieval (Week 3), where 6-8 of these incidents are held out
-of the index. Agent 1, the status reporter, is scored automatically by
+This set measured the model alone on real incidents from platform-lab
+(Phase 1) and local-airgap-LLM (Phase 2) whose causes and fixes are known
+(the Week 1 baseline below). The triage agent it was meant for was dropped
+(ADR 0006); the set stays as the record of that baseline. Agent 1, the status reporter, is scored automatically by
 fault injection instead: [eval-status.md](eval-status.md). Thinking stays
 off by default; opt-in is tested on agent 1 once it works (Week 4).
 

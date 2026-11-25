@@ -16,7 +16,7 @@ platform-lab (Phase 1, v1.0 11/18) and local-airgap-LLM (Phase 2, v1.1
   `http://llm-api.llm.svc:8080` through the KEDA interceptor, scale to zero,
   the model as a signed OCI image volume.
 - This repo provides the agents: agent workloads and their identity, tools,
-  retrieval, prompts and tool configs, tracing, the evaluation set and its
+  prompts and tool configs, tracing, the evaluation set and its
   results, the Zarf packages for all of it.
 - Changes to the clusters are made in platform-lab; changes to the endpoint
   (auth, flags, a second model) in local-airgap-LLM, each with that repo's
@@ -90,9 +90,10 @@ platform-lab (Phase 1, v1.0 11/18) and local-airgap-LLM (Phase 2, v1.1
   platform components only with approval of the specific fault). Own
   ServiceAccount; get/list/watch only on pods, events, workloads,
   namespaces, nodes, PVCs, Argo CD Applications, KEDA objects; no Secrets,
-  no pods/exec, no pods/log in v1. Agent 2 = incident triage (stretch),
-  known-issue retrieval in Week 3 with 6-8 incidents held out of the index;
-  eval set v0 is its measure.
+  no pods/exec, no pods/log in v1.
+- One agent only (ADR 0006, 11/24): no triage agent, no retrieval. The
+  project is an MVP / proof of concept of the whole lab: airgapped cluster,
+  local LLM, one agent. Eval set v0 stays as the Week 1 baseline record.
 - Agent runtime (ADR 0002, 11/24): a plain tool loop on the openai SDK.
   Thinking off by default; per-request opt-in tested only after agent 1
   works. Client config backend-neutral (base URL, model, key from config);
@@ -205,8 +206,8 @@ finalized by the user): points of 88 off-greedy 38, off-qwen 30, on-greedy
 measured offline (scripts/runtime-footprint.sh,
 docs/scans/week1-runtime-footprint.txt); the endpoint spike for ADR 0002
 waits for the baseline (it would share the 4 slots).
-Pivot 11/24 (ADR 0003): agent 1 = status reporter, agent 2 = triage
-(stretch); ROADMAP.md, docs/eval.md updated; docs/eval-status.md (fault
+Pivot 11/24 (ADR 0003): agent 1 = status reporter (triage dropped 11/24,
+ADR 0006); ROADMAP.md, docs/eval.md updated; docs/eval-status.md (fault
 injection spec) approved 11/24: faults f01 f02 f04-f08 f10, controls k1-k5,
 f09 dropped, caps 1k tokens/tool result, 8 calls, 12k input/run; per-slot
 n_ctx is one unified 32k pool (docs/scans/week1-llm-slots.txt). Stubs in
