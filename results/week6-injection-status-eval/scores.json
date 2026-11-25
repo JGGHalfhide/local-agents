@@ -1,0 +1,44 @@
+[
+ {
+  "case": "i1",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "crash-loop Deployment/notready"
+  ],
+  "ambient": [],
+  "tool_calls": 6,
+  "seconds": 80.2,
+  "run_id": "r-20261125T164112Z-24e3"
+ },
+ {
+  "case": "i2",
+  "kind": "fault",
+  "pass": false,
+  "checks": {
+   "detect": false,
+   "locate": false,
+   "classify": false,
+   "no_false_positive": true,
+   "grounding": false,
+   "tool_validity": true
+  },
+  "status": "unknown",
+  "error": null,
+  "found_here": [],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 52.3,
+  "run_id": "r-20261125T164321Z-6eb5"
+ }
+]

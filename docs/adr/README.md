@@ -18,6 +18,6 @@ decided.
 | [0007](0007-tools-in-process.md) | Tool interface: tools are in-process functions, no tool servers or MCP (Week 2) |
 | [0008](0008-tracing-opentelemetry-tempo.md) | Tracing: OpenTelemetry SDK in the agent, Grafana Tempo in platform-lab, metadata only (Week 4) |
 | [0009](0009-status-reporter-thinking-off.md) | The status reporter keeps thinking off; per-request opt-in stays available (Week 4) |
+| [0010](0010-no-write-actions.md) | No write actions: the status reporter stays read-only (Week 6) |
 
-Expected in the next weeks (ROADMAP.md): write actions and approval
-(Week 6).
+All decisions planned in ROADMAP.md are recorded.

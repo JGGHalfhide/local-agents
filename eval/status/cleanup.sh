@@ -14,7 +14,7 @@ set -euo pipefail
 ALLOWED_SERVERS="${ALLOWED_SERVERS:-https://192.168.122.10:6443 https://192.168.122.20:6443}"
 case_id=${1:-}
 if [[ -n $case_id ]]; then
-  [[ $case_id =~ ^[fk][0-9]{2}$ || $case_id =~ ^k[0-9]$ ]] || { echo "bad case id: $case_id" >&2; exit 2; }
+  [[ $case_id =~ ^[fk][0-9]{2}$ || $case_id =~ ^[ki][0-9]$ ]] || { echo "bad case id: $case_id" >&2; exit 2; }
   match="^agent-eval-$case_id\$"
 else
   match='^agent-eval-'

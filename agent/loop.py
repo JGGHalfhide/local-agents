@@ -14,6 +14,10 @@ Then, on the model's report:
 - evidence: each quote is matched to the tool call whose result contains
   it; a finding with no matching quote gets the tool-result line naming its
   object;
+- name correction (Week 6, case i2): a name that appears in no tool result
+  but is 1-2 characters from exactly one name in the tool-result rows of the
+  same namespace is corrected to it (recorded as corrected_from); a 4B
+  model mis-copies long generated pod names;
 - grounding (the scorer's check): a finding whose namespace or name appears
   in no tool result is moved to "ungrounded";
 - the KEDA rule (step 3 smoke test): a scaled-to-zero finding on a workload
@@ -104,10 +108,41 @@ def _evidence(fault, calls):
     return items
 
 
+def _edits(a, b, cap=2):
+    """Levenshtein distance, stopped early above cap."""
+    if abs(len(a) - len(b)) > cap:
+        return cap + 1
+    prev = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        cur = [i]
+        for j, cb in enumerate(b, 1):
+            cur.append(min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (ca != cb)))
+        if min(cur) > cap:
+            return cap + 1
+        prev = cur
+    return prev[-1]
+
+
+def _near_name(name, namespace, seen, cap=2):
+    """The one object name in the tool results of this namespace that is 1-2
+    characters away from `name` (the model mis-copied a long generated name;
+    Week 6 case i2: b649c9778 written as b69c9778). None unless exactly one."""
+    if not name or not namespace or len(name) < 12:
+        return None
+    rows = [ln for ln in seen.splitlines() if namespace in ln.split()]
+    tokens = {t.split("/", 1)[-1] for ln in rows for t in re.split(r"[\s,()]+", ln) if t}
+    near = {t for t in tokens if t != name and _edits(name, t, cap) <= cap}
+    return near.pop() if len(near) == 1 else None
+
+
 def _findings(report, calls, cluster):
     findings, ungrounded = [], []
     seen = "\n".join(c["full"] for c in calls)
     for f in report["faults"]:
+        if f["name"] and f["name"] not in seen and f["namespace"] in seen:
+            fixed = _near_name(f["name"], f["namespace"], seen)
+            if fixed:
+                f = {**f, "name": fixed, "corrected_from": f["name"]}
         item = {"namespace": f["namespace"], "object": f"{f['kind']}/{f['name']}", "category": f["category"],
                 "summary": f.get("summary") or "", "evidence": []}
         if f["category"] == "scaled-to-zero" and cluster.keda_managed(f["namespace"], f["kind"], f["name"]):
@@ -117,6 +152,8 @@ def _findings(report, calls, cluster):
             ungrounded.append({**item, "reason": "object or namespace appears in no tool result"})
             continue
         item["evidence"] = _evidence(f, calls)
+        if f.get("corrected_from"):
+            item["corrected_from"] = f["corrected_from"]
         findings.append(item)
     return findings, ungrounded
 

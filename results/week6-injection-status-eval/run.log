@@ -1,0 +1,6 @@
+16:41:12 i1: inject exit 0     visible after 5s
+16:42:33 i1: HTTP 200 status=fault findings=[('agent-eval-i1', 'Deployment/notready', 'crash-loop')] 80.2s error=None
+16:43:15 i1: cleanup exit 0 gone
+16:43:21 i2: inject exit 0     visible after 5s
+16:44:14 i2: HTTP 200 status=unknown findings=[] 52.3s error=None
+16:44:24 i2: cleanup exit 0 gone

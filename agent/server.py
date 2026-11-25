@@ -2,10 +2,16 @@
 
   python -m agent serve [--port 8080]
 
-POST /v1/status, GET /v1/runs, GET /v1/runs/{id}, GET /healthz. One run at
-a time (a second POST gets 429 with Retry-After); runs are kept as JSON
-files in AGENT_RUNS_DIR (an emptyDir in the cluster), the newest RUNS_KEPT.
-Every run uses a fresh snapshot of the cluster.
+POST /v1/status, GET /v1/runs, GET /v1/runs/{id}, GET /healthz, and the
+read-only web view (agent/web.py): GET /, GET /runs/{id}. One run at a time
+(a second POST gets 429 with Retry-After); runs are kept as JSON files in
+AGENT_RUNS_DIR (an emptyDir in the cluster), the newest RUNS_KEPT. Every
+run uses a fresh snapshot of the cluster.
+
+Demo mode (AGENT_DEMO_RUNS=<dir of recorded run JSON>): serves those runs,
+marks every run "demo": true and every page with a DEMO banner, and
+answers POST /v1/status with 409, so a demo is never taken for a live
+report.
 """
 import json
 import os
@@ -14,16 +20,17 @@ import re
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from agent import __version__, k8s, loop, tools
+from agent import __version__, k8s, loop, tools, web
 
 RUNS_KEPT = 50
 RUN_ID = re.compile(r"^r-\d{8}T\d{6}Z-[0-9a-f]{4}$")
 
 
 class State:
-    def __init__(self, cfg, runs_dir):
-        self.cfg, self.dir = cfg, pathlib.Path(runs_dir)
-        self.dir.mkdir(parents=True, exist_ok=True)
+    def __init__(self, cfg, runs_dir, demo=False):
+        self.cfg, self.dir, self.demo = cfg, pathlib.Path(runs_dir), demo
+        if not demo:
+            self.dir.mkdir(parents=True, exist_ok=True)
         self.lock = threading.Lock()
         self.running = None
 
@@ -41,12 +48,17 @@ class State:
                 continue
             out.append({"run_id": r["run_id"], "started": r["timings"]["started"], "status": r["status"],
                         "namespace": r["namespace"], "findings": len(r["findings"]),
-                        "seconds": r["timings"]["total_s"], "demo": r.get("demo", False)})
+                        "seconds": r["timings"]["total_s"], "demo": self.demo or r.get("demo", False)})
         return out
 
     def get(self, run_id):
         f = self.dir / f"{run_id}.json"
-        return json.loads(f.read_text()) if RUN_ID.match(run_id) and f.exists() else None
+        if not (RUN_ID.match(run_id) and f.exists()):
+            return None
+        r = json.loads(f.read_text())
+        if self.demo:
+            r["demo"] = True
+        return r
 
 
 def make_handler(state):
@@ -68,10 +80,31 @@ def make_handler(state):
             self.end_headers()
             self.wfile.write(data)
 
+        def send_text(self, code, text, ctype):
+            data = text.encode()
+            self.send_response(code)
+            self.send_header("Content-Type", ctype)
+            self.send_header("Content-Length", str(len(data)))
+            for k, v in web.HEADERS.items():
+                self.send_header(k, v)
+            self.end_headers()
+            self.wfile.write(data)
+
         def do_GET(self):
             if self.path == "/healthz":
                 return self.send(200, {"ok": True, "version": __version__, "busy": state.running is not None,
-                                       "runs_kept": len(list(state.dir.glob("r-*.json")))})
+                                       "demo": state.demo, "runs_kept": len(list(state.dir.glob("r-*.json")))})
+            if self.path == "/":
+                return self.send_text(200, web.index(state.runs(), state.demo, __version__), "text/html; charset=utf-8")
+            if self.path == "/static/view.css":
+                return self.send_text(200, web.CSS, "text/css; charset=utf-8")
+            m = re.fullmatch(r"/runs/([^/]+)", self.path)
+            if m:
+                r = state.get(m.group(1))
+                if not r:
+                    return self.send_text(404, web._page("Not found", "<p>No such run.</p>", state.demo),
+                                          "text/html; charset=utf-8")
+                return self.send_text(200, web.run_page(r, state.demo), "text/html; charset=utf-8")
             if self.path == "/v1/runs":
                 return self.send(200, state.runs())
             m = re.fullmatch(r"/v1/runs/([^/]+)", self.path)
@@ -83,6 +116,8 @@ def make_handler(state):
         def do_POST(self):
             if self.path != "/v1/status":
                 return self.send(404, {"error": "not found"})
+            if state.demo:
+                return self.send(409, {"error": "demo mode: recorded runs only; no live run is started", "demo": True})
             n = int(self.headers.get("Content-Length") or 0)
             if n > 4096:
                 return self.send(400, {"error": "body too large"})
@@ -113,7 +148,10 @@ def make_handler(state):
 
 
 def serve(cfg, port=8080, runs_dir=None):
-    state = State(cfg, runs_dir or os.environ.get("AGENT_RUNS_DIR", "/var/lib/agent/runs"))
+    demo_dir = os.environ.get("AGENT_DEMO_RUNS")
+    state = State(cfg, demo_dir or runs_dir or os.environ.get("AGENT_RUNS_DIR", "/var/lib/agent/runs"),
+                  demo=bool(demo_dir))
     srv = ThreadingHTTPServer(("0.0.0.0", port), make_handler(state))
-    print(json.dumps({"listening": port, "version": __version__, "runs_dir": str(state.dir)}), flush=True)
+    print(json.dumps({"listening": port, "version": __version__, "runs_dir": str(state.dir), "demo": state.demo}),
+          flush=True)
     srv.serve_forever()

@@ -52,7 +52,7 @@ def score_case(cid, case, run):
                 ns in f["namespace"] or ns in f["object"] or any(ns in e.get("excerpt", "") for e in f.get("evidence") or []))]
         checks["detect"] = run.get("status") == "fault"
         checks["locate"] = bool(located)
-        checks["classify"] = any(f["category"] in cats for f in located)
+        checks["classify"] = bool(located) if case.get("any_category") else any(f["category"] in cats for f in located)
     else:
         checks["no_fault_here"] = not here
     checks["no_false_positive"] = not other_eval

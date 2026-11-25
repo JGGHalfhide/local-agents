@@ -1,7 +1,7 @@
 # Operator interface: API v1, agentctl, web view
 
-Status: **planned** (Week 2, 11/24; [ADR 0005](adr/0005-operator-interface.md)).
-Nothing here is implemented yet.
+Status: **implemented**. API v1 and agentctl in Week 2 (11/24), the web view
+in Week 6 (11/25, agent/web.py); [ADR 0005](adr/0005-operator-interface.md).
 
 One path for everyone: the status reporter runs only through the API below.
 Operators call it with `agentctl` or read it in the web view; the hourly
@@ -153,6 +153,15 @@ Operator use: `kubectl -n agents port-forward svc/status-reporter 8080:8080`
 in one terminal, `agentctl status` in another.
 
 ## Web view
+
+Implemented 11/25 (agent/web.py, served by agent/server.py). Checked locally
+in demo mode with recorded eval runs: the CSP and the other headers below on
+every page; a run with HTML and script text planted in the summary, a
+finding and a tool result renders with no `<script>`, `<img>`, `<svg>` or
+`<iframe>` tag (all escaped); unknown runs and path traversal answer 404;
+`POST /v1/status` answers 409 in demo mode. Open it with
+`kubectl -n agents port-forward svc/status-reporter 8080:8080`, then
+http://localhost:8080/.
 
 Read-only HTML served by the same server, rendered from the same run JSON:
 
