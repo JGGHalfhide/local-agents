@@ -19,6 +19,8 @@ three repos together show the whole chain end to end, from bare hardware to
 an agent on an airgapped cluster
 ([ADR 0006](docs/adr/0006-scope-one-agent.md)).
 
+![local-agents overview: read-only tools, a local model with grounded findings, a signed agent image, least-privilege policy and an airgapped deploy, tracing and the operator interface, and the measured results](docs/images/overview.png)
+
 **Status:** v1.0 (11/25). Both clusters rebuilt from fresh clones of the
 three repos and evaluated; running on the build cluster and on the
 airgapped cluster.
