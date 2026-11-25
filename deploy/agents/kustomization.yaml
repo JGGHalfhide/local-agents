@@ -6,3 +6,15 @@ resources:
   - rbac.yaml
   - networkpolicy.yaml
   - status-reporter.yaml
+# The status reporter's prompts and limits (agent/profile.py): a change is a
+# commit; the hash suffix on the name rolls the Deployment. CI requires eval
+# results recorded with the same config (eval/status/check_config.py).
+configMapGenerator:
+  - name: status-reporter-prompts
+    files:
+      - prompts/system.txt
+      - prompts/user.txt
+      - prompts/user-namespace.txt
+      - prompts/final-ask.txt
+      - prompts/look-first.txt
+      - prompts/limits.json

@@ -44,8 +44,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: status-reporter
-          # local-agents/agent:e06d4f4 (make agent-image at e06d4f4)
-          image: 127.0.0.1:30500/local-agents/agent@sha256:14cece9dc2c0730415e5eaba273dc4549e7771743ce63c87aad99f8bc54a0969
+          # local-agents/agent:393577d (make agent-image at 393577d)
+          image: 127.0.0.1:30500/local-agents/agent@sha256:1c670a10ac053ec59cb845fe801ab1f8c6ac6bb7d03e678352656d1429d2b0d5
           args: [serve, --port, "8080"]
           env:
             - name: AGENT_CONFIG
@@ -53,6 +53,8 @@ spec:
             - name: AGENT_RUNS_DIR
               value: /var/lib/agent/runs
             # Traces (ADR 0008, agent/tracing.py): metadata only, to Tempo.
+            - name: AGENT_PROMPTS_DIR
+              value: /opt/agent/prompts
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: http://tempo.monitoring.svc:4318
           ports:
@@ -86,10 +88,19 @@ spec:
               readOnly: true
             - name: runs
               mountPath: /var/lib/agent/runs
+            - name: prompts
+              mountPath: /opt/agent/prompts
+              readOnly: true
       volumes:
         - name: config
           configMap:
             name: status-reporter-config
+        # Prompts and limits (agent/profile.py), from deploy/agents/prompts/ by
+        # the configMapGenerator in kustomization.yaml: the name carries a hash
+        # of the content, so a prompt commit rolls this Deployment.
+        - name: prompts
+          configMap:
+            name: status-reporter-prompts
         - name: runs
           # The last 50 runs (docs/interface.md); lost on restart by design.
           emptyDir:
@@ -148,8 +159,8 @@ spec:
               type: RuntimeDefault
           containers:
             - name: agentctl
-              # local-agents/agent:e06d4f4, same digest as the Deployment
-              image: 127.0.0.1:30500/local-agents/agent@sha256:14cece9dc2c0730415e5eaba273dc4549e7771743ce63c87aad99f8bc54a0969
+              # local-agents/agent:393577d, same digest as the Deployment
+              image: 127.0.0.1:30500/local-agents/agent@sha256:1c670a10ac053ec59cb845fe801ab1f8c6ac6bb7d03e678352656d1429d2b0d5
               command: [/bin/sh, -c]
               args:
                 - python3 /opt/agent/app/agent/agentctl.py status; rc=$?; [ "$rc" -le 1 ] || [ "$rc" -eq 3 ]
