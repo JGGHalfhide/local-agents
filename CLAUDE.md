@@ -296,7 +296,10 @@ GOMEMLIMIT 800MiB, request 256Mi): the same 26 reads in a row, 0 restarts,
 618 MiB seen (docs/scans/week4-tempo-memory.txt). Thinking tokens:
 median output 1,299 vs 231, none cut at max_tokens
 (docs/scans/week4-thinking-tokens.txt).
-Next in Week 4: tag v0.4 (rebuild check, employer check).
+Tagged v0.4 (11/25; employer check signed off; image at 393577d rebuilt
+byte-identical, sha256:1c670a10). Next: Week 5 (airgap: Zarf packages for
+the agent image, manifests, prompts, tracing and dashboard; deploy with
+egress blocked; eval on the airgapped cluster; docs/airgap-runbook.md).
 Lab: build-node-01 running (started 11/25), airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state

@@ -77,9 +77,9 @@ Goal: every model and tool call visible; prompts change by commit.
 - [x] Prompts and tool configs as versioned files synced by Argo CD (11/25, deploy/agents/prompts/, agent/profile.py; image 393577d, deployed 7e81b03); a prompt change is a commit, and CI requires eval results with the same config_sha256 (eval/status/check_config.py). Eval 8/8, 5/5, no ambient findings, median 49.4 s (results/week4-status-eval/)
 - [x] Dashboard as code (11/25, platform-lab 1b20d42, gitops/monitoring/dashboards/local-agents.json): 9 panels from the Tempo traces (TraceQL metrics): runs by status, failures, run duration, thinking on/off, model-call latency, tokens, tool calls, finish reasons, recent runs
 - [x] Thinking (11/25, ADR 0009): opt-in tested on the 13 cases: 8/8, 5/5, same as off, median 149.8 s vs 49.4 s; off stays the default for the status reporter (results/week4-thinking-status-eval/)
-- [ ] Tag v0.4
+- [x] Tag v0.4 (11/25; rebuild check: fresh clone lint + eval-check incl. the config check, image at 393577d rebuilt byte-identical to the deployed digest sha256:1c670a10; employer check signed off)
 
-Acceptance: a status-reporter run is fully traced; fault-injection results with thinking off vs opted in.
+Acceptance: a status-reporter run is fully traced; fault-injection results with thinking off vs opted in. (11/25: every run one trace in Tempo; off 8/8, 5/5, median 49.4 s; on 8/8, 5/5, median 149.8 s.)
 
 ## Week 5: Airgap
 

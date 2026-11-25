@@ -11,7 +11,19 @@ automatically by fault injection
 ([ADR 0003](docs/adr/0003-first-agent-status-reporter.md)). One agent by design: the lab shows the whole
 chain end to end (airgapped cluster, local LLM, one agent; [ADR 0006](docs/adr/0006-scope-one-agent.md)).
 
-**Status:** Week 2 (11/24): the status reporter runs in the cluster behind
+**Status:** Week 4 (v0.4, 11/25): every run is traced with OpenTelemetry
+into Grafana Tempo, one trace per run with a span per model call and tool
+call, metadata only, no prompt or tool text
+([ADR 0008](docs/adr/0008-tracing-opentelemetry-tempo.md)); a Grafana
+dashboard reads runs, latency, tokens and tool calls from the traces.
+Prompts and limits are files synced by Argo CD, and CI requires eval
+results recorded with the deployed ones. Fault-injection eval: **8/8
+faults, 5/5 controls, no false findings, median 49 s**
+([eval-status.md](docs/eval-status.md#results-week-4-1125-resultsweek4-status-eval)).
+Thinking opted in: the same scores at 3x the time, so it stays off
+([ADR 0009](docs/adr/0009-status-reporter-thinking-off.md)).
+
+Week 2 (v0.2, 11/24): the status reporter runs in the cluster behind
 an operator API and `agentctl` ([ADR 0005](docs/adr/0005-operator-interface.md)),
 under its own read-only identity; image built with crane and signed
 ([ADR 0004](docs/adr/0004-agent-image-built-with-crane.md)). Fault-injection
@@ -20,7 +32,7 @@ eval: **8/8 faults found and classified, 5/5 healthy controls clean**
 Tools stay in-process functions, no tool servers
 ([ADR 0007](docs/adr/0007-tools-in-process.md)).
 
-Week 3 (11/24): the eval's follow-ups closed; rerun **8/8 faults, 5/5
+Week 3 (v0.3, 11/24): the eval's follow-ups closed; rerun **8/8 faults, 5/5
 controls with no false findings in any run** (admission denials now located
 at the blocked object), median 49 s per report
 ([eval-status.md](docs/eval-status.md#results-week-3-1124-resultsweek3-status-eval)).
@@ -66,6 +78,7 @@ flowchart LR
   op -. "port-forward" .-> sr
   sr -- "chat completions + tool calls" --> icp --> srv
   sr -- "GET" --> api
+  sr -- "OTLP spans, metadata only" --> tempo["Tempo + Grafana<br/>(platform-lab monitoring)"]
   zot["Zot: signed image<br/>(Kyverno verifies)"] -. "pull by digest" .-> sr
   argo["Argo CD"] -. "sync deploy/" .-> agents
 ```
