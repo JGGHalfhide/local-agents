@@ -9,14 +9,23 @@
 # Rules kept from the approved spec:
 # - only approved case ids; only namespace agent-eval-<id> (labelled
 #   local-agents/eval=true); nothing in a platform namespace;
-# - refuses a kubeconfig whose server is not the build cluster's;
+# - refuses a kubeconfig whose server is not the build cluster's or, since
+#   11/25 (user's OK, Week 5), the airgapped rehearsal cluster's;
+# - on the airgapped cluster (namespace zarf exists) each case namespace gets
+#   a copy of Zarf's pull Secret (local-airgap-LLM scripts/zarf-pull-secret.sh)
+#   EXCEPT f02: there 127.0.0.1:31999 is the real Zarf registry, so f02's
+#   fault is the missing pull credential (kubelet: "no basic auth
+#   credentials"), the airgap's own image-pull failure (local-airgap-LLM
+#   docs/airgap-runbook.md). Same case, category and objects;
 # - every workload: a signed image from 127.0.0.1:30500 by digest, labels,
 #   requests and limits, restricted securityContext; it breaks only what its
 #   case is about (f02 and f06 use the image itself as the fault).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-BUILD_SERVER="${BUILD_SERVER:-https://192.168.122.10:6443}"
+# The build cluster and the airgapped rehearsal cluster (docs/airgap-runbook.md).
+ALLOWED_SERVERS="${ALLOWED_SERVERS:-https://192.168.122.10:6443 https://192.168.122.20:6443}"
+LOCAL_AIRGAP_LLM="${LOCAL_AIRGAP_LLM:-$ROOT/../local-airgap-LLM}"
 TIMEOUT="${TIMEOUT:-240}"
 # Approved by the user 11/24 (docs/eval-status.md, Decisions). f09 dropped.
 APPROVED=(f01 f02 f04 f05 f06 f07 f08 f10 k1 k2 k3 k4 k5)
@@ -29,7 +38,7 @@ manifest="$ROOT/eval/status/cases/$case_id.yaml"
 [[ -f $manifest ]] || { echo "missing $manifest" >&2; exit 2; }
 
 server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
-[[ "$server" == "$BUILD_SERVER" ]] || { echo "refusing: kubeconfig server $server is not the build cluster ($BUILD_SERVER)" >&2; exit 3; }
+[[ " $ALLOWED_SERVERS " == *" $server "* ]] || { echo "refusing: kubeconfig server $server is not an eval cluster ($ALLOWED_SERVERS)" >&2; exit 3; }
 # Every object in the manifest must be the namespace itself or inside it.
 others="$(kubectl apply --dry-run=client -f "$manifest" -o jsonpath='{range .items[*]}{.kind}/{.metadata.namespace}{"\n"}{end}' |
   grep -v -e "^Namespace/" -e "/$ns\$" || true)"
@@ -37,6 +46,12 @@ others="$(kubectl apply --dry-run=client -f "$manifest" -o jsonpath='{range .ite
 
 [[ "${CHECK_ONLY:-0}" == 1 ]] && { echo "CHECK_ONLY=1: $case_id passes the guards; nothing applied"; exit 0; }
 echo "==> $case_id: applying $manifest into $ns"
+if kubectl get ns zarf >/dev/null 2>&1 && [[ $case_id != f02 ]]; then
+  # Airgapped cluster: the namespace first, then Zarf's pull Secret, then the case.
+  kubectl apply -f <(sed -n '1,/^---/p' "$manifest" | sed '/^---/d') >/dev/null
+  "$LOCAL_AIRGAP_LLM/scripts/zarf-pull-secret.sh" "$ns" | kubectl apply -f - >/dev/null
+  echo "    airgapped cluster: Zarf pull Secret copied into $ns"
+fi
 case "$case_id" in
   f06|f08)
     # Kyverno rejects the workload itself at admission (autogen applies the

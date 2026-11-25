@@ -1,0 +1,43 @@
+# The status reporter for the airgapped cluster (Week 5): the same manifests
+# Argo CD syncs on the build cluster (deploy/agents: namespace, RBAC,
+# NetworkPolicies, the prompts ConfigMap from deploy/agents/prompts/, the
+# Deployment and the hourly CronJob), and the agent image from the build
+# cluster's registry with its cosign signature (.sig) and SBOM attestation
+# (.att). Zarf does not pick up cosign's tag-based artifacts on its own, so
+# they are listed; Kyverno verifies the .sig after the Zarf agent rewrites
+# the reference. docs/airgap-runbook.md.
+#
+# Needs, deployed first: platform-lab's platform, policies, monitoring (Tempo
+# for the traces) and keda packages, and local-airgap-LLM's llm package (the
+# endpoint). Built and signed with platform-lab's scripts/airgap-packages.sh
+# (make airgap-packages).
+kind: ZarfPackageConfig
+metadata:
+  name: agents
+  description: local-agents status reporter (API, agentctl CronJob, prompts, read-only identity)
+  version: 0.5.0
+  architecture: amd64
+
+components:
+  - name: status-reporter
+    required: true
+    manifests:
+      - name: agents
+        kustomizations:
+          - ../../deploy/agents
+    # The digest in deploy/agents/status-reporter.yaml (image 393577d), signed
+    # by make image in platform-lab.
+    images:
+      - registry.platform-lab.internal/local-agents/agent:393577d@sha256:1c670a10ac053ec59cb845fe801ab1f8c6ac6bb7d03e678352656d1429d2b0d5
+      - registry.platform-lab.internal/local-agents/agent:sha256-1c670a10ac053ec59cb845fe801ab1f8c6ac6bb7d03e678352656d1429d2b0d5.sig
+      - registry.platform-lab.internal/local-agents/agent:sha256-1c670a10ac053ec59cb845fe801ab1f8c6ac6bb7d03e678352656d1429d2b0d5.att
+    actions:
+      onDeploy:
+        after:
+          - description: status reporter Available
+            wait:
+              cluster:
+                kind: Deployment
+                name: status-reporter
+                namespace: agents
+                condition: Available

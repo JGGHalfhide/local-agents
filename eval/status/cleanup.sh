@@ -7,10 +7,11 @@
 # Deletes only namespaces whose name starts with agent-eval- AND that carry
 # the label local-agents/eval=true (both, so a similarly named or mislabelled
 # namespace is never touched); prints each one before deleting it; waits
-# until they are gone. Refuses a kubeconfig that is not the build cluster's.
+# until they are gone. Refuses a kubeconfig that is not the build cluster's
+# or the airgapped rehearsal cluster's (11/25, user's OK).
 set -euo pipefail
 
-BUILD_SERVER="${BUILD_SERVER:-https://192.168.122.10:6443}"
+ALLOWED_SERVERS="${ALLOWED_SERVERS:-https://192.168.122.10:6443 https://192.168.122.20:6443}"
 case_id=${1:-}
 if [[ -n $case_id ]]; then
   [[ $case_id =~ ^[fk][0-9]{2}$ || $case_id =~ ^k[0-9]$ ]] || { echo "bad case id: $case_id" >&2; exit 2; }
@@ -20,7 +21,7 @@ else
 fi
 
 server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
-[[ "$server" == "$BUILD_SERVER" ]] || { echo "refusing: kubeconfig server $server is not the build cluster ($BUILD_SERVER)" >&2; exit 3; }
+[[ " $ALLOWED_SERVERS " == *" $server "* ]] || { echo "refusing: kubeconfig server $server is not an eval cluster ($ALLOWED_SERVERS)" >&2; exit 3; }
 
 mapfile -t targets < <(kubectl get ns -l local-agents/eval=true -o name | sed 's#^namespace/##' | grep -E "$match" || true)
 if [[ ${#targets[@]} -eq 0 ]]; then echo "nothing to delete"; exit 0; fi
