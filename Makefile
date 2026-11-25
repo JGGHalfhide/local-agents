@@ -8,8 +8,8 @@ LOCAL_AIRGAP_LLM ?= $(abspath ../local-airgap-LLM)
 AIRGAP_OUT := $(CURDIR)/build/airgap/packages
 LLM_OUT := $(LOCAL_AIRGAP_LLM)/build/airgap/packages
 AGENTS_VERSION := $(shell sed -n 's/^  version: //p' zarf/agents/zarf.yaml)
-LLM_VERSION := $(shell sed -n 's/^  version: //p' $(LOCAL_AIRGAP_LLM)/zarf/llm/zarf.yaml)
-SMOKE_VERSION := $(shell sed -n 's/^  version: //p' $(LOCAL_AIRGAP_LLM)/zarf/llm-smoke/zarf.yaml)
+LLM_VERSION := $(shell sed -n 's/^  version: //p' $(LOCAL_AIRGAP_LLM)/zarf/llm/zarf.yaml 2>/dev/null)
+SMOKE_VERSION := $(shell sed -n 's/^  version: //p' $(LOCAL_AIRGAP_LLM)/zarf/llm-smoke/zarf.yaml 2>/dev/null)
 
 lint:
 	yamllint -s .
