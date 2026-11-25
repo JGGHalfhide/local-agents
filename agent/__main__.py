@@ -43,6 +43,8 @@ def main():
         import openai
         print(f"local-agents {__version__}, openai {openai.__version__}, python {sys.version.split()[0]}")
         return 0
+    from agent import tracing
+    tracing.setup()
     if a.mode == "serve":
         from agent import server
         server.serve(load_config(a.config), port=a.port)

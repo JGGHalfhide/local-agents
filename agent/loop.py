@@ -28,7 +28,9 @@ import time
 
 from openai import OpenAI
 
-from agent import tools
+from opentelemetry.trace import Status, StatusCode
+
+from agent import tools, tracing
 
 CATEGORIES = ["scaled-to-zero", "image-pull", "crash-loop", "oom-killed", "admission-denied", "unschedulable",
               "storage-unbound", "gitops-unhealthy", "node-not-ready", "other"]
@@ -153,8 +155,25 @@ def new_run_id():
 
 
 def run(cfg, cluster, namespace=None, thinking=False, run_id=None, log=None):
-    """One status run. Returns the API's run object (docs/interface.md)."""
+    """One status run, traced (agent/tracing.py). Returns the API's run object (docs/interface.md)."""
     run_id = run_id or new_run_id()
+    with tracing.tracer().start_as_current_span(f"invoke_agent {tracing.SERVICE}") as span:
+        span.set_attributes({"gen_ai.operation.name": "invoke_agent", "gen_ai.agent.name": tracing.SERVICE,
+                             "gen_ai.request.model": cfg["model"], "agent.run_id": run_id,
+                             "agent.thinking": bool(thinking), "agent.namespace": namespace or "",
+                             "agent.prompt_sha256": PROMPT_SHA256})
+        out = _run(cfg, cluster, namespace, thinking, run_id, log)
+        out["trace_id"] = tracing.trace_id(span)
+        span.set_attributes({"agent.status": out["status"], "agent.findings": len(out["findings"]),
+                             "agent.ungrounded": len(out["ungrounded"]), "agent.tool_calls": len(out["tool_calls"]),
+                             "agent.turns": out["timings"]["turns"]})
+        if out["error"]:
+            span.set_status(Status(StatusCode.ERROR, out["error"][:200]))
+    tracing.flush()
+    return out
+
+
+def _run(cfg, cluster, namespace, thinking, run_id, log):
     started, t0 = _now(), time.monotonic()
     client = OpenAI(base_url=cfg["base_url"], api_key=cfg["api_key"], max_retries=0)
     opts = {"model": cfg["model"], "temperature": 0, "max_tokens": MAX_TOKENS}
@@ -176,10 +195,25 @@ def run(cfg, cluster, namespace=None, thinking=False, run_id=None, log=None):
         if remaining() <= 5:
             raise TimeoutError("deadline exceeded")
         t = time.monotonic()
-        try:
-            return client.with_options(timeout=remaining()).chat.completions.create(messages=msgs, **opts, **kw)
-        finally:
-            model_s += time.monotonic() - t
+        with tracing.tracer().start_as_current_span(f"chat {cfg['model']}") as span:
+            span.set_attributes({"gen_ai.operation.name": "chat", "gen_ai.request.model": cfg["model"],
+                                 "gen_ai.request.temperature": 0, "gen_ai.request.max_tokens": MAX_TOKENS,
+                                 "agent.thinking": bool(thinking), "agent.messages": len(msgs),
+                                 "agent.request": "final" if "response_format" in kw else "tools"})
+            try:
+                r = client.with_options(timeout=remaining()).chat.completions.create(messages=msgs, **opts, **kw)
+            except Exception as e:
+                span.set_status(Status(StatusCode.ERROR, type(e).__name__))
+                raise
+            finally:
+                model_s += time.monotonic() - t
+            u = r.usage
+            span.set_attributes({"gen_ai.response.model": r.model or "",
+                                 "gen_ai.response.finish_reasons": [c.finish_reason or "" for c in r.choices],
+                                 "gen_ai.usage.input_tokens": u.prompt_tokens if u else 0,
+                                 "gen_ai.usage.output_tokens": u.completion_tokens if u else 0,
+                                 "agent.tool_calls_requested": len(r.choices[0].message.tool_calls or [])})
+            return r
 
     report = None
     try:
@@ -211,9 +245,17 @@ def run(cfg, cluster, namespace=None, thinking=False, run_id=None, log=None):
                     out, err = "error: arguments are not JSON", True
                 else:
                     t = time.monotonic()
-                    out = tools.call(cluster, c.function.name, args)
+                    with tracing.tracer().start_as_current_span(f"execute_tool {c.function.name}") as span:
+                        out = tools.call(cluster, c.function.name, args)
+                        err = out.startswith("error:")
+                        span.set_attributes({"gen_ai.operation.name": "execute_tool",
+                                             "gen_ai.tool.name": c.function.name,
+                                             "gen_ai.tool.call.id": f"t{len(calls) + 1}",
+                                             "agent.tool.argument_keys": sorted(args),
+                                             "agent.tool.result_chars": len(out)})
+                        if err:
+                            span.set_status(Status(StatusCode.ERROR, out[:120]))
                     tools_s += time.monotonic() - t
-                    err = out.startswith("error:")
                 call = {"id": f"t{len(calls) + 1}", "tool": c.function.name, "arguments": args or {},
                         "full": out, "duration_ms": int((time.monotonic() - t) * 1000) if args is not None and not err else 0,
                         "error": err}
