@@ -94,6 +94,8 @@ platform-lab (Phase 1, v1.0 11/18) and local-airgap-LLM (Phase 2, v1.1
 - One agent only (ADR 0006, 11/24): no triage agent, no retrieval. The
   project is an MVP / proof of concept of the whole lab: airgapped cluster,
   local LLM, one agent. Eval set v0 stays as the Week 1 baseline record.
+- Tools (ADR 0007, 11/24): in-process functions in the agent image; no
+  tool servers or MCP unless a second consumer or a write action needs one.
 - Agent runtime (ADR 0002, 11/24): a plain tool loop on the openai SDK.
   Thinking off by default; per-request opt-in tested only after agent 1
   works. Client config backend-neutral (base URL, model, key from config);
@@ -246,8 +248,12 @@ docs/interface.md), deployed (image e6ae522, signed); fault-injection eval
 through the API: faults 8/8, controls 5/5 (results/week2-status-eval/,
 first pass kept). f06/f08 are rejected by Kyverno at creation: visible only
 as PolicyViolation events. Week 2 over its 7-10 h budget; web view is a
-Week 5-6 stretch. Open: tag v0.2, tool-interface ADR, eval follow-ups
-(ROADMAP).
+Week 5-6 stretch.
+Week 2 close (11/24): tool interface decided (ADR 0007: tools stay
+in-process functions, no MCP); docs/stack.md pipeline, data flow and
+diagram written, Mermaid diagram in the README; eval follow-ups moved to
+Week 3. Tagged v0.2 (11/24; employer check signed off; image rebuilt
+byte-identical to the deployed digest). Next: Week 3 follow-ups.
 Lab: build-node-01 running, airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state

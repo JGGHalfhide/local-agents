@@ -17,6 +17,9 @@ under its own read-only identity; image built with crane and signed
 ([ADR 0004](docs/adr/0004-agent-image-built-with-crane.md)). Fault-injection
 eval: **8/8 faults found and classified, 5/5 healthy controls clean**
 ([eval-status.md](docs/eval-status.md#results-1124-resultsweek2-status-eval)).
+Tools stay in-process functions, no tool servers
+([ADR 0007](docs/adr/0007-tools-in-process.md)). Next: Week 3, the eval's
+follow-ups (ROADMAP.md).
 
 Week 1 (v0.1, 11/24): VMs sized (12 vCPU / 20 GiB,
 [resource plan](docs/resource-plan.md)), endpoint access decided
@@ -40,6 +43,30 @@ local-airgap-LLM (its ADR 0007). See [ROADMAP.md](ROADMAP.md).
 - **This repo** provides the agents: agent workloads and their identity,
   tools, prompts and tool configs, tracing, the evaluation set and
   results, and the Zarf packages for the airgapped cluster.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph agents["namespace agents"]
+    cron["CronJob (hourly)<br/>agentctl"]
+    op["operator<br/>kubectl port-forward"]
+    sr["status-reporter<br/>API v1 + tool loop<br/>11 read-only tools"]
+  end
+  subgraph llm["local-airgap-LLM"]
+    icp["KEDA HTTP interceptor"]
+    srv["llama-server<br/>Qwen3.5 4B, scale to zero"]
+  end
+  api["Kubernetes API<br/>get/list/watch only"]
+  cron -- "POST /v1/status" --> sr
+  op -. "port-forward" .-> sr
+  sr -- "chat completions + tool calls" --> icp --> srv
+  sr -- "GET" --> api
+  zot["Zot: signed image<br/>(Kyverno verifies)"] -. "pull by digest" .-> sr
+  argo["Argo CD"] -. "sync deploy/" .-> agents
+```
+
+How a run moves through it: [docs/stack.md](docs/stack.md#data-flow).
 
 ## Decisions
 

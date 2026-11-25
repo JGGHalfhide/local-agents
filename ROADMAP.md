@@ -41,7 +41,7 @@ tools under the platform's policies, reachable through a structured API and
 
 - [x] Image build path (11/24, ADR 0004): crane on the host, `make agent-image`, published with platform-lab's `make image IMAGE=oci-layout:...` (platform-lab 47c3d56); `local-agents/agent:0.1.0` signed and admitted, an unsigned copy rejected (docs/scans/week2-agent-image-admission.txt)
 - [x] Status reporter tools, from the spike (11/24): list_events hides warnings about objects healthy now, workloads show KEDA scaling (zero by design is not a fault), list_nodes added, a tool call required before any report, grounding check; first live run 0 false faults (docs/scans/week2-status-reporter-live.txt)
-- [ ] Tool interface: tools as functions in the agent vs separate tool servers (e.g. MCP); ADR
+- [x] Tool interface (11/24, ADR 0007): tools stay in-process functions; no tool servers or MCP
 - [x] First read-only tools (11/24, agent/tools.py: namespaces, nodes, pods, workloads, events, KEDA objects, get_status; PVCs and Argo CD Applications not yet) (Kubernetes API, get/list/watch): pods, events, workloads, namespaces, nodes, PVCs, Argo CD Applications, KEDA objects; every result capped and summarised within a per-run input budget (docs/eval-status.md). Pod logs not in v1; a safe way to add them proposed. Prometheus and Loki queries later
 - [x] Identity (11/24, deploy/agents/rbac.yaml): ServiceAccount status-reporter, ClusterRole get/list/watch only; can-i: Secrets, logs, exec, attach, port-forward and every write denied (docs/scans/week2-identity-smoke.txt). Original item: Identity: the status reporter's own ServiceAccount and ClusterRole (get/list/watch only on the resources above; no Secrets, no pods/exec, no pods/log in v1); one ServiceAccount per tool server if any; no Secrets in env
 - [x] NetworkPolicy (11/24, deploy/agents/networkpolicy.yaml): default deny; status reporter -> DNS, the KEDA interceptor :8080, the API server on the lab network :6443 only; namespace and pod carry the client label. Original item: NetworkPolicy: agent -> tools and llm-api only; tools -> their backends only; no egress; namespaces labelled as endpoint clients
@@ -51,8 +51,8 @@ tools under the platform's policies, reachable through a structured API and
 - [x] Deterministic rule and tools (11/24: KEDA rule in agent/loop.py; overview, list_pvcs, list_argocd_apps, pod_metrics; get_status reads CronJobs). Original item: Deterministic rule from the step 3 smoke test: drop `scaled-to-zero` findings on workloads the tools mark as KEDA-managed; PVC and Argo CD Application tools (for f10)
 - [x] Fault-injection eval run (11/24, results/week2-status-eval/): faults 8/8, controls 5/5 through the operator API; one greedy run per case (MVP); first pass 6/6 and 3/4 kept. Original item: Fault-injection eval run (approved faults and controls only, in `agent-eval-*` namespaces), every run through POST /v1/status (the operators' path): automatic scores; greedy repeated to check determinism, any sampled configuration run 3 times
 - [x] Smoke test (11/24): in-cluster report (Job from the CronJob, 142 s, 1 false fault), labelled pod reaches the endpoint, unlabelled pod blocked, unsigned image rejected (docs/scans/week2-identity-smoke.txt, week2-agent-image-admission.txt). Original item: Smoke test: a status report in-cluster with tool calls; unlabelled pod blocked; no egress; unsigned image rejected; the agent's ServiceAccount denied Secrets, pods/exec and pods/log
-- [ ] Follow-ups from the eval (11/24): the CronJob should treat 429 (busy) as a skipped run, not a failed Job; list_workloads should not print benign conditions (JobResumed=False on a completed Job); the model files Kyverno PolicyViolation findings under the policy's namespace (default) instead of the blocked object's
-- [ ] Tag v0.2
+- [x] Follow-ups from the eval (11/24): recorded, moved to Week 3
+- [x] Tag v0.2 (11/24; rebuild check: fresh clone lint + eval-check, image at e6ae522 rebuilt byte-identical to the deployed digest)
 
 Acceptance: the status reporter runs in-cluster with read-only tools, passing the platform's policies as written or with documented scoped exceptions, with automatic fault-injection scores.
 
@@ -62,8 +62,8 @@ Goal: the eval's follow-ups closed and the open Week 2 decisions made.
 (Was agent 2, triage with retrieval: dropped, ADR 0006.)
 
 - [ ] Eval follow-ups from Week 2: the CronJob treats 429 (busy) as a skipped run; list_workloads hides benign conditions (JobResumed=False); Kyverno PolicyViolation findings located at the blocked object
-- [ ] Tool interface: tools stay in-process functions (no tool servers such as MCP); short ADR
-- [ ] Rebuild check and tag v0.2 if not done at the end of Week 2
+- [x] Tool interface: tools stay in-process functions (ADR 0007, done in Week 2)
+- [x] Rebuild check and tag v0.2 (done at the end of Week 2)
 - [ ] Tag v0.3
 
 Acceptance: follow-ups closed; the eval still passes (8/8, 5/5).
@@ -115,7 +115,7 @@ Acceptance: a fresh clone of the three repos reproduces the agents on both clust
 - When should an agent opt in to thinking (per step type), with which sampling settings (Qwen recommends sampling, not greedy, in thinking mode), and should reasoning be kept across turns (`--reasoning-preserve`, context growth)? Off by default; opt-in tested on the status reporter only after it works (Week 4).
 - Pod logs for the status reporter: how to add them safely (size caps, redaction, which namespaces) after v1 (Week 2 proposal).
 - One model or two: is Qwen3.5 4B enough, or does a larger model for hard steps earn its memory? The client is backend-neutral, so the same fault-injection eval can later run against a hosted model for comparison (not planned yet). (Week 1 baseline, Week 4)
-- Agent runtime: plain loop vs a framework; tools in-process vs tool servers (MCP) (Weeks 1-2).
+- ~~Agent runtime: plain loop vs a framework; tools in-process vs tool servers (MCP) (Weeks 1-2).~~ Answered 11/24: a plain loop (ADR 0002), tools in-process (ADR 0007).
 - Concurrency: the endpoint has 4 slots shared with every client; an agent run is many calls. Queueing, priorities, a second replica (does not fit today)?
 - Write actions: offered at all, and how approved (Week 6)?
 - What may traces contain (Week 4)?
