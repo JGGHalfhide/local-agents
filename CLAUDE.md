@@ -272,7 +272,16 @@ spans, metadata only (no prompt, output or tool text), trace_id in the run
 object. One run = 18 spans, 8.2 KiB; Tempo 29-152 MiB
 (docs/scans/week4-tracing.txt). Follow-up: list_events still shows a
 CronJob's boot-time FailedCreate (Kyverno/Zot not ready) after a later
-SuccessfulCreate: one false fault in the traced run.
+SuccessfulCreate: one false fault in the traced run -> fixed (393577d).
+Week 4 step 2 done (11/25): prompts and limits as files in
+deploy/agents/prompts/ (configMapGenerator, hash suffix rolls the
+Deployment; agent/profile.py loads them, AGENT_PROMPTS_DIR); runs record
+config_sha256 (b085a9e3); CI fails unless results/*-status-eval/ has all 13
+cases with the current config_sha256 (eval/status/check_config.py, in
+`make eval-check`). Image 393577d, deployed 7e81b03. Eval: 8/8, 5/5, no
+ambient findings, median 49.4 s (results/week4-status-eval/). Traces: the
+final structured request is 35-45 s of every run.
+Next in Week 4: dashboard as code, thinking opt-in test, tag v0.4.
 Lab: build-node-01 running (started 11/25), airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state

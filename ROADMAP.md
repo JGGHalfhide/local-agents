@@ -74,7 +74,7 @@ Goal: every model and tool call visible; prompts change by commit.
 
 - [x] Trace every model call and tool call (11/25, ADR 0008): OpenTelemetry SDK in the agent, Grafana Tempo 3.1.1 in platform-lab (62262d6); one run = 1 trace, 18 spans, tokens and latency per call (docs/scans/week4-tracing.txt)
 - [x] What traces may contain (11/25, ADR 0008): metadata only; no prompt, output, tool argument values or tool text (checked on the stored trace); content stays in the run object
-- [ ] Prompts and tool configs as versioned files synced by Argo CD; a prompt change is a commit, and the eval reruns on it
+- [x] Prompts and tool configs as versioned files synced by Argo CD (11/25, deploy/agents/prompts/, agent/profile.py; image 393577d, deployed 7e81b03); a prompt change is a commit, and CI requires eval results with the same config_sha256 (eval/status/check_config.py). Eval 8/8, 5/5, no ambient findings, median 49.4 s (results/week4-status-eval/)
 - [ ] Dashboard as code: runs, tool calls, latency, tokens, failures, thinking on/off
 - [ ] Thinking: per-request opt-in tested on the status reporter, only after agent 1 works with thinking off (off stays the default)
 - [ ] Tag v0.4

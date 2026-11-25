@@ -7,6 +7,30 @@ namespaces; a fault outside them needs the user's approval of that specific
 fault. Code: eval/status/ (cases.yaml, cases/*.yaml, inject.sh, cleanup.sh,
 score.py, run_eval.py); every run goes through the operator API (ADR 0005).
 
+## Results, Week 4 (11/25, results/week4-status-eval/)
+
+Faults 8/8, controls 5/5 reported healthy with no findings, **no ambient
+findings in any of the 13 runs**; every run grounded, 6-8 tool calls,
+47.3-93.2 s, median 49.4 s (Week 3: 48.9 s). Agent image 393577d, first
+pass, one greedy run per case. Same rendered system prompt as Week 3
+(`prompt_sha256` 3b79b738...), now read from deploy/agents/prompts/:
+every run records `config_sha256` b085a9e3... (prompts and limits), which
+the CI check eval/status/check_config.py requires.
+
+Changes since Week 3:
+- Tracing (ADR 0008): every run has a `trace_id` in Tempo.
+- Prompts and limits are files synced by Argo CD (agent/profile.py).
+- A controller's `FailedCreate` followed by a later `SuccessfulCreate` on
+  the same object is resolved (a CronJob's Jobs rejected while Kyverno and
+  Zot started after a VM boot were a false fault in the first traced run,
+  docs/scans/week4-tracing.txt). f06 (no later success) still found.
+
+From the traces (Tempo, per model call): the final structured request
+takes 35-45 s in every run, 40-70% of it. The slowest runs (f05 93.2 s,
+f06 84.7 s, f08 78.3 s) made one tool call per turn: 8-9 model calls and
+22-27k input tokens, against 3 calls and 7k tokens for k4 (48.9 s), where
+the model asked for several tools per turn.
+
 ## Results, Week 3 (11/24, results/week3-status-eval/)
 
 Faults 8/8 found, located and classified; controls 5/5 reported healthy
