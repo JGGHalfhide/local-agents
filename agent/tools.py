@@ -7,8 +7,9 @@ Secret names are never returned.
 Built in from the ADR 0002 spike (every report there listed 4-7 false
 faults):
 - list_events shows only warnings whose object is NOT healthy now (and says
-  how many resolved ones it hid); a FailedCreate followed by a later
-  SuccessfulCreate on the same object counts as resolved;
+  how many resolved ones it hid); a failure followed by a later success
+  on the same object counts as resolved (RESOLVED_BY: FailedCreate then
+  SuccessfulCreate, ApplyManifestFailed then AppliedManifest);
 - workload rows say when a KEDA ScaledObject scales them; a KEDA workload
   at zero replicas is marked as expected;
 - list_nodes exists, so node health is read, not guessed.
@@ -19,6 +20,12 @@ import json
 import pathlib
 
 MAX_RESULT_CHARS = 3500
+# Warning reason -> the Normal reason that means the same object has succeeded
+# since (list_events hides the warning then).
+RESOLVED_BY = {
+    "FailedCreate": "SuccessfulCreate",             # Job, ReplicaSet, StatefulSet, DaemonSet, CronJob controllers
+    "ApplyManifestFailed": "AppliedManifest",       # RKE2's addon controller (server/manifests)
+}
 KINDS = ["Pod", "Deployment", "StatefulSet", "DaemonSet", "ReplicaSet", "Job", "CronJob", "ScaledObject", "Node"]
 
 
@@ -211,16 +218,17 @@ class Cluster:
     def events(self, include_resolved=False):
         seen = {}
         events = self.src.items("events")
-        # A controller's FailedCreate is resolved by a later SuccessfulCreate on the
-        # same object (11/25: a CronJob's Jobs rejected while Kyverno and Zot were
-        # still starting after a VM boot, created 5 s later, reported as a fault).
-        created = {}
+        # A failure resolved by a later success on the same object (RESOLVED_BY):
+        # 11/25, a CronJob's Jobs rejected and RKE2's local-path-storage addon not
+        # applied while Kyverno and the Zarf registry were still starting after a
+        # VM boot; both succeeded seconds later and were reported as faults.
+        succeeded = {}
         for e in events:
-            if e.get("type") == "Normal" and e.get("reason") == "SuccessfulCreate":
+            if e.get("type") == "Normal" and e.get("reason") in RESOLVED_BY.values():
                 io = e.get("involvedObject", {})
-                k = (io.get("namespace") or e["metadata"]["namespace"], io.get("kind"), io.get("name"))
+                k = (io.get("namespace") or e["metadata"]["namespace"], io.get("kind"), io.get("name"), e.get("reason"))
                 ts = e.get("lastTimestamp") or e.get("eventTime") or e["metadata"].get("creationTimestamp") or ""
-                created[k] = max(created.get(k, ""), ts)
+                succeeded[k] = max(succeeded.get(k, ""), ts)
         for e in events:
             if e.get("type") != "Warning":
                 continue
@@ -245,8 +253,9 @@ class Cluster:
                 now = self.object_now(ns, kind, name)
             key = (ns, kind, name, e.get("reason"))
             ts = e.get("lastTimestamp") or e.get("eventTime") or e["metadata"].get("creationTimestamp") or ""
-            if e.get("reason") == "FailedCreate" and created.get((ns, kind, name), "") > ts:
-                now = "ok"                          # created since: the failure is over
+            ok_reason = RESOLVED_BY.get(e.get("reason"))
+            if ok_reason and succeeded.get((ns, kind, name, ok_reason), "") > ts:
+                now = "ok"                          # succeeded since: the failure is over
             if key not in seen or ts > seen[key]["ts"]:
                 seen[key] = {"namespace": ns, "object": f"{kind}/{name}", "reason": e.get("reason"),
                              "count": e.get("count") or 1, "ts": ts, "age": _age(self.now, ts),

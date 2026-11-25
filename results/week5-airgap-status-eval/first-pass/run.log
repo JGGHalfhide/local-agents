@@ -1,0 +1,39 @@
+15:18:59 f01: inject exit 0     visible after 0s
+15:20:37 f01: HTTP 200 status=fault findings=[('agent-eval-f01', 'Deployment/podinfo', 'scaled-to-zero')] 97.7s error=None
+15:20:42 f01: cleanup exit 0 gone
+15:20:48 f02: inject exit 0     visible after 5s
+15:21:40 f02: HTTP 200 status=fault findings=[('agent-eval-f02', 'Pod/puller-6979648498-gnxr6', 'image-pull')] 51.7s error=None
+15:21:50 f02: cleanup exit 0 gone
+15:21:57 f04: inject exit 0     visible after 5s
+15:22:56 f04: HTTP 200 status=fault findings=[('agent-eval-f04', 'Deployment/crashy', 'crash-loop')] 59.6s error=None
+15:23:07 f04: cleanup exit 0 gone
+15:23:13 f05: inject exit 0     visible after 5s
+15:24:17 f05: HTTP 200 status=fault findings=[('agent-eval-f05', 'Pod/hungry-5486775455-trj9r', 'oom-killed'), ('agent-eval-f05', 'Deployment/hungry', 'crash-loop')] 64.8s error=None
+15:24:28 f05: cleanup exit 0 gone
+15:24:29 f06: inject exit 0     visible after 0s
+15:26:13 f06: HTTP 200 status=fault findings=[('agent-eval-f06', 'Deployment/unsigned', 'admission-denied'), ('kube-system', 'Addon/local-path-storage', 'admission-denied')] 104.1s error=None
+15:26:18 f06: cleanup exit 0 gone
+15:26:25 f07: inject exit 0     visible after 5s
+15:27:12 f07: HTTP 200 status=fault findings=[('agent-eval-f07', 'Pod/greedy-658b9c4b58-7ctb6', 'unschedulable')] 47.0s error=None
+15:27:17 f07: cleanup exit 0 gone
+15:27:18 f08: inject exit 0     visible after 0s
+15:28:53 f08: HTTP 200 status=fault findings=[('agent-eval-f08', 'DaemonSet/hostnet', 'admission-denied'), ('kube-system', 'Addon/local-path-storage', 'other')] 94.8s error=None
+15:28:58 f08: cleanup exit 0 gone
+15:29:00 f10: inject exit 0     visible after 0s
+15:30:12 f10: HTTP 200 status=fault findings=[('agent-eval-f10', 'Pod/claimer', 'storage-unbound'), ('agent-eval-f10', 'PersistentVolumeClaim/data', 'storage-unbound')] 71.8s error=None
+15:30:22 f10: cleanup exit 0 gone
+15:30:24 k1: inject exit 0     visible after 0s
+15:31:31 k1: HTTP 200 status=fault findings=[('kube-system', 'Addon/local-path-storage', 'other')] 67.7s error=None
+15:31:42 k1: cleanup exit 0 gone
+15:32:08 k2: inject exit 0     visible after 25s
+15:33:20 k2: HTTP 200 status=fault findings=[('kube-system', 'Addon/local-path-storage', 'other')] 72.0s error=None
+15:34:03 k2: cleanup exit 0 gone
+15:34:09 k3: inject exit 0     visible after 5s
+15:35:15 k3: HTTP 200 status=fault findings=[('kube-system', 'Addon/local-path-storage', 'other')] 66.2s error=None
+15:35:21 k3: cleanup exit 0 gone
+15:35:27 k4: inject exit 0     visible after 5s
+15:36:38 k4: HTTP 200 status=fault findings=[('kube-system', 'Addon/local-path-storage', 'other')] 71.0s error=None
+15:36:48 k4: cleanup exit 0 gone
+15:36:55 k5: inject exit 0     visible after 5s
+15:38:41 k5: HTTP 200 status=fault findings=[('kube-system', 'Addon/local-path-storage', 'other')] 106.7s error=None
+15:39:24 k5: cleanup exit 0 gone

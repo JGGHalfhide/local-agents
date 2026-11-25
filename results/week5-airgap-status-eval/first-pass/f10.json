@@ -1,0 +1,132 @@
+{
+ "run_id": "r-20261125T152859Z-43b8",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f10",
+   "object": "Pod/claimer",
+   "category": "storage-unbound",
+   "summary": "Pod claimer is Pending due to unbound PersistentVolumeClaims.",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "agent-eval-f10 claimer Pending 0/0 0 - - -"
+    },
+    {
+     "tool_call_id": "t1",
+     "excerpt": "agent-eval-f10 Pod/claimer FailedScheduling 1 0m 0/1 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found"
+    }
+   ]
+  },
+  {
+   "namespace": "agent-eval-f10",
+   "object": "PersistentVolumeClaim/data",
+   "category": "storage-unbound",
+   "summary": "PVC data is Pending because its storage class \"agent-eval-missing\" does not exist.",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "agent-eval-f10 data Pending agent-eval-missing NO"
+    },
+    {
+     "tool_call_id": "t1",
+     "excerpt": "agent-eval-f10 PersistentVolumeClaim/data ProvisioningFailed 1 0m storageclass.storage.k8s.io \"agent-eval-missing\" not found"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "Two storage-unbound faults in agent-eval-f10 namespace: a PVC missing its storage class prevents a pod from scheduling.",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 46/47 healthy; workloads 63/63 healthy; warning events (object not healthy now) 44/47 healthy; pvcs 5/6 healthy; argo cd apps 0/0 healthy\n\npods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f10\tclaimer\tPending\t0/0\t0\t-\t-\t-\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f10\tPod/claimer\tFailedScheduling\t1\t0m\t0/1 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found\nagent-eval-f10\tPersistentVolumeClaim/data\tProvisioningFailed\t1\t0m\tstorageclass.storage.k8s.io \"agent-eval-missing\" not found\nkube-system\tAddon/local-path-storage\tApplyManifestFailed\t1\t34m\tApplying manifest at \"/var/lib/rancher/rke2/server/manifests/local-path-storage.yaml\" failed: failed to update local-path-storage/local-path-provisioner apps/v1, Kind=Deployment for kube-system/local-\n\npvcs\nnamespace\tname\tphase\tstorage_class\tclass_exists\nagent-eval-f10\tdata\tPending\tagent-eval-missing\tNO",
+   "result_chars": 996,
+   "truncated": false,
+   "duration_ms": 85,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agent-eval-f10"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f10\tclaimer\tPending\t0/0\t0\t-\t-\t-",
+   "result_chars": 113,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_pvcs",
+   "arguments": {
+    "namespace": "agent-eval-f10"
+   },
+   "result": "persistent volume claims\nnamespace\tname\tphase\tstorage_class\tclass_exists\tcapacity\nagent-eval-f10\tdata\tPending\tagent-eval-missing\tNO\t-",
+   "result_chars": 133,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_nodes",
+   "arguments": {},
+   "result": "nodes\nname\tready\tpressure\tunschedulable\nairgap-rehearsal\tTrue\t-\tFalse",
+   "result_chars": 69,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agent-eval-f10"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler",
+   "result_chars": 65,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t6",
+   "tool": "list_argocd_apps",
+   "arguments": {},
+   "result": "argo cd applications\nnamespace\tname\tsync\thealth\tmessage",
+   "result_chars": 55,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "tool_result_chars": 3500,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849",
+  "config_sha256": "b085a9e3041f2aae7e32ba53d8b99fac39dcba1a96427831eb40278b2a767617"
+ },
+ "timings": {
+  "started": "2026-11-25T15:28:59Z",
+  "finished": "2026-11-25T15:30:11Z",
+  "total_s": 71.8,
+  "model_s": 71.7,
+  "tools_s": 0.09,
+  "turns": 6
+ },
+ "error": null,
+ "trace_id": "77862bca6177b7dd911f000af3bb5afd"
+}

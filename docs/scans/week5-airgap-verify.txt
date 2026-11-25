@@ -1,0 +1,42 @@
+# Week 5 airgap verification (11/25), airgap-rehearsal (192.168.122.20), egress blocked.
+# Packages: platform 0.6.0, policies 0.8.0, sample-app 0.6.0, monitoring 0.8.0, keda 0.8.0 (platform-lab);
+# llm 0.7.0, llm-smoke 0.5.0 (local-airgap-LLM); agents 0.5.0 (local-agents). Deployed with make airgap-deploy (local-agents).
+
+## Egress (on the node)
+curl: (7) Failed to connect to github.com port 443: No route to host
+curl_rc=7
+
+## Zarf package records
+admission-test-unsigned  0.6.0    1 components ['Succeeded']
+agents                   0.5.0    1 components ['Succeeded']
+init                     v0.89.0  4 components ['Succeeded']
+keda                     0.8.0    2 components ['Succeeded']
+llm                      0.7.0    1 components ['Succeeded']
+llm-smoke                0.5.0    1 components ['Succeeded']
+monitoring               0.8.0    5 components ['Succeeded']
+platform                 0.6.0    1 components ['Succeeded']
+policies                 0.8.0    1 components ['Succeeded']
+sample-app               0.6.0    1 components ['Succeeded']
+
+## Images in the pods (rewritten by the Zarf agent, admitted after signature verification)
+127.0.0.1:31999/local-agents/agent@sha256:1c670a10ac053ec59cb845fe801ab1f8c6ac6bb7d03e678352656d1429d2b0d5
+127.0.0.1:31999/grafana/tempo@sha256:64e2fbd56d9c2b3412a4b430a58ea59e91a670b1e75f920a0c702213ad145044 env=[{"name":"GOMEMLIMIT","value":"800MiB"}]
+
+## Image pull errors (events)
+ 9 events  ns=keda  at 2026-11-25T14:54Z
+ 9 events  ns=keda  at 2026-11-25T15:10Z
+from the deploys (after 14:56:00Z, excluding the boot windows): 0
+Cause of the listed events: boot race, KEDA pods pull before the Zarf registry pod is Ready (14:54:46Z first boot, 15:10:06Z second); all recovered.
+
+## Unsigned image (platform-lab tests/airgap: admission-test-unsigned 0.6.0 deployed, so the image IS in the Zarf registry)
+$ kubectl apply -f tests/airgap/unsigned-pod.yaml
+Error from server: ... admission webhook "ivpol.validate.kyverno.svc-fail" denied the request: Policy verify-platform-images failed: image is not signed with the platform-lab cosign key (pki/cosign.pub); publish it with `make image`
+(before that package was deployed the same apply was denied with MANIFEST_UNKNOWN: image absent, a weaker test)
+
+## Status run on the airgapped cluster (agentctl --json status via port-forward)
+run r-20261125T151459Z-5c1b status fault trace_id 0f77a92719084a737468d6f66a6989e3 total_s 66.8 tool_calls 8 error None config_sha256 b085a9e3041f
+finding: agents Job/status-reporter-29926980 crash-loop | Job failed due to deadline exceeded
+finding: sample-app Pod/unsigned-test admission-denied | Pod blocked at admission due to unsigned image
+Both findings are real: Job/status-reporter-29926980 (the 15:00 CronJob run) passed its 420 s deadline while the VM was
+shut down for the policies rebuild (Failed=DeadlineExceeded at 15:10:38Z); Pod/unsigned-test is the unsigned-image test above.
+14 spans: {'invoke_agent': 1, 'chat': 5, 'execute_tool': 8}

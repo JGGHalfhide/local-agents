@@ -1,0 +1,144 @@
+{
+ "run_id": "r-20261125T152718Z-6675",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f08",
+   "object": "DaemonSet/hostnet",
+   "category": "admission-denied",
+   "summary": "DaemonSet hostnet blocked at admission due to hostNetwork, hostPID, and hostIPC settings",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "blocked at admission by ValidatingPolicy/pod-security-restricted: fail (blocked); hostNetwork, hostPID and hostIPC must not be set"
+    }
+   ]
+  },
+  {
+   "namespace": "kube-system",
+   "object": "Addon/local-path-storage",
+   "category": "other",
+   "summary": "Addon local-path-storage failed to apply manifest for local-path-provisioner",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Applying manifest at \"/var/lib/rancher/rke2/server/manifests/local-path-storage.yaml\" failed: failed to update local-path-storage/local-path-provisioner apps/v1, Kind=Deployment for kube-system/local-"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "Found 2 faults: 1 admission-denied DaemonSet and 1 other addon apply failure",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 46/46 healthy; workloads 63/63 healthy; warning events (object not healthy now) 43/45 healthy; pvcs 5/5 healthy; argo cd apps 0/0 healthy\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f08\tDaemonSet/hostnet\tPolicyViolation\t1\t0m\tblocked at admission by ValidatingPolicy/pod-security-restricted: fail (blocked); hostNetwork, hostPID and hostIPC must not be set\nkube-system\tAddon/local-path-storage\tApplyManifestFailed\t1\t32m\tApplying manifest at \"/var/lib/rancher/rke2/server/manifests/local-path-storage.yaml\" failed: failed to update local-path-storage/local-path-provisioner apps/v1, Kind=Deployment for kube-system/local-",
+   "result_chars": 703,
+   "truncated": false,
+   "duration_ms": 117,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_argocd_apps",
+   "arguments": {},
+   "result": "argo cd applications\nnamespace\tname\tsync\thealth\tmessage",
+   "result_chars": 55,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_events",
+   "arguments": {},
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagent-eval-f08\tDaemonSet/hostnet\tPolicyViolation\t1\t0m\tblocked at admission\tblocked at admission by ValidatingPolicy/pod-security-restricted: fail (blocked); hostNetwork, hostPID and hostIPC must not be set\nkube-system\tAddon/local-path-storage\tApplyManifestFailed\t1\t32m\t?\tApplying manifest at \"/var/lib/rancher/rke2/server/manifests/local-path-storage.yaml\" failed: failed to update local-path-storage/local-path-provisioner apps/v1, Kind=Deployment for kube-system/local-\n(43 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 646,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_workloads",
+   "arguments": {},
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagents\tDeployment\tstatus-reporter\t1\t1\t-\t-\nagents\tReplicaSet\tstatus-reporter-5f667f4dbd\t1\t1\t-\t-\nkeda\tDeployment\tkeda-add-ons-http-interceptor\t1\t1\t-\tscaled by KEDA ScaledObject/keda-add-ons-http-interceptor (1-1)\nkeda\tDeployment\tkeda-add-ons-http-operator\t1\t1\t-\t-\nkeda\tDeployment\tkeda-add-ons-http-scaler\t1\t1\t-\t-\nkeda\tDeployment\tkeda-admission\t1\t1\t-\t-\nkeda\tDeployment\tkeda-metrics-apiserver\t1\t1\t-\t-\nkeda\tDeployment\tkeda-operator\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-add-ons-http-interceptor-7bb75f56b5\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-add-ons-http-operator-5bbc8ddf7b\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-add-ons-http-scaler-6cc79c548c\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-admission-78db496f9f\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-metrics-apiserver-68cf466b57\t1\t1\t-\t-\nkeda\tReplicaSet\tkeda-operator-6db7499d6\t1\t1\t-\t-\nkube-system\tDaemonSet\trke2-canal\t1\t1\t-\t-\nkube-system\tDaemonSet\trke2-traefik\t1\t1\t-\t-\nkube-system\tDeployment\trke2-coredns-rke2-coredns\t1\t1\t-\t-\nkube-system\tDeployment\trke2-coredns-rke2-coredns-autoscaler\t1\t1\t-\t-\nkube-system\tDeployment\trke2-metrics-server\t1\t1\t-\t-\nkube-system\tDeployment\trke2-snapshot-controller\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-canal\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-coredns\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-metrics-server\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-runtimeclasses\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-snapshot-controller\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-snapshot-controller-crd\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-traefik\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-traefik-crd\t1\t1\t-\t-\nkube-system\tReplicaSet\trke2-coredns-rke2-coredns-747b86f67b\t1\t1\t-\t-\nkube-system\tReplicaSet\trke2-coredns-rke2-coredns-autoscaler-878589fc9\t1\t1\t-\t-\nkube-system\tReplicaSet\trke2-metrics-server-956b4b7f5\t1\t1\t-\t-\nkube-system\tReplicaSet\trke2-snapshot-controller-5574cc88bf\t1\t1\t-\t-\nkyverno\tDeployment\tkyverno-admission-controller\t1\t1\t-\t-\nkyverno\tDeployment\tkyverno-background-controller\t1\t1\t-\t-\nkyverno\tD",
+   "result_chars": 3430,
+   "truncated": true,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agent-eval-f08"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler",
+   "result_chars": 65,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t6",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "kube-system"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nkube-system\tDaemonSet\trke2-canal\t1\t1\t-\t-\nkube-system\tDaemonSet\trke2-traefik\t1\t1\t-\t-\nkube-system\tDeployment\trke2-coredns-rke2-coredns\t1\t1\t-\t-\nkube-system\tDeployment\trke2-coredns-rke2-coredns-autoscaler\t1\t1\t-\t-\nkube-system\tDeployment\trke2-metrics-server\t1\t1\t-\t-\nkube-system\tDeployment\trke2-snapshot-controller\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-canal\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-coredns\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-metrics-server\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-runtimeclasses\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-snapshot-controller\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-snapshot-controller-crd\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-traefik\t1\t1\t-\t-\nkube-system\tJob\thelm-install-rke2-traefik-crd\t1\t1\t-\t-\nkube-system\tReplicaSet\trke2-coredns-rke2-coredns-747b86f67b\t1\t1\t-\t-\nkube-system\tReplicaSet\trke2-coredns-rke2-coredns-autoscaler-878589fc9\t1\t1\t-\t-\nkube-system\tReplicaSet\trke2-metrics-server-956b4b7f5\t1\t1\t-\t-\nkube-system\tReplicaSet\trke2-snapshot-controller-5574cc88bf\t1\t1\t-\t-",
+   "result_chars": 1099,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t7",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "local-path-storage"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nlocal-path-storage\tDeployment\tlocal-path-provisioner\t1\t1\t-\t-\nlocal-path-storage\tReplicaSet\tlocal-path-provisioner-6f9b6486fb\t1\t1\t-\t-",
+   "result_chars": 198,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t8",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 46/46 healthy; workloads 63/63 healthy; warning events (object not healthy now) 43/45 healthy; pvcs 5/5 healthy; argo cd apps 0/0 healthy\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f08\tDaemonSet/hostnet\tPolicyViolation\t1\t0m\tblocked at admission by ValidatingPolicy/pod-security-restricted: fail (blocked); hostNetwork, hostPID and hostIPC must not be set\nkube-system\tAddon/local-path-storage\tApplyManifestFailed\t1\t32m\tApplying manifest at \"/var/lib/rancher/rke2/server/manifests/local-path-storage.yaml\" failed: failed to update local-path-storage/local-path-provisioner apps/v1, Kind=Deployment for kube-system/local-",
+   "result_chars": 703,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "tool_result_chars": 3500,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849",
+  "config_sha256": "b085a9e3041f2aae7e32ba53d8b99fac39dcba1a96427831eb40278b2a767617"
+ },
+ "timings": {
+  "started": "2026-11-25T15:27:18Z",
+  "finished": "2026-11-25T15:28:53Z",
+  "total_s": 94.8,
+  "model_s": 94.6,
+  "tools_s": 0.12,
+  "turns": 9
+ },
+ "error": null,
+ "trace_id": "1b5297e1d0ddc8ca4ec142b9af50c63a"
+}

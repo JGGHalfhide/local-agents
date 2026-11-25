@@ -1,0 +1,284 @@
+[
+ {
+  "case": "f01",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "scaled-to-zero Deployment/podinfo"
+  ],
+  "ambient": [],
+  "tool_calls": 6,
+  "seconds": 97.7,
+  "run_id": "r-20261125T151859Z-01f5"
+ },
+ {
+  "case": "f02",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "image-pull Pod/puller-6979648498-gnxr6"
+  ],
+  "ambient": [],
+  "tool_calls": 6,
+  "seconds": 51.7,
+  "run_id": "r-20261125T152048Z-e6c0"
+ },
+ {
+  "case": "f04",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "crash-loop Deployment/crashy"
+  ],
+  "ambient": [],
+  "tool_calls": 6,
+  "seconds": 59.6,
+  "run_id": "r-20261125T152156Z-6e85"
+ },
+ {
+  "case": "f05",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "oom-killed Pod/hungry-5486775455-trj9r",
+   "crash-loop Deployment/hungry"
+  ],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 64.8,
+  "run_id": "r-20261125T152312Z-e6be"
+ },
+ {
+  "case": "f06",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "admission-denied Deployment/unsigned"
+  ],
+  "ambient": [
+   "admission-denied kube-system/Addon/local-path-storage"
+  ],
+  "tool_calls": 8,
+  "seconds": 104.1,
+  "run_id": "r-20261125T152429Z-d811"
+ },
+ {
+  "case": "f07",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "unschedulable Pod/greedy-658b9c4b58-7ctb6"
+  ],
+  "ambient": [],
+  "tool_calls": 6,
+  "seconds": 47.0,
+  "run_id": "r-20261125T152624Z-c39b"
+ },
+ {
+  "case": "f08",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "admission-denied DaemonSet/hostnet"
+  ],
+  "ambient": [
+   "other kube-system/Addon/local-path-storage"
+  ],
+  "tool_calls": 8,
+  "seconds": 94.8,
+  "run_id": "r-20261125T152718Z-6675"
+ },
+ {
+  "case": "f10",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "storage-unbound Pod/claimer",
+   "storage-unbound PersistentVolumeClaim/data"
+  ],
+  "ambient": [],
+  "tool_calls": 6,
+  "seconds": 71.8,
+  "run_id": "r-20261125T152859Z-43b8"
+ },
+ {
+  "case": "k1",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [],
+  "ambient": [
+   "other kube-system/Addon/local-path-storage"
+  ],
+  "tool_calls": 7,
+  "seconds": 67.7,
+  "run_id": "r-20261125T153023Z-67cc"
+ },
+ {
+  "case": "k2",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [],
+  "ambient": [
+   "other kube-system/Addon/local-path-storage"
+  ],
+  "tool_calls": 7,
+  "seconds": 72.0,
+  "run_id": "r-20261125T153208Z-b206"
+ },
+ {
+  "case": "k3",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [],
+  "ambient": [
+   "other kube-system/Addon/local-path-storage"
+  ],
+  "tool_calls": 7,
+  "seconds": 66.2,
+  "run_id": "r-20261125T153409Z-0e9d"
+ },
+ {
+  "case": "k4",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [],
+  "ambient": [
+   "other kube-system/Addon/local-path-storage"
+  ],
+  "tool_calls": 7,
+  "seconds": 71.0,
+  "run_id": "r-20261125T153526Z-b75e"
+ },
+ {
+  "case": "k5",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [],
+  "ambient": [
+   "other kube-system/Addon/local-path-storage"
+  ],
+  "tool_calls": 7,
+  "seconds": 106.7,
+  "run_id": "r-20261125T153654Z-93d0"
+ }
+]
