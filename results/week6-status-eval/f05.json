@@ -1,0 +1,108 @@
+{
+ "run_id": "r-20261125T173919Z-e8c1",
+ "status": "fault",
+ "demo": false,
+ "namespace": null,
+ "findings": [
+  {
+   "namespace": "agent-eval-f05",
+   "object": "Pod/hungry-5486775455-6wrsg",
+   "category": "oom-killed",
+   "summary": "Pod crash-looping due to OOMKilled (exit code 137)",
+   "evidence": [
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Running 0/1 1 CrashLoopBackOff OOMKilled(137)"
+    },
+    {
+     "tool_call_id": "t1",
+     "excerpt": "Back-off restarting failed container hungry in pod hungry-5486775455-6wrsg_agent-eval-f05(36ac92df-2999-44ce-abb6-fc325d49dde0)"
+    }
+   ]
+  }
+ ],
+ "ungrounded": [],
+ "summary": "1 fault: oom-killed pod in agent-eval-f05 namespace",
+ "tool_calls": [
+  {
+   "id": "t1",
+   "tool": "overview",
+   "arguments": {},
+   "result": "overview: nodes 1/1 healthy; pods 48/49 healthy; workloads 65/67 healthy; warning events (object not healthy now) 35/36 healthy; pvcs 5/5 healthy; argo cd apps 0/0 healthy\n\npods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f05\thungry-5486775455-6wrsg\tRunning\t0/1\t1\tCrashLoopBackOff\tOOMKilled(137)\tReplicaSet/hungry-5486775455\n\nworkloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f05\tDeployment\thungry\t1\t0\tAvailable=False(MinimumReplicasUnavailable)\t-\nagent-eval-f05\tReplicaSet\thungry-5486775455\t1\t0\t-\t-\n\nwarning events (object not healthy now)\nnamespace\tobject\treason\tcount\tage\tmessage\nagent-eval-f05\tPod/hungry-5486775455-6wrsg\tBackOff\t2\t0m\tBack-off restarting failed container hungry in pod hungry-5486775455-6wrsg_agent-eval-f05(36ac92df-2999-44ce-abb6-fc325d49dde0)",
+   "result_chars": 826,
+   "truncated": false,
+   "duration_ms": 91,
+   "error": false
+  },
+  {
+   "id": "t2",
+   "tool": "list_pods",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "pods\nnamespace\tname\tphase\tready\trestarts\twaiting\tlast_terminated\towner\nagent-eval-f05\thungry-5486775455-6wrsg\tRunning\t0/1\t1\tCrashLoopBackOff\tOOMKilled(137)\tReplicaSet/hungry-5486775455",
+   "result_chars": 184,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t3",
+   "tool": "list_events",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "warning events about objects that are not healthy now\nnamespace\tobject\treason\tcount\tage\tnow\tmessage\nagent-eval-f05\tPod/hungry-5486775455-6wrsg\tBackOff\t2\t0m\tNOT OK\tBack-off restarting failed container hungry in pod hungry-5486775455-6wrsg_agent-eval-f05(36ac92df-2999-44ce-abb6-fc325d49dde0)\n(35 warning events about objects that are healthy now or gone were hidden)",
+   "result_chars": 365,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t4",
+   "tool": "list_workloads",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "workloads\nnamespace\tkind\tname\tdesired\tready\tconditions\tautoscaler\nagent-eval-f05\tDeployment\thungry\t1\t0\tAvailable=False(MinimumReplicasUnavailable)\t-\nagent-eval-f05\tReplicaSet\thungry-5486775455\t1\t0\t-\t-",
+   "result_chars": 200,
+   "truncated": false,
+   "duration_ms": 0,
+   "error": false
+  },
+  {
+   "id": "t5",
+   "tool": "pod_metrics",
+   "arguments": {
+    "namespace": "agent-eval-f05"
+   },
+   "result": "pod metrics in agent-eval-f05\npod\tcontainer\tcpu\tmemory\tmemory_limit",
+   "result_chars": 67,
+   "truncated": false,
+   "duration_ms": 7,
+   "error": false
+  }
+ ],
+ "model": {
+  "name": "qwen3.5-4b",
+  "base_url": "http://llm-api.llm.svc:8080/v1",
+  "temperature": 0,
+  "max_tokens": 1024,
+  "thinking": false,
+  "max_tool_calls": 8,
+  "max_turns": 10,
+  "tool_result_chars": 3500,
+  "prompt_sha256": "3b79b7384e7a0dac711f93f6af8ff7d1cb567df15c1df415e6cd8d7a1a68c849",
+  "config_sha256": "b085a9e3041f2aae7e32ba53d8b99fac39dcba1a96427831eb40278b2a767617"
+ },
+ "timings": {
+  "started": "2026-11-25T17:39:19Z",
+  "finished": "2026-11-25T17:40:08Z",
+  "total_s": 48.7,
+  "model_s": 48.6,
+  "tools_s": 0.1,
+  "turns": 5
+ },
+ "error": null,
+ "trace_id": "07f07c12d1b7d4b70acd4394b451686d"
+}
