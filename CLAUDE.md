@@ -262,7 +262,8 @@ Eval rerun: 8/8, 5/5, f06/f08 scored strictly, no ambient findings,
 median 48.9 s (results/week3-status-eval/; first pass 7/8 and an f06
 rerun kept). A leftover failed Job (Week 2's 429) pulled the model off f06;
 deleted with the user's OK. The eval assumes an otherwise healthy cluster.
-Open: tag v0.3 (rebuild check, employer check).
+Tagged v0.3 (11/24; employer check signed off; image rebuilt
+byte-identical). Next: Week 4 (tracing, prompts via GitOps, thinking opt-in).
 Lab: build-node-01 running, airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state

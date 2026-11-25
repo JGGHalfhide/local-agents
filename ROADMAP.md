@@ -64,7 +64,7 @@ Goal: the eval's follow-ups closed and the open Week 2 decisions made.
 - [x] Eval follow-ups from Week 2 (11/24, images c4f5677 and f906bd3): the CronJob treats 429 (busy) as a skipped run (agentctl exit 3; seen live); benign conditions hidden (Suspended=False etc.); Kyverno PolicyViolation findings located at the blocked object and marked "blocked at admission"
 - [x] Tool interface: tools stay in-process functions (ADR 0007, done in Week 2)
 - [x] Rebuild check and tag v0.2 (done at the end of Week 2)
-- [ ] Tag v0.3
+- [x] Tag v0.3 (11/24; rebuild check: fresh clone lint + eval-check, image at f906bd3 rebuilt byte-identical to the deployed digest)
 
 Acceptance: follow-ups closed; the eval still passes (8/8, 5/5). (11/24: 8/8, 5/5 with f06/f08 scored strictly, no ambient findings, median 48.9 s: docs/eval-status.md.)
 
