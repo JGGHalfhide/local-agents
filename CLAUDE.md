@@ -353,7 +353,7 @@ every VM boot the eval waits until no restarted container has run < 10 min.
 The rebuilt clusters' Terraform state, kubeconfigs and packages were made in
 ~/projects/freshclone-1125/ and copied back to the working repos.
 Tagged v1.0 (11/25; employer check signed off).
-Lab: airgap-rehearsal running (egress blocked; image dba61ba), build-node-01 off (both rebuilt 11/25) (a libvirt domain named
+Lab: all VMs shut off at the end of 11/25 (both rebuilt 11/25; image dba61ba on both; fresh clones and *.pre-v1.0 copies deleted) (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state
 and kubeconfigs.
