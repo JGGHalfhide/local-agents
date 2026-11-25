@@ -15,7 +15,7 @@ kind: ZarfPackageConfig
 metadata:
   name: agents
   description: local-agents status reporter (API, agentctl CronJob, prompts, read-only identity)
-  version: 0.5.1
+  version: 0.6.0
   architecture: amd64
 
 components:
@@ -25,12 +25,12 @@ components:
       - name: agents
         kustomizations:
           - ../../deploy/agents
-    # The digest in deploy/agents/status-reporter.yaml (image 854e81c), signed
+    # The digest in deploy/agents/status-reporter.yaml (image 3afc620), signed
     # by make image in platform-lab.
     images:
-      - registry.platform-lab.internal/local-agents/agent:854e81c@sha256:26e744ae562d11fe1486d6aba284ea41ecb1d245cbfc28e5dd1949a9c1304354
-      - registry.platform-lab.internal/local-agents/agent:sha256-26e744ae562d11fe1486d6aba284ea41ecb1d245cbfc28e5dd1949a9c1304354.sig
-      - registry.platform-lab.internal/local-agents/agent:sha256-26e744ae562d11fe1486d6aba284ea41ecb1d245cbfc28e5dd1949a9c1304354.att
+      - registry.platform-lab.internal/local-agents/agent:3afc620@sha256:30d3bd129aafb5b56774a6bde2814ee2253dfe7e1f3f124f4a7e9b489ea940a1
+      - registry.platform-lab.internal/local-agents/agent:sha256-30d3bd129aafb5b56774a6bde2814ee2253dfe7e1f3f124f4a7e9b489ea940a1.sig
+      - registry.platform-lab.internal/local-agents/agent:sha256-30d3bd129aafb5b56774a6bde2814ee2253dfe7e1f3f124f4a7e9b489ea940a1.att
     actions:
       onDeploy:
         after:
