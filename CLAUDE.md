@@ -297,10 +297,26 @@ GOMEMLIMIT 800MiB, request 256Mi): the same 26 reads in a row, 0 restarts,
 median output 1,299 vs 231, none cut at max_tokens
 (docs/scans/week4-thinking-tokens.txt).
 Tagged v0.4 (11/25; employer check signed off; image at 393577d rebuilt
-byte-identical, sha256:1c670a10). Next: Week 5 (airgap: Zarf packages for
-the agent image, manifests, prompts, tracing and dashboard; deploy with
-egress blocked; eval on the airgapped cluster; docs/airgap-runbook.md).
-Lab: build-node-01 running (started 11/25), airgap-rehearsal off (a libvirt domain named
+byte-identical, sha256:1c670a10).
+Week 5 (11/25, docs/airgap-runbook.md): zarf/agents (0.5.1, image 854e81c
+sha256:26e744ae, deployed on the build cluster 312ad1e); `make
+airgap-packages` / `make airgap-deploy` reuse platform-lab's script and
+zarf role. Rebuilt stale packages: platform-lab monitoring 0.8.0 (Tempo,
+datasource, dashboard) and policies 0.8.0 (Tempo exception; Kyverno had
+denied Tempo), the zarf role's version pins (261711e, 221693e);
+local-airgap-LLM llm 0.7.0 (--ctx-checkpoints 4). Egress blocked; unsigned
+image rejected with it present in the Zarf registry; 0 pull errors from the
+deploys (KEDA pulls before the Zarf registry at boot: recovered).
+inject.sh/cleanup.sh accept the airgap cluster (192.168.122.20); case
+namespaces get Zarf's pull Secret except f02 (fault = missing pull
+credential there). Eval there: 8/8, 5/5 healthy, no ambient findings,
+median 47.7 s (results/week5-airgap-status-eval/; first pass kept: 7/13
+runs reported RKE2's boot-time ApplyManifestFailed, fixed in 854e81c with
+RESOLVED_BY in agent/tools.py). A failed CronJob Job (VM shut down mid-run)
+and two unsigned-test events deleted with the user's OK. Lessons: bump the
+zarf role pin with the package; a package built from a kustomization goes
+stale with its sources; avoid the top of the hour (CronJob -> 429).
+Lab: airgap-rehearsal running (egress blocked), build-node-01 off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state
 and kubeconfigs.

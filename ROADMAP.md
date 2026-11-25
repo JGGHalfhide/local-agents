@@ -85,11 +85,11 @@ Acceptance: a status-reporter run is fully traced; fault-injection results with 
 
 Goal: the same agents on the disconnected VM.
 
-- [ ] Zarf packages: agent image, manifests, tracing, dashboard
-- [ ] Packages built and signed on the build host; deployed with egress blocked via platform-lab's flow (after the cluster has settled post-boot)
-- [ ] Signatures verified via the Zarf registry; unsigned image rejected; 0 pull errors
-- [ ] Eval run on the airgapped cluster; results match the build cluster
-- [ ] docs/airgap-runbook.md
+- [x] Zarf packages (11/25): `zarf/agents` 0.5.1 (agent image + .sig/.att, deploy/agents with the prompts ConfigMap); Tempo and the dashboard in platform-lab's monitoring 0.8.0; endpoint fix in local-airgap-LLM's llm 0.7.0; policies 0.8.0 (Tempo exception)
+- [x] Packages built and signed on the build host; deployed with egress blocked via platform-lab's flow (11/25, `make airgap-deploy`; three stale packages found and rebuilt, docs/airgap-runbook.md)
+- [x] Signatures verified via the Zarf registry; unsigned image rejected (present in the registry, denied for the signature); 0 pull errors from the deploys (boot-time KEDA pulls recovered) (docs/scans/week5-airgap-verify.txt)
+- [x] Eval run on the airgapped cluster (11/25): 8/8, 5/5, no ambient findings, median 47.7 s, matching the build cluster after a boot-warning fix (854e81c; first pass kept) (results/week5-airgap-status-eval/)
+- [x] docs/airgap-runbook.md (11/25)
 - [ ] Tag v0.5
 
 Acceptance: status reports on the airgapped VM with egress blocked, everything verified, no pull errors.

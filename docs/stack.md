@@ -40,7 +40,7 @@ Keep this page current every week.
 | Tracing | OpenTelemetry SDK + OTLP/HTTP exporter 1.45.2 (agent/tracing.py, locked); Grafana Tempo 3.1.1 single binary in platform-lab (chart grafana-community/tempo 3.2.1, `monitoring`, 2 Gi local-path, 7 days), Grafana datasource | One trace per run: `invoke_agent` span, a `chat` span per model call (tokens, finish reason, latency), an `execute_tool` span per tool call (result size, latency); metadata only, no prompt, output or tool text; `trace_id` in the run object | Per-call latency and tokens across runs, in the Grafana that already runs; airgap-capable; one run = 18 spans, 8.2 KiB; Tempo 46 MiB idle, 618 MiB seen under 26 trace reads in a row, limit 1 GiB with GOMEMLIMIT 800 MiB after two OOMKills at 512 MiB ([memory](scans/week4-tempo-memory.txt)) ([ADR 0008](adr/0008-tracing-opentelemetry-tempo.md), [scan](scans/week4-tracing.txt)) |
 | Evaluation set and scoring | v0: 22 cases (`eval/cases/`), `eval/check.py`, `eval/run_baseline.py`, `eval/review_sheet.py` | Real incidents from Phases 1-2 with known cause and fix; automatic first pass by patterns, then human review; leak check in CI | Decide by measurement; no judge model fits the lab ([eval.md](eval.md)) |
 | Status reporter eval | eval/status/ (11/24): 13 cases in `agent-eval-*` namespaces, `inject.sh` / `cleanup.sh` (build cluster only, labelled namespaces only), `score.py`, `run_eval.py` through the operator API | Injects a fault or control, asks the status reporter, scores detect / locate / classify / grounding / tool validity | Automatic, repeatable scoring with no hand review (ADR 0003); Week 4: 8/8 faults, 5/5 controls, no ambient findings, median 49.4 s; CI requires results recorded with the deployed prompts and limits (`eval/status/check_config.py`) ([eval-status.md](eval-status.md)) |
-| Zarf packages | *planned, Week 5* | | |
+| Zarf packages | Zarf v0.89.0 (platform-lab); `zarf/agents` 0.5.1 (11/25), built and signed with platform-lab's `scripts/airgap-packages.sh`, deployed with its zarf role (`make airgap-packages`, `make airgap-deploy`) | Carries `deploy/agents` (with the prompts ConfigMap) and the signed agent image with its `.sig` and `.att` to the airgapped cluster; the Zarf agent rewrites the image to its registry, Kyverno verifies it there | The platform's airgap flow, reused; eval on the airgapped cluster 8/8, 5/5, no ambient findings, median 47.7 s ([airgap-runbook.md](airgap-runbook.md)) |
 
 ## Pipeline
 
@@ -59,7 +59,10 @@ Keep this page current every week.
 6. **Eval.** eval/status/run_eval.py injects one fault or control in an
    `agent-eval-*` namespace, runs the agent through the same API, scores it
    (results/week2-status-eval/).
-7. **Airgap** (Week 5): the same image and manifests as Zarf packages.
+7. **Airgap** (Week 5): `make airgap-packages` builds and signs `zarf/agents`
+   (the same manifests and image digest); `make airgap-deploy` deploys it
+   after platform-lab's and local-airgap-LLM's packages on the node with
+   egress blocked ([airgap-runbook.md](airgap-runbook.md)).
 
 ## Data flow
 

@@ -1,0 +1,270 @@
+[
+ {
+  "case": "f01",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "scaled-to-zero Deployment/podinfo"
+  ],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 48.1,
+  "run_id": "r-20261125T155135Z-013f"
+ },
+ {
+  "case": "f02",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "image-pull Pod/puller-6979648498-925gl"
+  ],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 43.4,
+  "run_id": "r-20261125T155235Z-01e8"
+ },
+ {
+  "case": "f04",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "crash-loop Deployment/crashy"
+  ],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 55.5,
+  "run_id": "r-20261125T155335Z-7f88"
+ },
+ {
+  "case": "f05",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "oom-killed Pod/hungry-5486775455-bdqb5",
+   "crash-loop Deployment/hungry",
+   "crash-loop ReplicaSet/hungry-5486775455"
+  ],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 81.7,
+  "run_id": "r-20261125T155447Z-dc5e"
+ },
+ {
+  "case": "f06",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "admission-denied Deployment/unsigned"
+  ],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 62.4,
+  "run_id": "r-20261125T155620Z-b1df"
+ },
+ {
+  "case": "f07",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "unschedulable Pod/greedy-658b9c4b58-6k7mj"
+  ],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 43.6,
+  "run_id": "r-20261125T155734Z-1cb5"
+ },
+ {
+  "case": "f08",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "admission-denied DaemonSet/hostnet"
+  ],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 89.4,
+  "run_id": "r-20261125T155825Z-8864"
+ },
+ {
+  "case": "f10",
+  "kind": "fault",
+  "pass": true,
+  "checks": {
+   "detect": true,
+   "locate": true,
+   "classify": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "fault",
+  "error": null,
+  "found_here": [
+   "storage-unbound PersistentVolumeClaim/data"
+  ],
+  "ambient": [],
+  "tool_calls": 5,
+  "seconds": 61.6,
+  "run_id": "r-20261125T161608Z-4167"
+ },
+ {
+  "case": "k1",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "healthy",
+  "error": null,
+  "found_here": [],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 47.3,
+  "run_id": "r-20261125T160128Z-750e"
+ },
+ {
+  "case": "k2",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "healthy",
+  "error": null,
+  "found_here": [],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 46.2,
+  "run_id": "r-20261125T160252Z-fbff"
+ },
+ {
+  "case": "k3",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "healthy",
+  "error": null,
+  "found_here": [],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 47.3,
+  "run_id": "r-20261125T160427Z-71d2"
+ },
+ {
+  "case": "k4",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "healthy",
+  "error": null,
+  "found_here": [],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 47.6,
+  "run_id": "r-20261125T160526Z-23cc"
+ },
+ {
+  "case": "k5",
+  "kind": "control",
+  "pass": true,
+  "checks": {
+   "no_fault_here": true,
+   "no_false_positive": true,
+   "grounding": true,
+   "tool_validity": true
+  },
+  "status": "healthy",
+  "error": null,
+  "found_here": [],
+  "ambient": [],
+  "tool_calls": 8,
+  "seconds": 47.7,
+  "run_id": "r-20261125T160630Z-494b"
+ }
+]

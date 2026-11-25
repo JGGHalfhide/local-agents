@@ -11,7 +11,15 @@ automatically by fault injection
 ([ADR 0003](docs/adr/0003-first-agent-status-reporter.md)). One agent by design: the lab shows the whole
 chain end to end (airgapped cluster, local LLM, one agent; [ADR 0006](docs/adr/0006-scope-one-agent.md)).
 
-**Status:** Week 4 (v0.4, 11/25): every run is traced with OpenTelemetry
+**Status:** Week 5 (v0.5, 11/25): the status reporter runs on the
+airgapped cluster with egress blocked, delivered as a signed Zarf package
+with the platform and the endpoint; its image verified through the Zarf
+registry, an unsigned image rejected, 0 pull errors from the deploy.
+Fault-injection eval there: **8/8 faults, 5/5 controls, no false findings,
+median 48 s**, matching the build cluster
+([airgap-runbook.md](docs/airgap-runbook.md)).
+
+Week 4 (v0.4, 11/25): every run is traced with OpenTelemetry
 into Grafana Tempo, one trace per run with a span per model call and tool
 call, metadata only, no prompt or tool text
 ([ADR 0008](docs/adr/0008-tracing-opentelemetry-tempo.md)); a Grafana

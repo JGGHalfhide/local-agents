@@ -18,6 +18,23 @@ ReplicaSet of the OOM-killed pod, f10 added the pod waiting on the unbound
 claim. Decision: thinking stays off for the status reporter
 ([ADR 0009](adr/0009-status-reporter-thinking-off.md)).
 
+## Results, Week 5: the airgapped cluster (11/25, results/week5-airgap-status-eval/)
+
+The 13 cases on `airgap-rehearsal` with egress blocked (Zarf packages,
+[airgap-runbook.md](airgap-runbook.md)), image 854e81c, same prompts and
+limits (`config_sha256` b085a9e3): **faults 8/8, controls 5/5 healthy with
+no findings, no ambient findings**, 43.4-89.4 s, median 47.7 s (build
+cluster, Week 4: 49.4 s). Each case namespace gets Zarf's pull Secret;
+f02's fault there is the missing pull credential (`127.0.0.1:31999` is the
+real registry on that cluster), same case and category.
+
+First pass kept (`first-pass/`, image 393577d): faults 8/8 but 7 of 13 runs
+reported RKE2's local-path-storage addon as faulty, a warning from the VM
+boot (`ApplyManifestFailed`, applied seconds later); every control came
+back `fault`. Fixed in 854e81c (a failure followed by its success on the
+same object is resolved). In the rerun f10 got 429 twice (the hourly
+CronJob's run) and was rerun alone.
+
 ## Results, Week 4 (11/25, results/week4-status-eval/)
 
 Faults 8/8, controls 5/5 reported healthy with no findings, **no ambient
