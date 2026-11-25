@@ -20,6 +20,11 @@ import json
 import pathlib
 
 MAX_RESULT_CHARS = 3500
+# A ready pod whose containers have all run this long since their last start
+# is stable: its earlier terminations are history (boot-time restarts), and
+# the row says so. A crash loop restarts sooner than this (f05: seconds to
+# minutes), so its terminations still read as current.
+STABLE_AFTER = dt.timedelta(minutes=10)
 # Warning reason -> the Normal reason that means the same object has succeeded
 # since (list_events hides the warning then).
 RESOLVED_BY = {
@@ -96,12 +101,27 @@ class Cluster:
                                 for c in cs if "terminated" in c.get("lastState", {})) or "-"
                 phase = st.get("phase", "")
                 ok = phase == "Succeeded" or (phase == "Running" and ready == len(cs) and waiting == "-")
+                if ok and last != "-" and phase == "Running" and self._stable(cs):
+                    last += f" earlier; running {int(STABLE_AFTER.total_seconds() // 60)}+ min, ready now: not a fault"
+                elif last != "-" and phase == "Succeeded":
+                    last += " earlier; completed: not a fault"
                 self._pods.append({
                     "namespace": p["metadata"]["namespace"], "name": p["metadata"]["name"], "phase": phase,
                     "ready": f"{ready}/{len(cs)}", "restarts": sum(c.get("restartCount", 0) for c in cs),
                     "waiting": waiting, "last_terminated": last, "ok": ok,
                     "owner": ",".join(f"{o['kind']}/{o['name']}" for o in p["metadata"].get("ownerReferences", [])) or "-"})
         return self._pods
+
+    def _stable(self, cs):
+        """Every container running for STABLE_AFTER or longer."""
+        for c in cs:
+            started = ((c.get("state") or {}).get("running") or {}).get("startedAt")
+            if not started:
+                return False
+            t = dt.datetime.fromisoformat(started.replace("Z", "+00:00"))
+            if self.now - t < STABLE_AFTER:
+                return False
+        return True
 
     def workloads(self):
         if self._wl is None:
@@ -137,7 +157,15 @@ class Cluster:
                                 if orphaned else "0 replicas, not autoscaled; no Service selects it")
                     conds = _bad_conditions(s.get("conditions"))
                     complete = kind == "Job" and any(c["type"] == "Complete" and c["status"] == "True" for c in s.get("conditions") or [])
-                    ok = (complete or (ready >= desired and conds in ("-",)) or (k is not None and desired == 0)) and not orphaned
+                    # A Job still running (active pods, no failures, every pod it owns
+                    # healthy) is not a fault: the hourly CronJob's run looked like
+                    # one while it ran (Week 6 rebuild, i2).
+                    running = (kind == "Job" and not complete and s.get("active", 0) > 0 and not s.get("failed")
+                               and conds == "-" and all(pd["ok"] for pd in self.pods() if pd["namespace"] == ns
+                                                        and pd["owner"] == f"Job/{name}"))
+                    if running and note == "-":
+                        note = "running now, not a fault"
+                    ok = (complete or running or (ready >= desired and conds in ("-",)) or (k is not None and desired == 0)) and not orphaned
                     self._wl.append({"namespace": ns, "kind": kind, "name": name, "desired": desired, "ready": ready,
                                      "conditions": conds, "autoscaler": note, "ok": ok})
         return self._wl
