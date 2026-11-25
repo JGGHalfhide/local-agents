@@ -25,6 +25,12 @@ API; the only difference is `"thinking": true` in POST /v1/status:
 | Run errors, ungrounded findings | 0, 0 | 0, 0 |
 | Run time | 47.3-93.2 s, median 49.4 s | 132.1-189.6 s, median 149.8 s |
 | Model turns (median) | 8 | 9 |
+| Output tokens per run, thinking included (median) | 231 | 1,299 |
+| Input tokens per run (median) | 15,582 | 23,733 |
+| Final structured request (median) | 35.3 s | 58.3 s |
+| Largest single output; cut at max_tokens (finish_reason=length) | 401; 0 | 842 of 1024; 0 |
+
+Tokens from the runs' traces in Tempo (docs/scans/week4-thinking-tokens.txt).
 
 Thinking changed two reports without changing a score: f05 named the
 ReplicaSet of the OOM-killed pod instead of the pod; f10 also reported the

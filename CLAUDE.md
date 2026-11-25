@@ -291,8 +291,12 @@ for the status reporter (results/week4-thinking-status-eval/).
 Snag 11/25: Tempo OOMKilled twice (512 MiB limit) while ~20 traces were read
 in a row; idle 46 MiB, memory steps up per read. Probable cause: no
 GOMEMLIMIT; proposed fix in platform-lab (limit 1 GiB, GOMEMLIMIT ~80%).
-All 26 eval traces survived.
-Next in Week 4: Tempo memory fix, tag v0.4 (rebuild check, employer check).
+All 26 eval traces survived. Fixed in platform-lab a7ecf2c (limit 1 GiB,
+GOMEMLIMIT 800MiB, request 256Mi): the same 26 reads in a row, 0 restarts,
+618 MiB seen (docs/scans/week4-tempo-memory.txt). Thinking tokens:
+median output 1,299 vs 231, none cut at max_tokens
+(docs/scans/week4-thinking-tokens.txt).
+Next in Week 4: tag v0.4 (rebuild check, employer check).
 Lab: build-node-01 running (started 11/25), airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state

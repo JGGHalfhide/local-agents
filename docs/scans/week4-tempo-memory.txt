@@ -1,0 +1,9 @@
+# Tempo memory fix check (11/25), platform-lab a7ecf2c: limit 512Mi -> 1Gi, GOMEMLIMIT 800MiB, request 256Mi.
+# Before: OOMKilled at 14:21:37Z and 14:22:55Z while ~20 traces were read in a row (512Mi limit); idle 46Mi.
+# Method: the same 26 GET /api/v2/traces/<id> back to back (the reads of docs/scans/week4-thinking-tokens.txt),
+# kubectl top pod tempo-0 every 2 s (metrics-server samples every ~15 s, so the true peak may be higher), restart count before/after.
+
+restarts before: 0, after: 0
+memory samples: 42Mi 42Mi 42Mi 42Mi 42Mi 42Mi 42Mi 42Mi 42Mi 42Mi 42Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 618Mi 
+peak seen: 618Mi (over the old 512Mi limit: the cause confirmed; under GOMEMLIMIT 800MiB and the 1Gi limit)
+all 26 traces read: rc=0

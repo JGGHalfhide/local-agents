@@ -12,7 +12,8 @@ score.py, run_eval.py); every run goes through the operator API (ADR 0005).
 The same 13 cases with `"thinking": true` (run_eval.py --thinking), same
 image and config: faults 8/8, controls 5/5, no ambient findings, no errors,
 nothing ungrounded; 7-8 tool calls; 132.1-189.6 s, median 149.8 s (3.0x
-thinking off). Two reports differ without changing a score: f05 named the
+thinking off); output tokens median 1,299 vs 231, largest single output 842
+of the 1024 max_tokens, none cut off (docs/scans/week4-thinking-tokens.txt). Two reports differ without changing a score: f05 named the
 ReplicaSet of the OOM-killed pod, f10 added the pod waiting on the unbound
 claim. Decision: thinking stays off for the status reporter
 ([ADR 0009](adr/0009-status-reporter-thinking-off.md)).

@@ -1,0 +1,36 @@
+# Thinking off vs on (11/25): same 13 cases, image 393577d, config_sha256 b085a9e3, max_tokens 1024, temperature 0.
+# Per run from the run objects (results/week4-status-eval, results/week4-thinking-status-eval) and their Tempo traces
+# (26 reads back to back: also the check of the Tempo memory fix, platform-lab a7ecf2c).
+# Columns: total s, model calls, input tokens, output tokens (incl. thinking), largest single output, final request s / output tokens, finish_reason=length count.
+
+## thinking off (results/week4-status-eval)
+f01  thinking=False   47.3s calls= 9 in= 15582 out=  231 max_out=  84 final= 13.9s/  84 length=0
+f02  thinking=False   54.7s calls= 8 in= 16453 out=  437 max_out= 266 final= 29.0s/ 266 length=0
+f04  thinking=False   52.6s calls= 8 in= 17070 out=  376 max_out= 207 final= 26.2s/ 207 length=0
+f05  thinking=False   93.2s calls= 8 in= 22246 out=  491 max_out= 184 final= 41.7s/ 184 length=0
+f06  thinking=False   84.7s calls= 9 in= 26033 out=  436 max_out= 183 final= 37.4s/ 148 length=0
+f07  thinking=False   47.6s calls= 9 in= 18445 out=  306 max_out= 135 final= 20.6s/ 135 length=0
+f08  thinking=False   78.3s calls= 9 in= 27030 out=  222 max_out= 102 final= 44.7s/ 102 length=0
+f10  thinking=False   49.2s calls= 6 in= 11412 out=  556 max_out= 401 final= 28.9s/ 401 length=0
+k1   thinking=False   55.0s calls= 3 in=  7116 out=  193 max_out= 106 final= 41.4s/  73 length=0
+k2   thinking=False   48.6s calls= 3 in=  7109 out=  158 max_out= 106 final= 35.0s/  38 length=0
+k3   thinking=False   49.4s calls= 3 in=  7124 out=  158 max_out= 106 final= 35.6s/  38 length=0
+k4   thinking=False   48.9s calls= 3 in=  7112 out=  158 max_out= 106 final= 35.3s/  38 length=0
+k5   thinking=False   49.4s calls= 3 in=  7119 out=  158 max_out= 106 final= 35.8s/  38 length=0
+median: total 49.4s, calls 8, input 15582, output 231, final 35.3s; finish_reason=length in 0 model calls; max single output 401
+
+## thinking on (results/week4-thinking-status-eval)
+f01  thinking=True   182.3s calls= 9 in= 22865 out= 1633 max_out= 842 final= 87.5s/ 842 length=0
+f02  thinking=True   134.1s calls= 9 in= 25973 out= 1169 max_out= 453 final= 55.7s/ 453 length=0
+f04  thinking=True   163.7s calls= 7 in= 17210 out= 1947 max_out= 468 final= 33.9s/ 327 length=0
+f05  thinking=True   170.1s calls= 7 in= 14803 out= 2164 max_out= 581 final= 47.6s/ 581 length=0
+f06  thinking=True   136.5s calls= 9 in= 20900 out= 1299 max_out= 590 final= 63.4s/ 590 length=0
+f07  thinking=True   148.3s calls= 7 in= 18330 out= 1857 max_out= 425 final= 29.7s/ 368 length=0
+f08  thinking=True   171.2s calls= 9 in= 23733 out= 1549 max_out= 738 final= 90.2s/ 738 length=0
+f10  thinking=True   189.6s calls= 5 in= 11230 out= 2199 max_out= 804 final= 80.0s/ 804 length=0
+k1   thinking=True   142.8s calls= 9 in= 30104 out=  899 max_out= 329 final= 62.2s/ 329 length=0
+k2   thinking=True   149.8s calls= 9 in= 34221 out=  997 max_out= 317 final= 60.9s/ 317 length=0
+k3   thinking=True   150.8s calls= 9 in= 33912 out= 1036 max_out= 291 final= 56.3s/ 291 length=0
+k4   thinking=True   139.8s calls= 9 in= 34217 out=  902 max_out= 254 final= 53.5s/ 254 length=0
+k5   thinking=True   132.1s calls= 9 in= 32928 out=  796 max_out= 324 final= 58.3s/ 324 length=0
+median: total 149.8s, calls 9, input 23733, output 1299, final 58.3s; finish_reason=length in 0 model calls; max single output 842
