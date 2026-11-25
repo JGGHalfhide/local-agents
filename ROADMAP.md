@@ -72,8 +72,8 @@ Acceptance: follow-ups closed; the eval still passes (8/8, 5/5). (11/24: 8/8, 5/
 
 Goal: every model and tool call visible; prompts change by commit.
 
-- [ ] Trace every model call and tool call (OpenTelemetry; a trace backend that runs airgapped); ADR
-- [ ] Decide what traces may contain (prompts, tool output, retrieved text), consistent with local-airgap-LLM's "no prompt content in Loki by default"; document
+- [x] Trace every model call and tool call (11/25, ADR 0008): OpenTelemetry SDK in the agent, Grafana Tempo 3.1.1 in platform-lab (62262d6); one run = 1 trace, 18 spans, tokens and latency per call (docs/scans/week4-tracing.txt)
+- [x] What traces may contain (11/25, ADR 0008): metadata only; no prompt, output, tool argument values or tool text (checked on the stored trace); content stays in the run object
 - [ ] Prompts and tool configs as versioned files synced by Argo CD; a prompt change is a commit, and the eval reruns on it
 - [ ] Dashboard as code: runs, tool calls, latency, tokens, failures, thinking on/off
 - [ ] Thinking: per-request opt-in tested on the status reporter, only after agent 1 works with thinking off (off stays the default)
@@ -118,6 +118,6 @@ Acceptance: a fresh clone of the three repos reproduces the agents on both clust
 - ~~Agent runtime: plain loop vs a framework; tools in-process vs tool servers (MCP) (Weeks 1-2).~~ Answered 11/24: a plain loop (ADR 0002), tools in-process (ADR 0007).
 - Concurrency: the endpoint has 4 slots shared with every client; an agent run is many calls. Queueing, priorities, a second replica (does not fit today)?
 - Write actions: offered at all, and how approved (Week 6)?
-- What may traces contain (Week 4)?
+- ~~What may traces contain (Week 4)?~~ Answered 11/25: metadata only (ADR 0008).
 - iGPU (Radeon 780M, Vulkan): deferred; only if CPU speed limits the agents.
 - platform-lab: re-running `zarf init` under the Kyverno policies is planned there (scoped exception during init); until then an interrupted init on the airgap VM means a fresh VM.

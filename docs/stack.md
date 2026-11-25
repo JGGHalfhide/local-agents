@@ -37,7 +37,7 @@ Keep this page current every week.
 | Operator interface | 11/24: HTTP API v1 (stdlib `http.server` in the agent image), `agentctl` (stdlib CLI); web view a Week 5-6 stretch | Starts a status run and returns structured, grounded findings with the tool-call trace; one path for operators, the CronJob and the eval | [ADR 0005](adr/0005-operator-interface.md), [interface.md](interface.md) |
 | Identity and policy | deploy/agents/ (11/24): namespace `agents` (restricted Pod Security, client label), ServiceAccount `status-reporter`, ClusterRole get/list/watch only, NetworkPolicies (default deny; DNS, KEDA interceptor :8080, API server :6443 on the lab network), hourly CronJob; synced by Argo CD (platform-lab Application `local-agents`) | The status reporter reads the cluster and calls the endpoint, nothing else | Least privilege as specified in ADR 0003 and ADR 0001; checked with `kubectl auth can-i` and probe pods ([scan](scans/week2-identity-smoke.txt)) |
 | Retrieval: embedding model, vector store, index | dropped (ADR 0006) | | |
-| Tracing | *planned, Week 4* | | |
+| Tracing | OpenTelemetry SDK + OTLP/HTTP exporter 1.45.2 (agent/tracing.py, locked); Grafana Tempo 3.1.1 single binary in platform-lab (chart grafana-community/tempo 3.2.1, `monitoring`, 2 Gi local-path, 7 days), Grafana datasource | One trace per run: `invoke_agent` span, a `chat` span per model call (tokens, finish reason, latency), an `execute_tool` span per tool call (result size, latency); metadata only, no prompt, output or tool text; `trace_id` in the run object | Per-call latency and tokens across runs, in the Grafana that already runs; airgap-capable; one run = 18 spans, 8.2 KiB, Tempo 29-152 MiB ([ADR 0008](adr/0008-tracing-opentelemetry-tempo.md), [scan](scans/week4-tracing.txt)) |
 | Evaluation set and scoring | v0: 22 cases (`eval/cases/`), `eval/check.py`, `eval/run_baseline.py`, `eval/review_sheet.py` | Real incidents from Phases 1-2 with known cause and fix; automatic first pass by patterns, then human review; leak check in CI | Decide by measurement; no judge model fits the lab ([eval.md](eval.md)) |
 | Status reporter eval | eval/status/ (11/24): 13 cases in `agent-eval-*` namespaces, `inject.sh` / `cleanup.sh` (build cluster only, labelled namespaces only), `score.py`, `run_eval.py` through the operator API | Injects a fault or control, asks the status reporter, scores detect / locate / classify / grounding / tool validity | Automatic, repeatable scoring with no hand review (ADR 0003); Week 3: 8/8 faults, 5/5 controls, no ambient findings ([eval-status.md](eval-status.md)) |
 | Zarf packages | *planned, Week 5* | | |
@@ -82,8 +82,13 @@ A status run, in the cluster:
 5. The final report is checked against the tool results (grounding) and
    stored as JSON in an emptyDir; agentctl prints it and exits 0 (healthy),
    1 (fault) or 2 (error / unknown).
+6. Each model call and tool call is a span; at the end of the run the
+   trace (metadata only, ADR 0008) goes as OTLP/HTTP to Tempo
+   (`tempo.monitoring.svc:4318`), and the run object records its
+   `trace_id`.
 
-Nothing leaves the cluster: no egress beyond the three destinations above.
+Nothing leaves the cluster: no egress beyond DNS, the interceptor, the API
+server and Tempo.
 
 ## Diagram
 
@@ -105,6 +110,7 @@ flowchart LR
   sr -- "chat completions + tool calls" --> icp --> srv
   sr -- "GET (ServiceAccount status-reporter)" --> api
   sr --> runs
+  sr -- "OTLP/HTTP spans, metadata only" --> tempo["Tempo (monitoring)<br/>Grafana datasource"]
   zot["Zot: signed image<br/>(Kyverno verifies)"] -. "pull by digest" .-> sr
   argo["Argo CD"] -. "sync deploy/" .-> agents
 ```

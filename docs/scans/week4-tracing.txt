@@ -1,0 +1,54 @@
+# Week 4 tracing check (11/25): one status run through agentctl, its trace read back from Tempo
+# Method: platform-lab 62262d6 (Tempo 3.1.1, chart 3.2.1), local-agents 1984e04 (image e06d4f4 sha256:14cece9d...).
+# agentctl --json status via port-forward; GET /api/v2/traces/<trace_id> from Tempo via port-forward; kubectl top; du on the PVC.
+
+## kubectl -n monitoring top pod tempo-0 (after the run)
+NAME      CPU(cores)   MEMORY(bytes)   
+tempo-0   4m           152Mi           
+
+## Tempo ingest (Tempo /metrics after the run; no du in the image, and the local-path volume's size
+## needs root on the node, so bytes received stands in for size: one run = 8.2 KiB of OTLP)
+tempo_distributor_bytes_received_total{tenant="single-tenant"} 8407
+tempo_distributor_spans_received_total{tenant="single-tenant"} 18
+
+## run object summary
+run_id r-20261125T130537Z-f72d status fault trace_id c8f25737c395a6c0f36872cf9b55b396
+timings {'started': '2026-11-25T13:05:37Z', 'finished': '2026-11-25T13:06:24Z', 'total_s': 47.7, 'model_s': 47.6, 'tools_s': 0.1, 'turns': 9}
+error None
+finding agents CronJob/status-reporter admission-denied | Error creating job: admission webhook "ivpol.validate.kyverno.svc-fail" denied the request: Policy verify-platform-images error: failed to evaluate policy: Get "https://zot.zot.svc.cluster.local:5000/
+
+## spans from Tempo (name, duration, tokens in/out, tool result chars, finish reasons)
+18 spans, one trace
+invoke_agent status-reporter            47729 ms  in= out= chars= finish=[]
+chat qwen3.5-4b                          5286 ms  in=1481 out=14 chars= finish=['tool_calls']
+execute_tool overview                     100 ms  in= out= chars=507 finish=[]
+chat qwen3.5-4b                          3234 ms  in=1661 out=26 chars= finish=['tool_calls']
+execute_tool list_events                    1 ms  in= out= chars=427 finish=[]
+chat qwen3.5-4b                          2918 ms  in=1810 out=27 chars= finish=['tool_calls']
+execute_tool list_workloads                 0 ms  in= out= chars=291 finish=[]
+chat qwen3.5-4b                          3277 ms  in=1983 out=27 chars= finish=['tool_calls']
+execute_tool list_pods                      0 ms  in= out= chars=532 finish=[]
+chat qwen3.5-4b                          3594 ms  in=2274 out=17 chars= finish=['tool_calls']
+execute_tool list_argocd_apps               0 ms  in= out= chars=544 finish=[]
+chat qwen3.5-4b                          2879 ms  in=2497 out=14 chars= finish=['tool_calls']
+execute_tool list_nodes                     0 ms  in= out= chars=66 finish=[]
+chat qwen3.5-4b                          1603 ms  in=2552 out=15 chars= finish=['tool_calls']
+execute_tool list_pvcs                      0 ms  in= out= chars=411 finish=[]
+chat qwen3.5-4b                          2476 ms  in=2711 out=16 chars= finish=['tool_calls']
+execute_tool list_keda_objects              0 ms  in= out= chars=251 finish=[]
+chat qwen3.5-4b                         22292 ms  in=1679 out=121 chars= finish=['stop']
+
+attribute keys: agent.findings, agent.messages, agent.namespace, agent.prompt_sha256, agent.request, agent.run_id, agent.status, agent.thinking, agent.tool.argument_keys, agent.tool.result_chars, agent.tool_calls, agent.tool_calls_requested, agent.turns, agent.ungrounded, gen_ai.agent.name, gen_ai.operation.name, gen_ai.request.max_tokens, gen_ai.request.model, gen_ai.request.temperature, gen_ai.response.finish_reasons, gen_ai.response.model, gen_ai.tool.call.id, gen_ai.tool.name, gen_ai.usage.input_tokens, gen_ai.usage.output_tokens
+content check: system prompt in trace: False | user prompt in trace: False | tool result text (NAMESPACE header) in trace: False
+
+## CronJob events (cause of the one finding: Kyverno/Zot not ready after VM boot)
+FIRST                  COUNT   TYPE      REASON
+2026-11-25T12:27:14Z   2       Warning   FailedCreate
+2026-11-25T12:27:14Z   4       Warning   FailedCreate
+2026-11-25T12:27:20Z   1       Warning   FailedCreate
+2026-11-25T12:27:25Z   1       Normal    SuccessfulCreate
+2026-11-25T12:29:14Z   1       Normal    SuccessfulDelete
+2026-11-25T12:29:14Z   1       Normal    SawCompletedJob
+2026-11-25T13:00:00Z   1       Normal    SuccessfulCreate
+2026-11-25T13:01:05Z   1       Normal    SuccessfulDelete
+2026-11-25T13:01:05Z   2       Normal    SawCompletedJob

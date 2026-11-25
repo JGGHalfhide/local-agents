@@ -264,7 +264,16 @@ rerun kept). A leftover failed Job (Week 2's 429) pulled the model off f06;
 deleted with the user's OK. The eval assumes an otherwise healthy cluster.
 Tagged v0.3 (11/24; employer check signed off; image rebuilt
 byte-identical). Next: Week 4 (tracing, prompts via GitOps, thinking opt-in).
-Lab: build-node-01 running, airgap-rehearsal off (a libvirt domain named
+Week 4 step 1 done (11/25, ADR 0008): tracing. Tempo 3.1.1 in platform-lab
+(62262d6, grafana-community chart 3.2.1, monitoring ns, 7 days, Grafana
+datasource); agent traces with the OpenTelemetry SDK (e06d4f4, image
+sha256:14cece9d, deployed 1984e04): one trace per run, chat/execute_tool
+spans, metadata only (no prompt, output or tool text), trace_id in the run
+object. One run = 18 spans, 8.2 KiB; Tempo 29-152 MiB
+(docs/scans/week4-tracing.txt). Follow-up: list_events still shows a
+CronJob's boot-time FailedCreate (Kyverno/Zot not ready) after a later
+SuccessfulCreate: one false fault in the traced run.
+Lab: build-node-01 running (started 11/25), airgap-rehearsal off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state
 and kubeconfigs.

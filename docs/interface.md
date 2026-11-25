@@ -101,7 +101,8 @@ the endpoint is (the endpoint is at zero most of the time).
             "max_tool_calls": 8, "max_turns": 10, "prompt_sha256": "..."},
   "timings": {"started": "2026-11-24T23:01:07Z", "finished": "2026-11-24T23:03:29Z",
               "total_s": 142.0, "model_s": 139.6, "tools_s": 0.4, "turns": 4},
-  "error": null
+  "error": null,
+  "trace_id": "c8f25737c395a6c0f36872cf9b55b396"
 }
 ```
 
@@ -114,6 +115,7 @@ the endpoint is (the endpoint is at zero most of the time).
 | `ungrounded` | Findings dropped by the grounding check, kept for review. |
 | `tool_calls[].result` | The first 2,000 characters of what the model saw (`result_chars` is the full length, up to the 3,500-character tool cap). |
 | `model` | Settings actually used. No key: the endpoint needs none (ADR 0001); a hosted backend's key would come from a Secret and never appear here. |
+| `trace_id` | The run's OpenTelemetry trace in Tempo (ADR 0008; metadata only: timings, tokens, tool names and sizes); `null` when tracing is off. Open it in Grafana (Explore, datasource Tempo). |
 
 Grounding (the same check the scorer uses): a finding is kept only if its
 namespace (when set) and object name appear in the result of at least one
