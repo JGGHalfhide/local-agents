@@ -1,72 +1,66 @@
 # local-agents
 
-AI agents running inside the
+An AI agent running inside the
 [platform-lab](https://github.com/JGGHalfhide/platform-lab) Kubernetes
-platform, calling the CPU-only, airgapped LLM endpoint from
-[local-airgap-LLM](https://github.com/JGGHalfhide/local-airgap-LLM): per-agent
-identity, read-only tools behind NetworkPolicy and Kyverno, every model and tool call traced, delivered through
-the same signed supply chain and deployed to an airgapped cluster with no
-internet. First agent: a read-only platform status reporter, scored
-automatically by fault injection
-([ADR 0003](docs/adr/0003-first-agent-status-reporter.md)). One agent by design: the lab shows the whole
-chain end to end (airgapped cluster, local LLM, one agent; [ADR 0006](docs/adr/0006-scope-one-agent.md)).
+platform, calling the CPU-only LLM endpoint from
+[local-airgap-LLM](https://github.com/JGGHalfhide/local-airgap-LLM), with no
+internet: its own read-only identity, tools behind NetworkPolicy and
+Kyverno, every model and tool call traced, delivered through the same
+signed supply chain, and deployed to an airgapped cluster with egress
+blocked.
 
-**Status:** Week 5 (v0.5, 11/25): the status reporter runs on the
-airgapped cluster with egress blocked, delivered as a signed Zarf package
-with the platform and the endpoint; its image verified through the Zarf
-registry, an unsigned image rejected, 0 pull errors from the deploy.
-Fault-injection eval there: **8/8 faults, 5/5 controls, no false findings,
-median 48 s**, matching the build cluster
-([airgap-runbook.md](docs/airgap-runbook.md)).
+The agent is a read-only **platform status reporter**
+([ADR 0003](docs/adr/0003-first-agent-status-reporter.md)): it reads the
+cluster through 11 read-only tools, asks Qwen3.5 4B (llama.cpp, CPU) to find
+what is broken, checks every finding against what the tools actually
+showed, and returns a structured report. It is scored automatically by
+injecting real faults into disposable namespaces. One agent by design: the
+three repos together show the whole chain end to end, from bare hardware to
+an agent on an airgapped cluster
+([ADR 0006](docs/adr/0006-scope-one-agent.md)).
 
-Week 4 (v0.4, 11/25): every run is traced with OpenTelemetry
-into Grafana Tempo, one trace per run with a span per model call and tool
-call, metadata only, no prompt or tool text
-([ADR 0008](docs/adr/0008-tracing-opentelemetry-tempo.md)); a Grafana
-dashboard reads runs, latency, tokens and tool calls from the traces.
-Prompts and limits are files synced by Argo CD, and CI requires eval
-results recorded with the deployed ones. Fault-injection eval: **8/8
-faults, 5/5 controls, no false findings, median 49 s**
-([eval-status.md](docs/eval-status.md#results-week-4-1125-resultsweek4-status-eval)).
-Thinking opted in: the same scores at 3x the time, so it stays off
-([ADR 0009](docs/adr/0009-status-reporter-thinking-off.md)).
+**Status:** Week 6 (11/25). Running on the build cluster and on the
+airgapped cluster; v1.0 after the full rebuild from fresh clones.
 
-Week 2 (v0.2, 11/24): the status reporter runs in the cluster behind
-an operator API and `agentctl` ([ADR 0005](docs/adr/0005-operator-interface.md)),
-under its own read-only identity; image built with crane and signed
-([ADR 0004](docs/adr/0004-agent-image-built-with-crane.md)). Fault-injection
-eval: **8/8 faults found and classified, 5/5 healthy controls clean**
-([eval-status.md](docs/eval-status.md#results-week-2-1124-resultsweek2-status-eval)).
-Tools stay in-process functions, no tool servers
-([ADR 0007](docs/adr/0007-tools-in-process.md)).
+## Results
 
-Week 3 (v0.3, 11/24): the eval's follow-ups closed; rerun **8/8 faults, 5/5
-controls with no false findings in any run** (admission denials now located
-at the blocked object), median 49 s per report
-([eval-status.md](docs/eval-status.md#results-week-3-1124-resultsweek3-status-eval)).
+Fault-injection eval, one status run per case through the operator API,
+thinking off ([full results](docs/results.md)):
 
-Week 1 (v0.1, 11/24): VMs sized (12 vCPU / 20 GiB,
-[resource plan](docs/resource-plan.md)), endpoint access decided
-([ADR 0001](docs/adr/0001-endpoint-access-networkpolicy-only.md)),
-evaluation set v0 of 22 real incidents with its scoring method
-([eval.md](docs/eval.md)); model-alone baseline final (points of 88:
-thinking off 38 greedy / 30 sampled, on 49 / 42). First agent: a read-only status reporter
-([ADR 0003](docs/adr/0003-first-agent-status-reporter.md)), scored by fault
-injection ([eval-status.md](docs/eval-status.md)).
-Agent runtime: a plain tool loop on the openai SDK, chosen by a spike of five
-runtimes ([ADR 0002](docs/adr/0002-agent-runtime-plain-openai-loop.md)). The
-spike found that agent tool loops OOM-killed the endpoint; fixed in
-local-airgap-LLM (its ADR 0007). See [ROADMAP.md](ROADMAP.md).
+| Cluster | Faults found, located, classified | Healthy controls clean | False findings | Median run |
+|---|---|---|---|---|
+| Build (Week 4) | 8/8 | 5/5 | 0 | 49 s |
+| Airgapped, egress blocked (Week 5) | 8/8 | 5/5 | 0 | 48 s |
+| Airgapped, with prompt injection (Week 6) | 10/10 | 5/5 | 0 | 49 s |
 
-## How it fits
+- **Prompt injection:** instructions planted in a readiness probe's output
+  and in an object's name were never followed (6 runs).
+- **Thinking** (the model reasons before answering): same scores at three
+  times the run time, so it stays off
+  ([ADR 0009](docs/adr/0009-status-reporter-thinking-off.md)).
+- **Supply chain:** every image signed and verified at admission on both
+  clusters; an unsigned image is rejected; 0 image pull errors on the
+  airgapped cluster.
+- **Read-only:** no write tools, no write RBAC
+  ([ADR 0010](docs/adr/0010-no-write-actions.md)).
 
-- **platform-lab** provides the clusters: VMs (Terraform), OS hardening,
-  RKE2, Argo CD, Zot, Kyverno, cosign, monitoring, Velero, KEDA, Zarf.
-- **local-airgap-LLM** provides the model endpoint: Qwen3.5 4B on
-  llama.cpp, OpenAI-compatible, scale to zero, the model as a signed image.
-- **This repo** provides the agents: agent workloads and their identity,
-  tools, prompts and tool configs, tracing, the evaluation set and
-  results, and the Zarf packages for the airgapped cluster.
+Every number has its raw output committed under `results/` or
+`docs/scans/`, and failed first passes are kept with their causes.
+
+## What it looks like
+
+`agentctl` on the airgapped cluster: health, a live run, the run list and
+the tool-call trace ([recording](docs/media/agentctl.cast),
+`asciinema play docs/media/agentctl.cast`):
+
+![agentctl walk-through](docs/media/agentctl.gif)
+
+The read-only web view (no JavaScript, strict CSP; runs start only through
+the API):
+
+![web view: recent runs](docs/media/web-runs.png)
+
+![web view: one run with its finding and tool calls](docs/media/web-run.png)
 
 ## Architecture
 
@@ -74,31 +68,82 @@ local-airgap-LLM (its ADR 0007). See [ROADMAP.md](ROADMAP.md).
 flowchart LR
   subgraph agents["namespace agents"]
     cron["CronJob (hourly)<br/>agentctl"]
-    op["operator<br/>kubectl port-forward"]
-    sr["status-reporter<br/>API v1 + tool loop<br/>11 read-only tools"]
+    op["operator<br/>agentctl / web view<br/>via port-forward"]
+    sr["status-reporter<br/>API v1 + web view<br/>tool loop, 11 read-only tools"]
+    prompts[("prompts + limits<br/>ConfigMap (GitOps)")]
   end
   subgraph llm["local-airgap-LLM"]
     icp["KEDA HTTP interceptor"]
-    srv["llama-server<br/>Qwen3.5 4B, scale to zero"]
+    srv["llama-server<br/>Qwen3.5 4B, CPU<br/>scale to zero"]
   end
   api["Kubernetes API<br/>get/list/watch only"]
+  tempo["Tempo + Grafana<br/>(platform-lab)"]
   cron -- "POST /v1/status" --> sr
   op -. "port-forward" .-> sr
+  prompts --> sr
   sr -- "chat completions + tool calls" --> icp --> srv
-  sr -- "GET" --> api
-  sr -- "OTLP spans, metadata only" --> tempo["Tempo + Grafana<br/>(platform-lab monitoring)"]
-  zot["Zot: signed image<br/>(Kyverno verifies)"] -. "pull by digest" .-> sr
-  argo["Argo CD"] -. "sync deploy/" .-> agents
+  sr -- "GET (read-only ServiceAccount)" --> api
+  sr -- "OTLP spans, metadata only" --> tempo
+  reg["Zot (build) / Zarf registry (airgap)<br/>signed image, Kyverno verifies"] -. "pull by digest" .-> sr
+  argo["Argo CD (build) / Zarf package (airgap)"] -. "deploy/" .-> agents
 ```
 
-How a run moves through it: [docs/stack.md](docs/stack.md#data-flow).
+How a run moves through it, and every component with its version and why:
+[docs/stack.md](docs/stack.md).
+
+## How it fits
+
+- **platform-lab** provides the clusters: VMs (Terraform), OS hardening,
+  RKE2, Argo CD, Zot, Kyverno and cosign, monitoring and Tempo, Velero,
+  KEDA, Zarf and the airgap flow.
+- **local-airgap-LLM** provides the model endpoint: Qwen3.5 4B on
+  llama.cpp, OpenAI-compatible, scale to zero, the model as a signed image.
+- **This repo** provides the agent: its image, identity and policies,
+  tools, prompts and limits, tracing, the operator API, `agentctl` and the
+  web view, the evaluations and their results, and its Zarf package.
+
+## Quickstart
+
+Needs platform-lab v1.0+ (build cluster up, `make image` working) and
+local-airgap-LLM v1.1+ (the endpoint deployed). A from-zero guide for all
+three repos is planned for v1.0 (ROADMAP.md).
+
+```bash
+make agent-image                       # reproducible image with crane (ADR 0004)
+make -C ../platform-lab image IMAGE=oci-layout:$PWD/build/agent-image/oci \
+  NAME=local-agents/agent:$(git rev-parse --short HEAD)   # SBOM, Trivy gate, cosign
+# pin the printed digest in deploy/agents/status-reporter.yaml; Argo CD
+# (platform-lab Application local-agents) syncs deploy/
+
+kubectl -n agents port-forward svc/status-reporter 8080:8080 &
+python3 agent/agentctl.py status       # or open http://localhost:8080/
+
+KUBECONFIG=... eval/status/run_eval.py results/<name>   # fault-injection eval
+make airgap-packages && make airgap-deploy             # the airgapped cluster
+```
+
+Details: [operator interface](docs/interface.md),
+[eval](docs/eval-status.md), [airgap runbook](docs/airgap-runbook.md),
+[image build](docs/image-build.md).
 
 ## Decisions
 
-Architecture decision records are in [docs/adr/](docs/adr/). Every tool,
-its version and why: [docs/stack.md](docs/stack.md).
+Architecture decision records: [docs/adr/](docs/adr/) (endpoint access,
+runtime, the agent, image build, operator interface, scope, tools, tracing,
+thinking, write actions).
+
+## Timeline
+
+| Week | Tag | What |
+|---|---|---|
+| 1 | v0.1 | VMs sized, endpoint access, eval set of 22 real incidents and the model-alone baseline, agent runtime chosen by a spike of five |
+| 2 | v0.2 | The status reporter in the cluster: image, identity, tools, operator API and `agentctl`; first fault-injection eval 8/8, 5/5 |
+| 3 | v0.3 | Eval follow-ups; no false findings |
+| 4 | v0.4 | Tracing (OpenTelemetry, Tempo), prompts as GitOps files with an eval gate in CI, dashboard, thinking tested |
+| 5 | v0.5 | The airgapped cluster: Zarf package, signatures via the Zarf registry, eval matching the build cluster |
+| 6 | | No write actions, prompt-injection cases, web view, results, recordings |
 
 ## License
 
-[MIT](LICENSE). Model weights and indexes are not in this repo; each
-model's source, license and SHA-256 are recorded in the docs.
+[MIT](LICENSE). Model weights are not in this repo; the model's source,
+license and SHA-256 are recorded in local-airgap-LLM.

@@ -98,12 +98,12 @@ Acceptance: status reports on the airgapped VM with egress blocked, everything v
 
 Goal: numbers, guardrails, and a repo a stranger can follow.
 
-- [ ] Guardrails: tools read-only by default; any write action (e.g. restart a deployment) behind explicit approval or not offered (decide, ADR); prompt-injection test cases (instructions planted in logs and docs)
-- [ ] Results: fault-injection scores, latency and tokens per run, variance, thinking off vs on; concurrency with the endpoint's 4 slots
-- [ ] README: architecture (Mermaid), results table, quickstart (depends on platform-lab v1.0+ and local-airgap-LLM v1.1+)
+- [x] Guardrails (11/25): no write actions (ADR 0010); prompt-injection cases i1 (readiness probe output) and i2 (object name): instruction never followed in 6 runs; a name-copy slip in i2 fixed by near-miss name correction in grounding (3afc620)
+- [x] Results (11/25, docs/results.md): scores per week and cluster, failed first passes with causes, injection, thinking off vs on, latency and tokens, run-to-run behaviour (no variance study; f01 flipped deterministically, fixed by stating the verdict, 5386613), concurrency, footprint
+- [x] README (11/25): results table, screenshots and recording, architecture (Mermaid, build and airgap), quickstart, timeline
 - [ ] docs/stack.md complete; ADRs complete; gitleaks; employer check
 - [ ] Full rebuild of both clusters from fresh clones of all three repos; record times
-- [ ] Stretch (Week 5-6, if time): read-only web view (ADR 0005, docs/interface.md): served by the agent's server from the same run JSON; server-rendered, no JavaScript, vendored CSS; everything HTML-escaped, strict CSP, no write actions; demo mode with a DEMO banner for screenshots
+- [x] Web view (11/25, agent/web.py): server-rendered, no JavaScript, strict CSP, everything escaped (planted HTML/script rendered no tag), no write actions, demo mode with a DEMO banner refusing runs; deployed on both clusters (3afc620)
 - [ ] Final step (user, 11/25): one all-encompassing build guide for the three repos together (platform-lab, local-airgap-LLM, local-agents), for someone starting from absolute zero, not just cloning these repos: host hardware and OS, host setup (libvirt/KVM, tools with pinned versions and checksums), VMs, OS hardening, RKE2, Argo CD, registry, PKI and signing keys, Kyverno policies, monitoring and tracing, KEDA, the model (source, license, SHA-256, OCI packaging), the inference endpoint, the agent, the eval, Zarf packages and the airgap flow; the full tech stack, architecture and network diagrams, and the data flow end to end; every step reproducible and verified with its expected output; where it lives decided then (likely its own doc linked from all three READMEs)
 - [ ] Final reminder (user, 11/25): terminal recordings (asciinema or similar) of `agentctl` (health, status, runs, trace) and of the web UI, plus screenshots (web UI, Grafana dashboard, a trace in Tempo), linked from the READMEs and the build guide; the web UI is the Week 5-6 stretch above, so it must exist first (demo mode, DEMO banner)
 - [ ] Tag v1.0; post (user's)

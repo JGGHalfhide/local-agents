@@ -321,10 +321,24 @@ false positive ("finish_reason=length" in a scan header); ignored by its
 one fingerprint in .gitleaksignore with the user's OK (7bdedf3, CI green).
 Check CI for the tagged commit before every tag.
 Tagged v0.5 (11/25; employer check signed off; image at 854e81c rebuilt
-byte-identical). Next: Week 6 (guardrails/write-action ADR, prompt-injection
-cases, results, README, full rebuild from fresh clones, from-zero build
-guide, recordings and screenshots).
-Lab: airgap-rehearsal running (egress blocked), build-node-01 off (a libvirt domain named
+byte-identical).
+Week 6 (11/25): ADR 0010 no write actions (user's choice). Web view
+(agent/web.py, demo mode; strict CSP; planted HTML/script rendered no tag).
+Prompt-injection cases i1 (readiness probe output) and i2 (object name),
+approved by the user: instruction never followed in 6 runs; i2's first run
+ended unknown from a one-character name-copy slip -> near-miss name
+correction in grounding (3afc620). Regression on 3afc620: f01 missed twice
+identically (the 4B model's verdict flipped with unrelated overview counts)
+-> the hand-scaled row states "a fault" (5386613, deployed both clusters
+8ed0846, agents 0.6.1). Final eval on the airgap (results/week6-status-eval/):
+10/10 faults incl. i1/i2, 5/5 controls, no ambient findings, median 48.7 s.
+docs/results.md (all measured results), README rewritten (results,
+screenshots, GIF, quickstart, timeline), docs/media/ (agentctl.cast/.gif via
+scripts/record-agentctl.sh; web view PNGs via headless Firefox with its own
+profile, since the user's Firefox is open). Open: Grafana and Tempo
+screenshots (need the Grafana login), the from-zero build guide, the full
+rebuild of both clusters from fresh clones (user: last, before v1.0), v1.0.
+Lab: airgap-rehearsal running (egress blocked; image 5386613), build-node-01 off (a libvirt domain named
 `laboratory`, 2 vCPU / 4 GiB, also exists, not part of these repos: leave
 it alone); the working platform-lab holds both clusters' Terraform state
 and kubeconfigs.
