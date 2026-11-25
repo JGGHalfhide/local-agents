@@ -62,6 +62,14 @@ the API):
 
 ![web view: one run with its finding and tool calls](docs/media/web-run.png)
 
+Every run is traced (metadata only, no prompt or tool text): the Grafana
+dashboard built from the traces, and one run's model and tool calls in
+Tempo:
+
+![Grafana dashboard: runs by status, failures, run duration, thinking](docs/media/grafana-dashboard.png)
+
+![Tempo trace of one run: chat and execute_tool spans](docs/media/tempo-trace.png)
+
 ## Architecture
 
 ```mermaid
