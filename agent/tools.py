@@ -30,6 +30,7 @@ STABLE_AFTER = dt.timedelta(minutes=10)
 RESOLVED_BY = {
     "FailedCreate": "SuccessfulCreate",             # Job, ReplicaSet, StatefulSet, DaemonSet, CronJob controllers
     "ApplyManifestFailed": "AppliedManifest",       # RKE2's addon controller (server/manifests)
+    "KEDAScaleTargetDeactivationFailed": "KEDAScaleTargetDeactivated",   # KEDA at boot, API server not ready
 }
 KINDS = ["Pod", "Deployment", "StatefulSet", "DaemonSet", "ReplicaSet", "Job", "CronJob", "ScaledObject", "Node"]
 
