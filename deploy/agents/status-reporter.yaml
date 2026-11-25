@@ -44,14 +44,17 @@ spec:
           type: RuntimeDefault
       containers:
         - name: status-reporter
-          # local-agents/agent:f906bd3 (make agent-image at f906bd3)
-          image: 127.0.0.1:30500/local-agents/agent@sha256:ee891ff03ae60d28894a883dc75468a4defec2e180bda02f84f8df1a8b708a27
+          # local-agents/agent:e06d4f4 (make agent-image at e06d4f4)
+          image: 127.0.0.1:30500/local-agents/agent@sha256:14cece9dc2c0730415e5eaba273dc4549e7771743ce63c87aad99f8bc54a0969
           args: [serve, --port, "8080"]
           env:
             - name: AGENT_CONFIG
               value: /opt/agent/config/config.json
             - name: AGENT_RUNS_DIR
               value: /var/lib/agent/runs
+            # Traces (ADR 0008, agent/tracing.py): metadata only, to Tempo.
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://tempo.monitoring.svc:4318
           ports:
             - name: http
               containerPort: 8080
@@ -145,8 +148,8 @@ spec:
               type: RuntimeDefault
           containers:
             - name: agentctl
-              # local-agents/agent:f906bd3, same digest as the Deployment
-              image: 127.0.0.1:30500/local-agents/agent@sha256:ee891ff03ae60d28894a883dc75468a4defec2e180bda02f84f8df1a8b708a27
+              # local-agents/agent:e06d4f4, same digest as the Deployment
+              image: 127.0.0.1:30500/local-agents/agent@sha256:14cece9dc2c0730415e5eaba273dc4549e7771743ce63c87aad99f8bc54a0969
               command: [/bin/sh, -c]
               args:
                 - python3 /opt/agent/app/agent/agentctl.py status; rc=$?; [ "$rc" -le 1 ] || [ "$rc" -eq 3 ]

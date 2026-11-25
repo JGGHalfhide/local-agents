@@ -4,8 +4,9 @@
 # 8080), and the Kubernetes API server (Canal matches egress after the
 # Service address is translated, so the rule names the API server's real
 # endpoint: port 6443 on the lab network, build-node-01 192.168.122.10 or
-# the airgap VM 192.168.122.20). Nothing outside the cluster and the lab
-# network.
+# the airgap VM 192.168.122.20), and Tempo's OTLP/HTTP receiver (4318 in
+# namespace monitoring; traces, ADR 0008). Nothing outside the cluster and
+# the lab network.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -53,6 +54,16 @@ spec:
       ports:
         - protocol: TCP
           port: 6443
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: tempo
+      ports:
+        - protocol: TCP
+          port: 4318
 ---
 # The API (ADR 0005): ingress only from the CronJob's agentctl pods.
 # Operators and the fault-injection scorer use kubectl port-forward, which
